@@ -1,0 +1,33 @@
+{
+  "name": "meetmydash",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "meetmydash: app de tableros propia (repositorio tablero).",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev": "node --watch servidor/index.ts",
+    "dev:web": "vite",
+    "build": "vite build && node scripts/version.mjs",
+    "start": "node servidor/index.ts",
+    "tipos": "tsc --noEmit",
+    "test": "tsc --noEmit && vitest run"
+  },
+  "dependencies": {
+    "@fastify/static": "^10.1.12",
+    "fastify": "^5.12.8",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.10",
+    "@types/react": "^19.3.2",
+    "@types/react-dom": "^19.3.0",
+    "@vitejs/plugin-react": "^6.3.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.8",
+    "vitest": "^5.1.2"
+  }
+}

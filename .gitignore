@@ -1,0 +1,8 @@
+PRIVADO.md
+.env
+.env.*
+!.env.example
+node_modules/
+datos/
+.DS_Store
+dist/

@@ -1,0 +1,360 @@
+<title>meetmydash · muestra de diseño</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Concepto: el tablero es un lienzo de color propio; las listas se apoyan directo sobre él
+   (sin cajas grises) y las tarjetas son hojas planas con borde fino. Un solo acento. */
+:root {
+  /* Misma familia que emilianosalasporta.cloud: azul eléctrico, Chakra Petch, Inter y JetBrains Mono. */
+  --fondo: #F1F4F9;        /* página */
+  --superficie: #FFFFFF;   /* tarjetas, paneles */
+  --hundido: #E6EAF2;      /* campos, zonas secundarias */
+  --tinta: #0E1220;
+  --tinta-suave: #566078;
+  --linea: #D2D8E4;
+  --acento: #0879C4;       /* azul */
+  --sobre-acento: #FFFFFF;
+  --brillo: none;
+  --marcador: #FF2E9A;     /* magenta: avisos sin leer, límite alcanzado */
+  --sobre-marcador: #FFFFFF;
+  --lienzo: #DCE6F4;       /* fondo del tablero de ejemplo */
+  --lienzo-tinta: #14213A;
+  --aviso: #A85C00;        /* vence pronto */
+  --alerta: #C2185B;       /* vencida */
+  --hecho: #1B7F4B;
+  --e-coral: #D9534F; --e-ambar: #C98A0B; --e-oliva: #4F8F3A; --e-cielo: #1F86D1; --e-uva: #7C4DBD; --e-grafito: #5B6472;
+  --f-titulo: "Chakra Petch", "Inter", system-ui, sans-serif;
+  --f-texto: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-dato: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --r-hoja: 8px; --r-chico: 6px;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --fondo: #0A0B10; --superficie: #12141C; --hundido: #181B26; --tinta: #E7ECF3; --tinta-suave: #8A93A6; --linea: #262A38;
+  --acento: #2FB8FF; --sobre-acento: #062229; --brillo: 0 0 18px rgba(47, 184, 255, 0.35); --marcador: #FF2E9A; --sobre-marcador: #FFFFFF;
+  --lienzo: #0D1524; --lienzo-tinta: #DCE6F5;
+  --aviso: #F0B25C; --alerta: #FF6FB5; --hecho: #4FD08A;
+  --e-coral: #F08A85; --e-ambar: #E5B34A; --e-oliva: #8FD06B; --e-cielo: #7CD4FF; --e-uva: #B594EA; --e-grafito: #A3ACBA;
+  color-scheme: dark } }
+:root[data-theme="dark"] {
+  --fondo: #0A0B10; --superficie: #12141C; --hundido: #181B26; --tinta: #E7ECF3; --tinta-suave: #8A93A6; --linea: #262A38;
+  --acento: #2FB8FF; --sobre-acento: #062229; --brillo: 0 0 18px rgba(47, 184, 255, 0.35); --marcador: #FF2E9A; --sobre-marcador: #FFFFFF;
+  --lienzo: #0D1524; --lienzo-tinta: #DCE6F5;
+  --aviso: #F0B25C; --alerta: #FF6FB5; --hecho: #4FD08A;
+  --e-coral: #F08A85; --e-ambar: #E5B34A; --e-oliva: #8FD06B; --e-cielo: #7CD4FF; --e-uva: #B594EA; --e-grafito: #A3ACBA;
+  color-scheme: dark }
+
+* { box-sizing: border-box; }
+body { background: var(--fondo); color: var(--tinta); font: 15px/1.45 var(--f-texto); }
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+.pagina { max-width: 1240px; margin: 0 auto; padding-block: 28px 56px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 36px; }
+.intro { display: flex; flex-wrap: wrap; gap: 16px 32px; align-items: end; justify-content: space-between; }
+.intro h1 { font: 700 30px/1.1 var(--f-titulo); margin: 0 0 6px; letter-spacing: -0.02em; }
+.intro p { margin: 0; color: var(--tinta-suave); max-width: 62ch; }
+.tema { display: inline-flex; background: var(--hundido); border-radius: 999px; padding: 3px; gap: 2px; }
+.tema button { border: 0; background: none; padding: 6px 14px; border-radius: 999px; font-weight: 600; font-size: 13px; color: var(--tinta-suave); }
+.tema button[aria-pressed="true"] { background: var(--superficie); color: var(--tinta); box-shadow: 0 0 0 1px var(--linea); }
+.seccion { display: flex; flex-direction: column; gap: 12px; }
+.seccion > h2 { font: 600 12px/1 var(--f-texto); letter-spacing: 0.09em; text-transform: uppercase; color: var(--tinta-suave); margin: 0; }
+.marco { border: 1px solid var(--linea); border-radius: 14px; overflow: hidden; background: var(--superficie); }
+
+/* ---------- barra superior de la app ---------- */
+.barra { display: flex; align-items: center; gap: 14px; padding: 10px 16px; border-bottom: 1px solid var(--linea); background: var(--superficie); }
+.marca { font: 700 16px/1 var(--f-titulo); letter-spacing: 0.06em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.marca i { width: 16px; height: 4px; background: var(--acento); box-shadow: var(--brillo); display: block; }
+.btn.lleno { box-shadow: var(--brillo); }
+.seccion > h2, .props dt, .rot { font-family: var(--f-dato) !important; }
+.intro h1, .cab h3, .abierta h3 { letter-spacing: 0 !important; }
+.campana b, .limite { color: var(--sobre-marcador) !important; }
+.buscar { flex: 1; min-width: 0; max-width: 380px; background: var(--hundido); border-radius: 8px; padding: 7px 12px; color: var(--tinta-suave); font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.barra .hueco { flex: 1; }
+.btn { border: 1px solid var(--linea); background: var(--superficie); border-radius: 8px; padding: 7px 12px; font-weight: 600; font-size: 14px; white-space: nowrap; }
+.btn.lleno { background: var(--acento); border-color: var(--acento); color: var(--sobre-acento); }
+.yo, .per { width: 28px; height: 28px; border-radius: 9px; display: inline-grid; place-items: center; font: 700 11px/1 var(--f-texto); color: #fff; flex: none; }
+.per { width: 24px; height: 24px; border-radius: 8px; font-size: 10px; box-shadow: 0 0 0 2px var(--superficie); }
+.p1 { background: #3F6FB5; } .p2 { background: #A8507A; } .p3 { background: #6B7A2A; } .p4 { background: #3A3F4B; }
+.campana { position: relative; width: 30px; height: 30px; display: grid; place-items: center; border-radius: 8px; color: var(--tinta-suave); }
+.campana b { position: absolute; top: 1px; right: 0; min-width: 15px; height: 15px; border-radius: 8px; background: var(--marcador); color: #1b1b1b; font: 600 10px/15px var(--f-dato); text-align: center; }
+svg.ic { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+/* ---------- tablero ---------- */
+.tablero { background: var(--lienzo); color: var(--lienzo-tinta); }
+.cab { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 18px; padding: 16px 18px 6px; }
+.cab h3 { font: 700 24px/1.1 var(--f-titulo); letter-spacing: -0.02em; margin: 0; }
+.vistas { display: flex; gap: 2px; font-size: 14px; font-weight: 600; }
+.vistas span { padding: 5px 10px; border-radius: 7px; opacity: .65; }
+.vistas span.activa { opacity: 1; background: color-mix(in srgb, var(--lienzo-tinta) 12%, transparent); }
+.cab .hueco { flex: 1; }
+.pila { display: flex; } .pila .per { margin-left: -6px; box-shadow: 0 0 0 2px var(--lienzo); } .pila .per:first-child { margin-left: 0; }
+.cab .btn { background: color-mix(in srgb, var(--superficie) 70%, transparent); border-color: color-mix(in srgb, var(--lienzo-tinta) 18%, transparent); color: var(--lienzo-tinta); }
+.listas { display: flex; gap: 14px; padding: 12px 18px 20px; overflow-x: auto; align-items: flex-start; scroll-snap-type: x proximity; scroll-padding-left: 18px; }
+.lista { flex: none; width: 272px; display: flex; flex-direction: column; gap: 8px; scroll-snap-align: start; }
+.lista header { display: flex; align-items: baseline; gap: 8px; padding: 0 2px 6px; border-bottom: 2px solid color-mix(in srgb, var(--lienzo-tinta) 22%, transparent); }
+.lista header h4 { font: 700 15px/1.2 var(--f-texto); margin: 0; flex: 1; min-width: 0; }
+.lista header .n { font: 500 12px/1 var(--f-dato); opacity: .7; }
+.lista header .mas { opacity: .55; font-weight: 700; letter-spacing: 1px; }
+.hoja { background: var(--superficie); color: var(--tinta); border: 1px solid var(--linea); border-radius: var(--r-hoja); padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; text-align: left; width: 100%; }
+.hoja .tit { font-weight: 600; font-size: 14.5px; line-height: 1.35; }
+.hoja.hecha .tit { color: var(--tinta-suave); }
+.portada { height: 84px; margin: -10px -12px 2px; border-radius: 9px 9px 0 0; border-bottom: 1px solid var(--linea);
+  background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--e-cielo) 30%, var(--superficie)) 0 14px, color-mix(in srgb, var(--e-cielo) 18%, var(--superficie)) 14px 28px); }
+.etqs { display: flex; flex-wrap: wrap; gap: 4px; }
+.etq { --c: var(--e-grafito); display: inline-flex; align-items: center; gap: 5px; font-size: 11.5px; font-weight: 600; line-height: 1; padding: 4px 7px 4px 6px; border-radius: 5px;
+  background: color-mix(in srgb, var(--c) 16%, var(--superficie)); color: color-mix(in srgb, var(--c) 62%, var(--tinta)); }
+.etq::before { content: ""; width: 7px; height: 7px; border-radius: 2px; background: var(--c); }
+.coral { --c: var(--e-coral); } .ambar { --c: var(--e-ambar); } .oliva { --c: var(--e-oliva); } .cielo { --c: var(--e-cielo); } .uva { --c: var(--e-uva); }
+.pie { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; color: var(--tinta-suave); font-size: 12px; }
+.pie .dato { display: inline-flex; align-items: center; gap: 4px; font-family: var(--f-dato); font-variant-numeric: tabular-nums; }
+.fecha { display: inline-flex; align-items: center; gap: 4px; padding: 3px 6px; border-radius: 5px; font-weight: 600; font-size: 11.5px; background: var(--hundido); color: var(--tinta-suave); }
+.fecha.pronto { background: color-mix(in srgb, var(--aviso) 15%, var(--superficie)); color: var(--aviso); }
+.fecha.vencida { background: color-mix(in srgb, var(--alerta) 14%, var(--superficie)); color: var(--alerta); }
+.fecha.ok { background: color-mix(in srgb, var(--hecho) 15%, var(--superficie)); color: var(--hecho); }
+.pie .hueco { flex: 1; }
+.pasos { display: flex; gap: 2px; align-items: center; }
+.pasos i { width: 9px; height: 5px; border-radius: 2px; background: var(--linea); }
+.pasos i.s { background: var(--acento); }
+.tilde { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--linea); flex: none; display: inline-grid; place-items: center; }
+.hecha .tilde { background: var(--hecho); border-color: var(--hecho); color: var(--superficie); }
+.fila-tit { display: flex; gap: 8px; align-items: flex-start; }
+.sumar { border: 0; background: none; text-align: left; padding: 6px 4px; font-weight: 600; font-size: 13.5px; color: var(--lienzo-tinta); opacity: .7; }
+.limite { font: 500 11px/1 var(--f-dato); padding: 3px 5px; border-radius: 4px; background: var(--marcador); color: #1b1b1b; }
+
+/* ---------- tarjeta abierta ---------- */
+.abierta { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); }
+.abierta > div { padding: 22px 24px; min-width: 0; display: flex; flex-direction: column; gap: 20px; }
+.abierta .lado { background: var(--fondo); border-left: 1px solid var(--linea); gap: 14px; }
+.miga { font-size: 13px; color: var(--tinta-suave); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.miga b { color: var(--tinta); font-weight: 600; } .miga .num { font-family: var(--f-dato); }
+.abierta h3 { font: 700 26px/1.15 var(--f-titulo); letter-spacing: -0.02em; margin: 0; text-wrap: balance; }
+.props { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px 20px; }
+.props dt, .rot { font: 600 11px/1 var(--f-texto); letter-spacing: 0.08em; text-transform: uppercase; color: var(--tinta-suave); margin: 0 0 7px; }
+.props dd { margin: 0; display: flex; flex-wrap: wrap; gap: 5px; align-items: center; font-size: 14px; }
+.desc p { margin: 0 0 8px; max-width: 64ch; } .desc ul { margin: 0; padding-left: 18px; } .desc code { font: 13px var(--f-dato); background: var(--hundido); padding: 1px 5px; border-radius: 4px; }
+.chk-cab { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.chk-cab strong { font-size: 15px; } .chk-cab .dato { font: 500 12px var(--f-dato); color: var(--tinta-suave); }
+.chk-cab .pasos i { width: 22px; height: 6px; }
+.items { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.items li { display: flex; gap: 10px; align-items: center; padding: 7px 0; border-top: 1px solid var(--linea); font-size: 14.5px; }
+.items li span.t { flex: 1; min-width: 0; }
+.caja { width: 17px; height: 17px; border-radius: 5px; border: 1.5px solid var(--tinta-suave); flex: none; display: grid; place-items: center; color: var(--sobre-acento); }
+li.si .caja { background: var(--acento); border-color: var(--acento); } li.si span.t { color: var(--tinta-suave); text-decoration: line-through; }
+.adj { display: flex; gap: 10px; align-items: center; border: 1px solid var(--linea); border-radius: 8px; padding: 8px 10px; font-size: 13.5px; }
+.adj .mini { width: 44px; height: 34px; border-radius: 5px; background: var(--hundido); display: grid; place-items: center; font: 500 10px var(--f-dato); color: var(--tinta-suave); flex: none; }
+.adj small { color: var(--tinta-suave); display: block; }
+.escribir { border: 1px solid var(--linea); background: var(--superficie); border-radius: 9px; padding: 10px 12px; color: var(--tinta-suave); font-size: 14px; }
+.hilo { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 14px; }
+.hilo li { display: flex; gap: 10px; font-size: 13.5px; }
+.hilo .per { box-shadow: none; margin-top: 1px; }
+.hilo .c { min-width: 0; flex: 1; }
+.hilo .quien { font-weight: 600; } .hilo time { color: var(--tinta-suave); font-size: 12px; margin-left: 4px; }
+.globo { background: var(--superficie); border: 1px solid var(--linea); border-radius: 9px; padding: 8px 10px; margin-top: 4px; font-size: 14px; }
+.globo .arroba { color: var(--acento); font-weight: 600; }
+.reac { display: inline-flex; gap: 4px; margin-top: 5px; } .reac span { border: 1px solid var(--linea); background: var(--superficie); border-radius: 999px; padding: 1px 7px; font-size: 12px; }
+.hilo .act { color: var(--tinta-suave); } .hilo .act b { color: var(--tinta); font-weight: 600; }
+.acciones { display: flex; flex-wrap: wrap; gap: 6px; }
+
+/* ---------- piezas ---------- */
+.piezas { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 0; }
+.piezas > div { padding: 16px 18px; border-right: 1px solid var(--linea); border-bottom: 1px solid var(--linea); display: flex; flex-direction: column; gap: 10px; margin: 0 -1px -1px 0; }
+.fila { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+
+@media (max-width: 760px) {
+  .abierta { grid-template-columns: 1fr; }
+  .abierta .lado { border-left: 0; border-top: 1px solid var(--linea); }
+  .abierta > div { padding: 18px 16px; }
+  .lista { width: 82vw; max-width: 300px; }
+  .buscar, .barra .btn.sec { display: none; }
+  .vistas span:not(.activa) { display: none; }
+}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-coment" viewBox="0 0 16 16"><path d="M2.5 3.5h11v7.5H7l-3 2.5V11H2.5z"/></symbol>
+  <symbol id="i-clip" viewBox="0 0 16 16"><path d="M10.5 4.5 5.8 9.2a1.6 1.6 0 0 0 2.3 2.3l5-5a2.8 2.8 0 0 0-4-4l-5.2 5.2a4 4 0 0 0 5.7 5.7l3.6-3.6"/></symbol>
+  <symbol id="i-reloj" viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3.2l2 1.3"/></symbol>
+  <symbol id="i-texto" viewBox="0 0 16 16"><path d="M3 4.5h10M3 8h10M3 11.5h6"/></symbol>
+  <symbol id="i-ok" viewBox="0 0 16 16"><path d="m4 8.3 2.6 2.6L12 5.5"/></symbol>
+  <symbol id="i-campana" viewBox="0 0 16 16"><path d="M4 11V7.5a4 4 0 0 1 8 0V11l1 1.5H3zM6.8 14h2.4"/></symbol>
+</svg>
+
+<div class="pagina">
+  <div class="intro">
+    <div>
+      <h1>Muestra de diseño</h1>
+      <p>Dos pantallas de meetmydash con contenido de ejemplo: el tablero y una tarjeta abierta. Es un dibujo para aprobar el estilo; los botones todavía no hacen nada. Achicá la ventana o abrila en el iPhone para ver cómo se acomoda.</p>
+    </div>
+    <div class="tema" role="group" aria-label="Tema">
+      <button type="button" id="t-sistema" aria-pressed="true">Sistema</button>
+      <button type="button" id="t-claro" aria-pressed="false">Claro</button>
+      <button type="button" id="t-oscuro" aria-pressed="false">Oscuro</button>
+    </div>
+  </div>
+
+  <section class="seccion">
+    <h2>Tablero</h2>
+    <div class="marco">
+      <div class="barra">
+        <div class="marca"><i></i>meetmydash</div>
+        <div class="buscar">Buscar tarjetas y tableros</div>
+        <div class="hueco"></div>
+        <button type="button" class="btn lleno">Crear</button>
+        <div class="campana" aria-label="3 avisos sin leer"><svg class="ic" style="width:18px;height:18px"><use href="#i-campana"/></svg><b>3</b></div>
+        <span class="yo p4">ES</span>
+      </div>
+      <div class="tablero">
+        <div class="cab">
+          <h3>Mudanza de oficina</h3>
+          <div class="vistas"><span class="activa">Tablero</span><span>Tabla</span><span>Calendario</span><span>Cronograma</span></div>
+          <div class="hueco"></div>
+          <div class="pila"><span class="per p1">ML</span><span class="per p2">CR</span><span class="per p3">JP</span><span class="per p4">ES</span></div>
+          <button type="button" class="btn sec">Filtrar</button>
+          <button type="button" class="btn">Compartir</button>
+        </div>
+        <div class="listas">
+          <div class="lista">
+            <header><h4>Por hacer</h4><span class="n">4</span><span class="mas">···</span></header>
+            <button type="button" class="hoja">
+              <div class="etqs"><span class="etq coral">Urgente</span><span class="etq cielo">Proveedores</span></div>
+              <div class="fila-tit"><span class="tilde"></span><span class="tit">Pedir tres presupuestos de flete</span></div>
+              <div class="pie"><span class="fecha vencida"><svg class="ic"><use href="#i-reloj"/></svg>lun 23 nov</span><span class="dato"><svg class="ic"><use href="#i-coment"/></svg>2</span><span class="hueco"></span><span class="per p2">CR</span></div>
+            </button>
+            <button type="button" class="hoja">
+              <div class="fila-tit"><span class="tilde"></span><span class="tit">Avisar el cambio de domicilio a clientes</span></div>
+              <div class="pie"><span class="dato"><svg class="ic"><use href="#i-texto"/></svg></span><span class="pasos" aria-label="1 de 5"><i class="s"></i><i></i><i></i><i></i><i></i></span><span class="dato">1/5</span></div>
+            </button>
+            <button type="button" class="hoja">
+              <div class="etqs"><span class="etq oliva">Compras</span></div>
+              <div class="fila-tit"><span class="tilde"></span><span class="tit">Cajas, cinta y rótulos</span></div>
+            </button>
+            <button type="button" class="hoja">
+              <div class="fila-tit"><span class="tilde"></span><span class="tit">Dar de baja internet en la oficina vieja</span></div>
+              <div class="pie"><span class="fecha"><svg class="ic"><use href="#i-reloj"/></svg>mié 9 dic</span></div>
+            </button>
+            <button type="button" class="sumar">+ Agregar tarjeta</button>
+          </div>
+
+          <div class="lista">
+            <header><h4>Esta semana</h4><span class="limite">3 / 3</span><span class="mas">···</span></header>
+            <button type="button" class="hoja">
+              <div class="portada"></div>
+              <div class="etqs"><span class="etq cielo">Proveedores</span><span class="etq uva">Obra</span></div>
+              <div class="fila-tit"><span class="tilde"></span><span class="tit">Definir el plano de puestos del piso 2</span></div>
+              <div class="pie"><span class="fecha pronto"><svg class="ic"><use href="#i-reloj"/></svg>jue 26 nov</span><span class="dato"><svg class="ic"><use href="#i-clip"/></svg>3</span><span class="dato"><svg class="ic"><use href="#i-coment"/></svg>5</span><span class="pasos" aria-label="4 de 6"><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i></i><i></i></span><span class="hueco"></span><span class="pila"><span class="per p1">ML</span><span class="per p3">JP</span></span></div>
+            </button>
+            <button type="button" class="hoja">
+              <div class="etqs"><span class="etq ambar">Sistemas</span></div>
+              <div class="fila-tit"><span class="tilde"></span><span class="tit">Contratar internet en la oficina nueva</span></div>
+              <div class="pie"><span class="fecha"><svg class="ic"><use href="#i-reloj"/></svg>vie 27 nov</span><span class="hueco"></span><span class="per p3">JP</span></div>
+            </button>
+            <button type="button" class="hoja">
+              <div class="fila-tit"><span class="tilde"></span><span class="tit">Inventario de muebles que se llevan</span></div>
+              <div class="pie"><span class="pasos" aria-label="2 de 4"><i class="s"></i><i class="s"></i><i></i><i></i></span><span class="dato">2/4</span><span class="hueco"></span><span class="per p4">ES</span></div>
+            </button>
+            <button type="button" class="sumar">+ Agregar tarjeta</button>
+          </div>
+
+          <div class="lista">
+            <header><h4>En revisión</h4><span class="n">1</span><span class="mas">···</span></header>
+            <button type="button" class="hoja">
+              <div class="etqs"><span class="etq uva">Obra</span></div>
+              <div class="fila-tit"><span class="tilde"></span><span class="tit">Contrato de alquiler revisado por el estudio</span></div>
+              <div class="pie"><span class="dato"><svg class="ic"><use href="#i-clip"/></svg>1</span><span class="dato"><svg class="ic"><use href="#i-coment"/></svg>8</span><span class="hueco"></span><span class="per p2">CR</span></div>
+            </button>
+            <button type="button" class="sumar">+ Agregar tarjeta</button>
+          </div>
+
+          <div class="lista">
+            <header><h4>Listo</h4><span class="n">2</span><span class="mas">···</span></header>
+            <button type="button" class="hoja hecha">
+              <div class="fila-tit"><span class="tilde"><svg class="ic" style="width:11px;height:11px;stroke-width:2.2"><use href="#i-ok"/></svg></span><span class="tit">Elegir la oficina nueva</span></div>
+              <div class="pie"><span class="fecha ok"><svg class="ic"><use href="#i-reloj"/></svg>vie 13 nov</span><span class="hueco"></span><span class="per p4">ES</span></div>
+            </button>
+            <button type="button" class="hoja hecha">
+              <div class="fila-tit"><span class="tilde"><svg class="ic" style="width:11px;height:11px;stroke-width:2.2"><use href="#i-ok"/></svg></span><span class="tit">Fecha de mudanza acordada con el edificio</span></div>
+            </button>
+            <button type="button" class="sumar">+ Agregar tarjeta</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <h2>Tarjeta abierta</h2>
+    <div class="marco abierta">
+      <div>
+        <div class="miga"><b>Mudanza de oficina</b><span>›</span><span>Esta semana</span><span>·</span><span class="num">N.º 14</span></div>
+        <div class="fila-tit" style="gap:12px;align-items:center"><span class="tilde" style="width:22px;height:22px"></span><h3>Definir el plano de puestos del piso 2</h3></div>
+        <dl class="props">
+          <div><dt>Miembros</dt><dd><span class="per p1" style="box-shadow:none">ML</span><span class="per p3" style="box-shadow:none">JP</span></dd></div>
+          <div><dt>Etiquetas</dt><dd><span class="etq cielo">Proveedores</span><span class="etq uva">Obra</span></dd></div>
+          <div><dt>Fechas</dt><dd><span class="fecha pronto"><svg class="ic"><use href="#i-reloj"/></svg>20 nov → jue 26 nov, 18:00</span></dd></div>
+        </dl>
+        <div class="desc">
+          <p class="rot">Descripción</p>
+          <p>Hay que entregarle al arquitecto la distribución final antes del jueves para que pida los tomas de red.</p>
+          <ul><li>22 puestos fijos y 6 rotativos</li><li>Sala de reuniones para 8 contra la ventana</li><li>Archivo: <code>plano-piso2-v3.pdf</code></li></ul>
+        </div>
+        <div>
+          <div class="chk-cab"><strong>Pasos</strong><span class="pasos"><i class="s"></i><i class="s"></i><i class="s"></i><i class="s"></i><i></i><i></i></span><span class="dato">4/6</span></div>
+          <ul class="items">
+            <li class="si"><span class="caja"><svg class="ic" style="width:11px;height:11px;stroke-width:2.4"><use href="#i-ok"/></svg></span><span class="t">Medir el piso</span></li>
+            <li class="si"><span class="caja"><svg class="ic" style="width:11px;height:11px;stroke-width:2.4"><use href="#i-ok"/></svg></span><span class="t">Contar puestos por equipo</span></li>
+            <li class="si"><span class="caja"><svg class="ic" style="width:11px;height:11px;stroke-width:2.4"><use href="#i-ok"/></svg></span><span class="t">Primer borrador</span></li>
+            <li class="si"><span class="caja"><svg class="ic" style="width:11px;height:11px;stroke-width:2.4"><use href="#i-ok"/></svg></span><span class="t">Ronda de comentarios</span></li>
+            <li><span class="caja"></span><span class="t">Versión final firmada</span><span class="fecha">mié 25 nov</span><span class="per p1" style="box-shadow:none">ML</span></li>
+            <li><span class="caja"></span><span class="t">Enviar al arquitecto</span><span class="per p3" style="box-shadow:none">JP</span></li>
+          </ul>
+        </div>
+        <div>
+          <p class="rot">Adjuntos</p>
+          <div class="fila">
+            <div class="adj"><span class="mini">PDF</span><span>plano-piso2-v3.pdf<small>1,2 MB · ayer</small></span></div>
+            <div class="adj"><span class="mini">JPG</span><span>foto-ventanal.jpg<small>840 KB · 19 nov</small></span></div>
+          </div>
+        </div>
+      </div>
+      <div class="lado">
+        <div class="acciones"><button type="button" class="btn">Mover</button><button type="button" class="btn">Copiar</button><button type="button" class="btn">Seguir</button><button type="button" class="btn">Archivar</button></div>
+        <p class="rot" style="margin:6px 0 0">Comentarios y actividad</p>
+        <div class="escribir">Escribí un comentario…</div>
+        <ul class="hilo">
+          <li><span class="per p3">JP</span><div class="c"><span class="quien">Juan Paz</span><time>hoy 10:42</time>
+            <div class="globo"><span class="arroba">@Marta</span> el arquitecto pide que la sala no tape el ventanal. ¿La corremos un módulo?</div>
+            <div class="reac"><span>👍 2</span></div></div></li>
+          <li><span class="per p4">A</span><div class="c act"><b>Alex</b> movió la tarjeta de <b>Por hacer</b> a <b>Esta semana</b><time>hoy 09:15</time></div></li>
+          <li><span class="per p1">ML</span><div class="c act"><b>Marta López</b> adjuntó <b>plano-piso2-v3.pdf</b><time>ayer 17:30</time></div></li>
+          <li><span class="per p1">ML</span><div class="c act"><b>Marta López</b> completó <b>Ronda de comentarios</b><time>ayer 17:28</time></div></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion">
+    <h2>Piezas</h2>
+    <div class="marco piezas">
+      <div><p class="rot" style="margin:0">Etiquetas</p><div class="fila"><span class="etq coral">Coral</span><span class="etq ambar">Ámbar</span><span class="etq oliva">Oliva</span><span class="etq cielo">Cielo</span><span class="etq uva">Uva</span><span class="etq">Grafito</span></div></div>
+      <div><p class="rot" style="margin:0">Fechas</p><div class="fila"><span class="fecha">Lejos</span><span class="fecha pronto">Vence pronto</span><span class="fecha vencida">Vencida</span><span class="fecha ok">Cumplida</span></div></div>
+      <div><p class="rot" style="margin:0">Botones</p><div class="fila"><button type="button" class="btn lleno">Principal</button><button type="button" class="btn">Secundario</button></div></div>
+      <div><p class="rot" style="margin:0">Personas y avance</p><div class="fila"><span class="per p1" style="box-shadow:none">ML</span><span class="per p2" style="box-shadow:none">CR</span><span class="per p3" style="box-shadow:none">JP</span><span class="pasos"><i class="s"></i><i class="s"></i><i class="s"></i><i></i><i></i></span><span class="limite">3 / 3</span></div></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  var raiz = document.documentElement;
+  var botones = { sistema: document.getElementById('t-sistema'), claro: document.getElementById('t-claro'), oscuro: document.getElementById('t-oscuro') };
+  var inicial = raiz.getAttribute('data-theme');
+  function poner(modo) {
+    if (modo === 'sistema') { if (inicial) raiz.setAttribute('data-theme', inicial); else raiz.removeAttribute('data-theme'); }
+    else raiz.setAttribute('data-theme', modo === 'claro' ? 'light' : 'dark');
+    for (var k in botones) botones[k].setAttribute('aria-pressed', String(k === modo));
+  }
+  botones.sistema.addEventListener('click', function () { poner('sistema'); });
+  botones.claro.addEventListener('click', function () { poner('claro'); });
+  botones.oscuro.addEventListener('click', function () { poner('oscuro'); });
+})();
+</script>
