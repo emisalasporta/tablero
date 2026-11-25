@@ -6,3 +6,5 @@ node_modules/
 datos/
 .DS_Store
 dist/
+datos-local/
+.claude/

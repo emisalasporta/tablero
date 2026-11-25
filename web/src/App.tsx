@@ -1,30 +1,45 @@
-// Pantalla provisoria de la tanda 2.0: solo confirma que la app está publicada y qué versión corre.
-import { useEffect, useState } from 'react';
+// Armazón de la app: la barra de arriba y qué pantalla corresponde a cada dirección.
+import { api, Avatar, Enlace, navegar, useAccion, useRuta, useSesion } from './base.tsx';
+import { Entrar, Invitacion } from './pantallas/Entrar.tsx';
+import { Espacio } from './pantallas/Espacio.tsx';
+import { Inicio } from './pantallas/Inicio.tsx';
+import { Perfil } from './pantallas/Perfil.tsx';
+import { Tablero } from './pantallas/Tablero.tsx';
 
-interface Salud { ok: boolean; version: string; commit: string; armada_en: string | null; migraciones: number }
+function Barra() {
+  const sesion = useSesion();
+  const accion = useAccion();
+  const salir = () => accion.hacer(async () => { await api('DELETE', '/api/sesion'); sesion.poner(null); navegar('/'); });
+  return (
+    <header className="barra">
+      <Enlace a="/" className="marca"><i />meetmydash</Enlace>
+      <span className="hueco" />
+      {sesion.yo && (
+        <>
+          <Enlace a="/perfil" className="btn plano chico" title="Tu cuenta"><Avatar p={sesion.yo} chica /><span>{sesion.yo.nombre.split(' ')[0]}</span></Enlace>
+          <button type="button" className="btn chico" onClick={salir}>Salir</button>
+        </>
+      )}
+    </header>
+  );
+}
+
+function Pantalla() {
+  const { yo, cargando } = useSesion();
+  const ruta = useRuta();
+  const camino = ruta.split('?')[0];
+  const partes = camino.split('/').filter(Boolean);
+  if (cargando) return null;
+  // Direcciones que se pueden abrir sin haber iniciado sesión.
+  if (partes[0] === 'invitacion' && partes[1]) return <Invitacion token={partes[1]} />;
+  if (partes[0] === 't' && partes[1]) return <Tablero key={partes[1]} enlace={partes[1]} />;
+  if (!yo) return <Entrar volverA={camino === '/entrar' ? '/' : ruta} />;
+  if (partes[0] === 'e' && partes[1]) return <Espacio key={partes[1]} id={partes[1]} />;
+  if (partes[0] === 'perfil') return <Perfil />;
+  if (partes.length === 0 || partes[0] === 'entrar') return <Inicio />;
+  return <main className="pagina"><h1>Esa página no existe</h1><Enlace a="/">Volver al inicio</Enlace></main>;
+}
 
 export function App() {
-  const [salud, setSalud] = useState<Salud | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    fetch('/api/salud')
-      .then((r) => r.json() as Promise<Salud>)
-      .then(setSalud)
-      .catch(() => setError('No se pudo hablar con el servidor.'));
-  }, []);
-
-  return (
-    <main style={{ fontFamily: 'system-ui, sans-serif', maxWidth: 520, margin: '15vh auto', padding: '0 20px', lineHeight: 1.5 }}>
-      <h1 style={{ fontSize: 28, margin: 0 }}>meetmydash</h1>
-      <p>La app está en construcción. Esta pantalla solo confirma que la publicación funciona.</p>
-      {error && <p role="alert">{error}</p>}
-      {salud && (
-        <p style={{ fontVariantNumeric: 'tabular-nums' }}>
-          Versión {salud.version} · cambio {salud.commit}
-          {salud.armada_en ? ` · armada el ${new Date(salud.armada_en).toLocaleString('es-AR')}` : ''}
-        </p>
-      )}
-    </main>
-  );
+  return <div className="app"><Barra /><Pantalla /></div>;
 }

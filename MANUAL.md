@@ -1,7 +1,7 @@
 # MANUAL — cómo se prueba, se publica, se respalda y se vuelve atrás
 
 Este archivo es para cualquier sesión de Claude (o persona) que retome el proyecto.
-Se actualiza al terminar cada tanda. Estado: **tanda 2.0** (esqueleto publicado en https://meetmydash.emilianosalasporta.cloud; publicación automática funcionando).
+Se actualiza al terminar cada tanda. Estado: **tanda 2.1** hecha (cuentas, espacios, miembros, invitaciones, permisos). Publicado en https://meetmydash.emilianosalasporta.cloud.
 
 ## Qué hay en cada carpeta
 | Carpeta / archivo | Qué es |
@@ -14,6 +14,25 @@ Se actualiza al terminar cada tanda. Estado: **tanda 2.0** (esqueleto publicado 
 | `diseno/` | Muestras de diseño. No se publican. |
 | `Dockerfile` | Receta con la que Dokploy arma y publica. Corre las pruebas adentro. |
 | `PRIVADO.md` | Datos del servidor y claves. **Ignorado por git. No subir nunca.** |
+
+## Cómo está armado el servidor (desde la tanda 2.1)
+| Archivo | Qué hace |
+|---|---|
+| `servidor/permisos.ts` | **Único lugar** donde se decide quién puede qué (instalación → espacio → tablero). Si cambia una regla, se cambia acá y en `pruebas/tableros-permisos.test.ts`. |
+| `servidor/nucleo.ts` | Sesiones (galleta `mmd_sesion`), registro de actividad, membresías e invitaciones por enlace. |
+| `servidor/rutas/cuenta.ts` | Crear cuenta, entrar, perfil, contraseña, administración general. |
+| `servidor/rutas/espacios.ts` | Espacios de trabajo, miembros, invitados, enlaces, pedidos. |
+| `servidor/rutas/tableros.ts` | Tableros (por ahora: visibilidad, miembros, permisos, cerrar/borrar). |
+| `web/src/base.tsx` | Base de las pantallas: pedidos al servidor, navegación, sesión, piezas comunes. |
+| `web/src/estilos.css` | Todos los colores y letras, como variables. Sale de `diseno/muestra.html` (diseño aprobado). |
+| `web/src/pantallas/` | Una pantalla por archivo. |
+
+Reglas de la casa:
+- La app es privada: la **primera cuenta** que se crea queda como administración general; las demás entran con enlace de invitación.
+- Contraseñas y códigos de sesión o invitación se guardan solo como huella (no legibles).
+- Toda acción que cambia algo llama a `registrarActividad` con quién la hizo.
+- Los errores salen siempre como `{ error: código, mensaje: texto para la persona }`.
+- Las letras están dentro de la app (`@fontsource`): no se pide nada a servidores de terceros.
 
 ## Probar
 ```bash

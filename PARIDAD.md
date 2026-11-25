@@ -1,6 +1,6 @@
 # PARIDAD — todas las funciones de Trello y su estado
 
-Última actualización: 25/11/2026 (tanda 2.0: esqueleto publicado, publicación automática y freno por pruebas comprobados).
+Última actualización: 25/11/2026 (tanda 2.1: cuentas, espacios de trabajo, miembros, invitados, invitaciones y permisos).
 
 ## Cómo leer esta lista
 - **Estado:** `pendiente` · `hecha` · `no se puede` (con el porqué en la nota).
@@ -16,16 +16,18 @@
 
 | Estado | Cantidad |
 |---|---|
-| Hechas | 2 |
-| Pendientes (se pueden igualar) | 332 |
-| Pendientes pero parciales (⚠, no quedan idénticas) | 18 |
+| Hechas | 39 |
+| Pendientes (se pueden igualar) | 297 |
+| Pendientes pero parciales (⚠, no quedan idénticas) | 16 |
 | No se puede | 47 |
+
+"Hecha" quiere decir: construida, con pruebas automáticas que pasan, y publicada.
 
 | Sección | Total | Hechas | Pendientes | Parciales | No se puede |
 |---|---|---|---|---|---|
-| A. Cuentas y perfil | 22 | 0 | 18 | 2 | 2 |
-| B. Espacios de trabajo | 28 | 0 | 25 | 1 | 2 |
-| C. Tableros | 42 | 0 | 37 | 2 | 3 |
+| A. Cuentas y perfil | 22 | 5 | 14 | 1 | 2 |
+| B. Espacios de trabajo | 28 | 17 | 9 | 0 | 2 |
+| C. Tableros | 42 | 14 | 23 | 2 | 3 |
 | D. Listas | 17 | 0 | 16 | 0 | 1 |
 | E. Tarjetas: lo básico | 22 | 0 | 22 | 0 | 0 |
 | F. Tarjetas: descripción y texto | 14 | 0 | 13 | 1 | 0 |
@@ -46,7 +48,7 @@
 | U. Plantillas | 5 | 0 | 4 | 0 | 1 |
 | V. Teléfono, instalación y escritorio | 13 | 0 | 5 | 2 | 6 |
 | W. Importar, exportar e imprimir | 5 | 0 | 4 | 0 | 1 |
-| X. Apariencia y accesibilidad | 7 | 0 | 7 | 0 | 0 |
+| X. Apariencia y accesibilidad | 7 | 1 | 6 | 0 | 0 |
 | Y. Tiempo real | 5 | 0 | 5 | 0 | 0 |
 | Z. Administración avanzada (Enterprise) | 6 | 0 | 2 | 0 | 4 |
 | AA. Requisitos propios de este proyecto (no son de Trello, pero se controlan acá) | 9 | 2 | 7 | 0 | 0 |
@@ -57,17 +59,17 @@
 ## A. Cuentas y perfil
 | # | Función | Estado | Tanda | Fuente | Nota |
 |---|---|---|---|---|---|
-| A01 | Crear cuenta con correo y contraseña | pendiente | 2.1 | M | Solo por invitación (la app es privada) |
-| A02 | Iniciar y cerrar sesión; sesión recordada | pendiente | 2.1 | M | |
-| A03 | Recuperar contraseña olvidada | pendiente | 2.1 | M | ⚠ parcial: por correo solo si hay cuenta de envío de correos; si no, la restablece un administrador o Alex |
+| A01 | Crear cuenta con correo y contraseña | hecha | 2.1 | M | Solo por invitación (la app es privada) |
+| A02 | Iniciar y cerrar sesión; sesión recordada | hecha | 2.1 | M | |
+| A03 | Recuperar contraseña olvidada | hecha | 2.1 | M | ⚠ parcial: sin correo; la administración general da una contraseña temporal |
 | A04 | Ingresar con Google, Microsoft, Apple o Slack | no se puede | — | M | Cada uno exige registrar la app ante esa empresa. Google se podría sumar más adelante si lo pedís |
 | A05 | Cuenta unificada de Atlassian | no se puede | — | A | Es propio de Atlassian; no aplica |
 | A06 | Verificación en dos pasos | pendiente | 6.7 | A | Con app de códigos (tipo Google Authenticator) |
-| A07 | Perfil: nombre, nombre de usuario, iniciales, biografía | pendiente | 2.1 | V | |
-| A08 | Foto de perfil (subir imagen o iniciales) | pendiente | 2.1 | V | |
-| A09 | Cambiar correo y contraseña | pendiente | 2.1 | A | |
+| A07 | Perfil: nombre, nombre de usuario, iniciales, biografía | hecha | 2.1 | V | |
+| A08 | Foto de perfil (subir imagen o iniciales) | pendiente | 2.1 | V | Iniciales ya están; subir foto pasa a la tanda 2.3, junto con los adjuntos |
+| A09 | Cambiar correo y contraseña | hecha | 2.1 | A | |
 | A10 | Idioma de la app | pendiente | 6.7 | A | ⚠ parcial: español e inglés (Trello tiene decenas) |
-| A11 | Zona horaria y formato de fecha/hora | pendiente | 2.1 | A | |
+| A11 | Zona horaria y formato de fecha/hora | pendiente | 2.1 | A | Zona horaria ya está; falta el formato de fecha y hora |
 | A12 | Visibilidad del perfil | pendiente | 6.7 | A | |
 | A13 | Página "mi actividad" | pendiente | 6.2 | A | |
 | A14 | Página "mis tarjetas" (asignadas a mí, de todos los tableros) | pendiente | 6.2 | A | |
@@ -83,31 +85,31 @@
 ## B. Espacios de trabajo
 | # | Función | Estado | Tanda | Fuente | Nota |
 |---|---|---|---|---|---|
-| B01 | Crear espacio de trabajo | pendiente | 2.1 | A | |
-| B02 | Editar nombre, descripción, sitio web y logo | pendiente | 2.1 | V | |
-| B03 | Visibilidad del espacio: privado o público | pendiente | 2.1 | V | |
-| B04 | Roles en el espacio: administrador y miembro normal | pendiente | 2.1 | V | |
-| B05 | El administrador del espacio administra todos sus tableros, también los privados | pendiente | 2.1 | A | |
-| B06 | Invitar miembros por correo o nombre de usuario | pendiente | 2.1 | A | ⚠ parcial: sin cuenta de envío de correos, la invitación se pasa como enlace |
-| B07 | Enlace de invitación al espacio (crear y desactivar) | pendiente | 2.1 | A | |
-| B08 | Quitar miembros | pendiente | 2.1 | A | |
-| B09 | Desactivar miembro (conserva historial, sin acceso) | pendiente | 2.1 | A | |
-| B10 | Invitados: personas en tableros sin ser del espacio | pendiente | 2.1 | A | |
-| B11 | Invitado de un tablero e invitado de varios tableros | pendiente | 2.1 | V | Sin diferencia de costo: acá no se cobra |
-| B12 | Convertir invitado en miembro; el invitado puede pedirlo | pendiente | 2.1 | A | |
-| B13 | Página de miembros e invitados del espacio, con pendientes | pendiente | 2.1 | A | |
-| B14 | Ajuste: quién puede crear tableros de cada visibilidad | pendiente | 2.1 | V | |
-| B15 | Ajuste: quién puede borrar tableros de cada visibilidad | pendiente | 2.1 | V | |
-| B16 | Ajuste: quién puede sumar invitados a los tableros | pendiente | 2.1 | A | |
+| B01 | Crear espacio de trabajo | hecha | 2.1 | A | |
+| B02 | Editar nombre, descripción, sitio web y logo | pendiente | 2.1 | V | Nombre, descripción y sitio web ya están; falta el logo (tanda 2.3) |
+| B03 | Visibilidad del espacio: privado o público | hecha | 2.1 | V | |
+| B04 | Roles en el espacio: administrador y miembro normal | hecha | 2.1 | V | |
+| B05 | El administrador del espacio administra todos sus tableros, también los privados | hecha | 2.1 | A | |
+| B06 | Invitar miembros por correo o nombre de usuario | hecha | 2.1 | A | ⚠ parcial: se suma por correo o usuario a quien ya tiene cuenta; a quien no, se le pasa el enlace |
+| B07 | Enlace de invitación al espacio (crear y desactivar) | hecha | 2.1 | A | |
+| B08 | Quitar miembros | hecha | 2.1 | A | |
+| B09 | Desactivar miembro (conserva historial, sin acceso) | hecha | 2.1 | A | |
+| B10 | Invitados: personas en tableros sin ser del espacio | hecha | 2.1 | A | |
+| B11 | Invitado de un tablero e invitado de varios tableros | hecha | 2.1 | V | Sin diferencia de costo: acá no se cobra |
+| B12 | Convertir invitado en miembro; el invitado puede pedirlo | hecha | 2.1 | A | |
+| B13 | Página de miembros e invitados del espacio, con pendientes | hecha | 2.1 | A | |
+| B14 | Ajuste: quién puede crear tableros de cada visibilidad | hecha | 2.1 | V | |
+| B15 | Ajuste: quién puede borrar tableros de cada visibilidad | hecha | 2.1 | V | |
+| B16 | Ajuste: quién puede sumar invitados a los tableros | hecha | 2.1 | A | |
 | B17 | Ajuste: limitar invitaciones a ciertos dominios de correo | pendiente | 6.7 | V | |
 | B18 | Página con todos los tableros del espacio (orden, filtro, búsqueda) | pendiente | 2.4 | A | |
 | B19 | Colecciones de tableros (agrupar y filtrar) | pendiente | 6.7 | A | |
 | B20 | Exportar todo el espacio (JSON, CSV, adjuntos en ZIP) | pendiente | 6.7 | A | |
 | B21 | Plantillas del espacio | pendiente | 6.4 | A | |
-| B22 | Borrar el espacio | pendiente | 2.1 | A | |
+| B22 | Borrar el espacio | hecha | 2.1 | A | |
 | B23 | Fusionar dos espacios | pendiente | 6.7 | A | |
 | B24 | Mover un tablero a otro espacio | pendiente | 2.4 | A | |
-| B25 | Pedir sumarse a un espacio / aprobar pedidos | pendiente | 2.1 | A | |
+| B25 | Pedir sumarse a un espacio / aprobar pedidos | hecha | 2.1 | A | |
 | B26 | Ajuste: restricción de tipos de adjunto | pendiente | 6.7 | V | |
 | B27 | Planes, facturación, prueba gratis, límite de 10 colaboradores y de 10 tableros | no se puede | — | A | No aplica: la app es tuya, sin planes ni límites |
 | B28 | Activar o desactivar la IA para el espacio | no se puede | — | A | Ver sección S |
@@ -116,20 +118,20 @@
 | # | Función | Estado | Tanda | Fuente | Nota |
 |---|---|---|---|---|---|
 | C01 | Crear tablero (nombre, fondo, espacio, visibilidad) | pendiente | 2.2 | A | |
-| C02 | Renombrar tablero | pendiente | 2.2 | A | |
+| C02 | Renombrar tablero | hecha | 2.2 | A | |
 | C03 | Descripción del tablero ("Acerca de este tablero") | pendiente | 2.4 | A | |
-| C04 | Visibilidad: privado | pendiente | 2.1 | V | |
-| C05 | Visibilidad: del espacio de trabajo | pendiente | 2.1 | V | |
-| C06 | Visibilidad: público (se ve con el enlace, sin cuenta) | pendiente | 2.1 | V | |
+| C04 | Visibilidad: privado | hecha | 2.1 | V | |
+| C05 | Visibilidad: del espacio de trabajo | hecha | 2.1 | V | |
+| C06 | Visibilidad: público (se ve con el enlace, sin cuenta) | hecha | 2.1 | V | |
 | C07 | Visibilidad: de la organización (Enterprise) | no se puede | — | A | No hay nivel "organización" por encima del espacio; no aplica |
-| C08 | Roles en el tablero: administrador, miembro normal, observador | pendiente | 2.1 | A | |
-| C09 | Invitar al tablero por nombre o correo, eligiendo rol | pendiente | 2.1 | A | |
-| C10 | Enlace de invitación al tablero (crear y desactivar) | pendiente | 2.1 | A | |
-| C11 | Cambiar rol o quitar a alguien; salir del tablero | pendiente | 2.1 | A | |
-| C12 | Pedido de acceso a un tablero y aprobación | pendiente | 2.1 | V | |
-| C13 | Permiso: quién comenta (5 opciones) | pendiente | 2.1 | A | |
-| C14 | Permiso: quién suma y quita miembros | pendiente | 2.1 | A | |
-| C15 | Permiso: los miembros del espacio pueden editar y unirse solos | pendiente | 2.1 | V | |
+| C08 | Roles en el tablero: administrador, miembro normal, observador | hecha | 2.1 | A | |
+| C09 | Invitar al tablero por nombre o correo, eligiendo rol | hecha | 2.1 | A | Por correo o usuario exacto de quien ya tiene cuenta |
+| C10 | Enlace de invitación al tablero (crear y desactivar) | hecha | 2.1 | A | |
+| C11 | Cambiar rol o quitar a alguien; salir del tablero | hecha | 2.1 | A | |
+| C12 | Pedido de acceso a un tablero y aprobación | hecha | 2.1 | V | |
+| C13 | Permiso: quién comenta (5 opciones) | hecha | 2.1 | A | |
+| C14 | Permiso: quién suma y quita miembros | hecha | 2.1 | A | |
+| C15 | Permiso: los miembros del espacio pueden editar y unirse solos | hecha | 2.1 | V | |
 | C16 | Permiso: quién vota | pendiente | 6.4 | V | |
 | C17 | Fondo: color liso o degradado | pendiente | 2.4 | V | |
 | C18 | Fondo: foto propia subida | pendiente | 2.4 | V | |
@@ -137,8 +139,8 @@
 | C20 | Texto claro u oscuro según el fondo; fondo distinto en modo oscuro | pendiente | 2.4 | V | |
 | C21 | Marcar tablero como favorito (estrella) y reordenar favoritos | pendiente | 2.4 | A | |
 | C22 | Tableros recientes | pendiente | 2.4 | A | |
-| C23 | Cerrar tablero, reabrirlo, y borrarlo definitivamente | pendiente | 2.4 | A | |
-| C24 | Página de tableros cerrados | pendiente | 2.4 | M | |
+| C23 | Cerrar tablero, reabrirlo, y borrarlo definitivamente | hecha | 2.4 | A | |
+| C24 | Página de tableros cerrados | hecha | 2.4 | M | |
 | C25 | Copiar tablero (con o sin tarjetas) | pendiente | 2.4 | A | |
 | C26 | Seguir tablero (recibir avisos de todo) | pendiente | 6.1 | A | |
 | C27 | Menú del tablero | pendiente | 2.4 | A | |
@@ -521,7 +523,7 @@
 ## X. Apariencia y accesibilidad
 | # | Función | Estado | Tanda | Fuente | Nota |
 |---|---|---|---|---|---|
-| X01 | Modo claro, oscuro e igual que el sistema | pendiente | 2.4 | A | |
+| X01 | Modo claro, oscuro e igual que el sistema | hecha | 2.4 | A | |
 | X02 | Respetar "reducir movimiento" del sistema | pendiente | 2.4 | A | |
 | X03 | Uso con teclado y con lector de pantalla | pendiente | 6.7 | M | |
 | X04 | Alto contraste | pendiente | 6.7 | V | |

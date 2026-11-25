@@ -1,0 +1,147 @@
+/* Estilos de meetmydash. Salen de la muestra aprobada (diseno/muestra.html):
+   azul eléctrico, Chakra Petch en títulos, Inter en texto, JetBrains Mono en rótulos y números.
+   Nunca se escribe un color suelto: todo pasa por estas variables. */
+:root {
+  --fondo: #F1F4F9;
+  --superficie: #FFFFFF;
+  --hundido: #E6EAF2;
+  --tinta: #0E1220;
+  --tinta-suave: #566078;
+  --linea: #D2D8E4;
+  --acento: #0879C4;
+  --sobre-acento: #FFFFFF;
+  --brillo: none;
+  --marcador: #FF2E9A;
+  --sobre-marcador: #FFFFFF;
+  --lienzo: #DCE6F4;
+  --lienzo-tinta: #14213A;
+  --aviso: #A85C00;
+  --alerta: #C2185B;
+  --hecho: #1B7F4B;
+  --velo: rgba(14, 18, 32, 0.45);
+  --f-titulo: "Chakra Petch", "Inter Variable", system-ui, sans-serif;
+  --f-texto: "Inter Variable", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-dato: "JetBrains Mono Variable", ui-monospace, "SF Mono", Menlo, monospace;
+  --r-hoja: 8px;
+  --r-panel: 12px;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    --fondo: #0A0B10; --superficie: #12141C; --hundido: #181B26; --tinta: #E7ECF3; --tinta-suave: #8A93A6; --linea: #262A38;
+    --acento: #2FB8FF; --sobre-acento: #062229; --brillo: 0 0 18px rgba(47, 184, 255, 0.35);
+    --lienzo: #0D1524; --lienzo-tinta: #DCE6F5; --aviso: #F0B25C; --alerta: #FF6FB5; --hecho: #4FD08A; --velo: rgba(0, 0, 0, 0.6);
+    color-scheme: dark;
+  }
+}
+:root[data-tema="oscuro"] {
+  --fondo: #0A0B10; --superficie: #12141C; --hundido: #181B26; --tinta: #E7ECF3; --tinta-suave: #8A93A6; --linea: #262A38;
+  --acento: #2FB8FF; --sobre-acento: #062229; --brillo: 0 0 18px rgba(47, 184, 255, 0.35);
+  --lienzo: #0D1524; --lienzo-tinta: #DCE6F5; --aviso: #F0B25C; --alerta: #FF6FB5; --hecho: #4FD08A; --velo: rgba(0, 0, 0, 0.6);
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body, #raiz { height: 100%; }
+body { margin: 0; background: var(--fondo); color: var(--tinta); font: 15px/1.45 var(--f-texto); -webkit-font-smoothing: antialiased; }
+h1, h2, h3 { font-family: var(--f-titulo); font-weight: 700; margin: 0; line-height: 1.15; text-wrap: balance; }
+h1 { font-size: 26px; } h2 { font-size: 20px; } h3 { font-size: 16px; }
+p { margin: 0; }
+a { color: var(--acento); text-decoration: none; }
+a:hover { text-decoration: underline; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+
+.suave { color: var(--tinta-suave); }
+.rotulo { font: 600 11px/1 var(--f-dato); letter-spacing: 0.08em; text-transform: uppercase; color: var(--tinta-suave); }
+.fila { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.columna { display: flex; flex-direction: column; gap: 14px; }
+.hueco { flex: 1; }
+
+/* ---------- armazón ---------- */
+.app { min-height: 100%; display: flex; flex-direction: column; }
+.barra { display: flex; align-items: center; gap: 12px; height: 52px; padding: 0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+  background: var(--superficie); border-bottom: 1px solid var(--linea); position: sticky; top: 0; z-index: 20; }
+.marca { font: 700 16px/1 var(--f-titulo); letter-spacing: 0.06em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; color: var(--tinta); white-space: nowrap; }
+.marca:hover { text-decoration: none; }
+.marca i { width: 16px; height: 4px; background: var(--acento); box-shadow: var(--brillo); display: block; }
+.pagina { width: 100%; max-width: 1080px; margin: 0 auto; padding: 28px max(16px, env(safe-area-inset-right)) 56px max(16px, env(safe-area-inset-left)); display: flex; flex-direction: column; gap: 28px; }
+.pagina.angosta { max-width: 440px; padding-top: 8vh; }
+.encabezado { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; }
+.encabezado h1 { min-width: 0; overflow-wrap: anywhere; }
+
+/* ---------- botones y campos ---------- */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--linea); background: var(--superficie); border-radius: 8px;
+  padding: 7px 12px; font-weight: 600; font-size: 14px; white-space: nowrap; cursor: pointer; min-height: 36px; color: var(--tinta); }
+.btn:hover { border-color: var(--tinta-suave); text-decoration: none; }
+.btn.lleno { background: var(--acento); border-color: var(--acento); color: var(--sobre-acento); box-shadow: var(--brillo); }
+.btn.lleno:hover { filter: brightness(1.08); }
+.btn.peligro { color: var(--alerta); }
+.btn.plano { border-color: transparent; background: none; }
+.btn.plano:hover { background: var(--hundido); }
+.btn:disabled { opacity: .5; cursor: not-allowed; box-shadow: none; }
+.btn.chico { padding: 4px 9px; min-height: 30px; font-size: 13px; }
+.campo { display: flex; flex-direction: column; gap: 6px; }
+.campo > span { font-size: 13px; font-weight: 600; }
+.campo small { color: var(--tinta-suave); }
+input[type="text"], input[type="email"], input[type="password"], input[type="url"], textarea, select {
+  width: 100%; background: var(--superficie); border: 1px solid var(--linea); border-radius: 8px; padding: 8px 10px; min-height: 38px; }
+select { appearance: auto; width: auto; max-width: 100%; }
+textarea { resize: vertical; min-height: 80px; }
+input:focus, textarea:focus, select:focus { outline: 2px solid var(--acento); outline-offset: 0; border-color: var(--acento); }
+.error { color: var(--alerta); font-size: 14px; }
+.ok { color: var(--hecho); font-size: 14px; }
+.codigo { font: 13px var(--f-dato); background: var(--hundido); border-radius: 6px; padding: 8px 10px; overflow-wrap: anywhere; user-select: all; }
+
+/* ---------- paneles, listas de cosas ---------- */
+.panel { background: var(--superficie); border: 1px solid var(--linea); border-radius: var(--r-panel); padding: 18px; display: flex; flex-direction: column; gap: 14px; }
+.panel.angosto { padding: 22px; gap: 16px; }
+.renglones { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.renglones li { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-top: 1px solid var(--linea); flex-wrap: wrap; }
+.renglones li:first-child { border-top: 0; }
+.renglones .quien { min-width: 0; flex: 1 1 180px; }
+.renglones .quien b { display: block; font-weight: 600; overflow-wrap: anywhere; }
+.renglones .quien small { color: var(--tinta-suave); overflow-wrap: anywhere; }
+.per { width: 28px; height: 28px; border-radius: 9px; display: inline-grid; place-items: center; font: 700 11px/1 var(--f-texto); color: #fff; flex: none; }
+.per.chica { width: 24px; height: 24px; border-radius: 8px; font-size: 10px; }
+.pila { display: flex; } .pila .per { margin-left: -6px; box-shadow: 0 0 0 2px var(--lienzo); } .pila .per:first-child { margin-left: 0; }
+.chapa { display: inline-flex; align-items: center; font: 600 11px/1 var(--f-dato); letter-spacing: 0.04em; text-transform: uppercase; padding: 4px 7px; border-radius: 5px; background: var(--hundido); color: var(--tinta-suave); white-space: nowrap; }
+.chapa.acento { background: color-mix(in srgb, var(--acento) 16%, var(--superficie)); color: var(--acento); }
+.chapa.marcador { background: var(--marcador); color: var(--sobre-marcador); }
+.pestanas { display: flex; gap: 2px; border-bottom: 1px solid var(--linea); }
+.pestanas button { border: 0; background: none; padding: 9px 12px; font-weight: 600; color: var(--tinta-suave); border-bottom: 2px solid transparent; margin-bottom: -1px; cursor: pointer; }
+.pestanas button[aria-selected="true"] { color: var(--tinta); border-bottom-color: var(--acento); }
+
+/* ---------- grilla de tableros ---------- */
+.grilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; }
+.ficha { display: flex; flex-direction: column; justify-content: space-between; gap: 18px; min-height: 96px; padding: 12px 14px; border-radius: var(--r-hoja);
+  background: var(--lienzo); color: var(--lienzo-tinta); border: 1px solid color-mix(in srgb, var(--lienzo-tinta) 14%, transparent); }
+.ficha:hover { text-decoration: none; border-color: var(--acento); }
+.ficha b { font: 700 16px/1.2 var(--f-titulo); overflow-wrap: anywhere; }
+.ficha.nueva { background: none; border-style: dashed; border-color: var(--linea); color: var(--tinta-suave); align-items: flex-start; cursor: pointer; text-align: left; }
+.ficha.cerrada { opacity: .6; }
+.vacio { border: 1px dashed var(--linea); border-radius: var(--r-panel); padding: 28px 18px; text-align: center; color: var(--tinta-suave); display: flex; flex-direction: column; gap: 12px; align-items: center; }
+
+/* ---------- tablero ---------- */
+.tablero { flex: 1; background: var(--lienzo); color: var(--lienzo-tinta); display: flex; flex-direction: column; min-height: 0; }
+.tablero .cab { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; padding: 14px max(16px, env(safe-area-inset-right)) 10px max(16px, env(safe-area-inset-left)); }
+.tablero .cab h1 { font-size: 22px; overflow-wrap: anywhere; min-width: 0; }
+.tablero .cab .btn { background: color-mix(in srgb, var(--superficie) 70%, transparent); border-color: color-mix(in srgb, var(--lienzo-tinta) 18%, transparent); color: var(--lienzo-tinta); }
+.tablero .cab .btn.lleno { background: var(--acento); color: var(--sobre-acento); border-color: var(--acento); }
+.tablero .cuerpo { flex: 1; padding: 8px max(16px, env(safe-area-inset-right)) 24px max(16px, env(safe-area-inset-left)); }
+.franja { background: var(--marcador); color: var(--sobre-marcador); padding: 8px 16px; font-weight: 600; font-size: 14px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.franja .btn { color: var(--tinta); }
+
+/* ---------- diálogo ---------- */
+.velo { position: fixed; inset: 0; background: var(--velo); z-index: 50; display: flex; align-items: flex-start; justify-content: center; padding: 6vh 12px 12px; overflow-y: auto; }
+.dialogo { background: var(--superficie); color: var(--tinta); border: 1px solid var(--linea); border-radius: var(--r-panel); width: 100%; max-width: 520px; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+.dialogo header { display: flex; align-items: center; gap: 10px; }
+.dialogo header h2 { flex: 1; min-width: 0; }
+
+@media (max-width: 600px) {
+  h1 { font-size: 22px; }
+  .pagina { padding-top: 20px; gap: 22px; }
+  .grilla { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .marca span { display: none; }
+}
