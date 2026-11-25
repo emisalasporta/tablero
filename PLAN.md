@@ -138,7 +138,7 @@ Te los voy a pedir de a uno, con los valores exactos, cuando llegue el momento.
 | 1 | ~~Darle a esta Mac permiso para escribir en GitHub como `emisalasporta`~~ | — | **Resuelto sin clic:** la cuenta ya estaba conectada en esta Mac; el repositorio usa esa cuenta. |
 | 2 | ~~En Dokploy: crear la aplicación `tablero`~~ | — | **Resuelto:** la creé por la API de Dokploy. |
 | 3 | ~~En Dokploy: crear una clave de API~~ | — | **Resuelto:** la generé desde tu sesión abierta en Chrome, con tu permiso; está en PRIVADO.md. |
-| 4 | En Cloudflare: crear el subdominio (propongo `meetmydash.emilianosalasporta.cloud`) apuntando al servidor. Hoy no existe (verificado). | Fase 4 | Es tu cuenta. |
+| 4 | ~~En Cloudflare: crear el subdominio~~ | — | **Resuelto:** creé `meetmydash.emilianosalasporta.cloud` desde tu sesión de Chrome, con tu permiso. |
 | 5 | En Cloudflare: crear el depósito para la copia externa del respaldo y su clave. | Fase 4 | Es tu cuenta. |
 | 6 | En Claude: sumar el conector personalizado con la dirección de la puerta MCP. | Fase 3/4 | Solo vos podés sumar conectores. |
 | 7 | En el iPhone: abrir la app en Safari → Compartir → "Agregar a inicio" y aceptar las notificaciones. | Fase 6.1 | Es tu teléfono. |
@@ -165,4 +165,4 @@ Con el punto 1 resuelto, el aviso de GitHub a Dokploy (publicación automática)
 
 ## 8. Estado
 - Fase 1: hecha y aprobada.
-- Tanda 2.0: hecha (falta solo el subdominio definitivo). Sigue la tanda 2.1.
+- Tanda 2.0: hecha. La app está en https://meetmydash.emilianosalasporta.cloud. Sigue la tanda 2.1.
