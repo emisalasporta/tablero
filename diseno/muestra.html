@@ -90,8 +90,9 @@ svg.ic { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-wid
 .pila { display: flex; } .pila .per { margin-left: -6px; box-shadow: 0 0 0 2px var(--lienzo); } .pila .per:first-child { margin-left: 0; }
 .cab .btn { background: color-mix(in srgb, var(--superficie) 70%, transparent); border-color: color-mix(in srgb, var(--lienzo-tinta) 18%, transparent); color: var(--lienzo-tinta); }
 .listas { display: flex; gap: 14px; padding: 12px 18px 20px; overflow-x: auto; align-items: flex-start; scroll-snap-type: x proximity; scroll-padding-left: 18px; }
-.lista { flex: none; width: 272px; display: flex; flex-direction: column; gap: 8px; scroll-snap-align: start; }
-.lista header { display: flex; align-items: baseline; gap: 8px; padding: 0 2px 6px; border-bottom: 2px solid color-mix(in srgb, var(--lienzo-tinta) 22%, transparent); }
+.lista { flex: none; width: 284px; display: flex; flex-direction: column; gap: 8px; scroll-snap-align: start;
+  background: var(--hundido); color: var(--tinta); border: 1px solid var(--linea); border-radius: 12px; padding: 10px 8px 6px; }
+.lista header { display: flex; align-items: baseline; gap: 8px; padding: 2px 6px 4px; }
 .lista header h4 { font: 700 15px/1.2 var(--f-texto); margin: 0; flex: 1; min-width: 0; }
 .lista header .n { font: 500 12px/1 var(--f-dato); opacity: .7; }
 .lista header .mas { opacity: .55; font-weight: 700; letter-spacing: 1px; }
@@ -118,7 +119,7 @@ svg.ic { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-wid
 .tilde { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--linea); flex: none; display: inline-grid; place-items: center; }
 .hecha .tilde { background: var(--hecho); border-color: var(--hecho); color: var(--superficie); }
 .fila-tit { display: flex; gap: 8px; align-items: flex-start; }
-.sumar { border: 0; background: none; text-align: left; padding: 6px 4px; font-weight: 600; font-size: 13.5px; color: var(--lienzo-tinta); opacity: .7; }
+.sumar { border: 0; background: none; text-align: left; padding: 6px; font-weight: 600; font-size: 13.5px; color: var(--tinta-suave); }
 .limite { font: 500 11px/1 var(--f-dato); padding: 3px 5px; border-radius: 4px; background: var(--marcador); color: #1b1b1b; }
 
 /* ---------- tarjeta abierta ---------- */
