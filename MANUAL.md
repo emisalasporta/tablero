@@ -44,8 +44,21 @@ Abre en http://localhost:3000. Para trabajar en las pantallas con recarga autom�
 `GET /api/salud` devuelve `version`, `commit` (los primeros 12 caracteres del cambio) y `armada_en`.
 
 ## Publicar
-Pendiente de configurar (tanda 2.0, publicación de prueba). El molde está en PRIVADO.md.
-Regla: subir a `main` → Dokploy arma con el Dockerfile → si `npm test` falla dentro del armado, no se publica.
+Se publica solo: cada cambio que llega a `main` en GitHub dispara un aviso (webhook) a Dokploy, que arma la app con el `Dockerfile` y la reemplaza. Tarda 1 a 3 minutos.
+
+- Dokploy: proyecto `tablero`, aplicación `app`. Origen: Git, `https://github.com/emisalasporta/tablero.git`, rama `main`, Dockerfile. Volumen `tablero-datos` en `/app/data`.
+- Los identificadores, la dirección de prueba, la dirección del aviso y la clave de la API de Dokploy están en `PRIVADO.md`.
+- Las pruebas corren dentro del armado (`RUN npm test`). Si fallan, el armado falla y sigue funcionando la versión anterior.
+
+### Comprobar que se publicó
+Pedir `/api/salud` en la dirección de la app y comparar `commit` con `git rev-parse --short=12 HEAD`.
+
+### Ver el estado o volver a publicar a mano (API de Dokploy)
+Con `DOKPLOY_URL` y `DOKPLOY_API_KEY` de `PRIVADO.md`, encabezado `x-api-key`:
+- Estado y últimas publicaciones: `GET /api/deployment.all?applicationId=<id>` (cada una trae `status`, `title` y `logPath`).
+- Datos de la app: `GET /api/application.one?applicationId=<id>` (`applicationStatus`).
+- Volver a publicar: `POST /api/application.deploy` con `{"applicationId":"<id>"}`.
+- El manual completo de la API está en `GET /api/settings.getOpenApiDocument`.
 
 ## Datos y migraciones
 - Base: `DATA_DIR/tablero.db` (SQLite). Al arrancar se aplican las migraciones pendientes, cada una en una transacción (si falla, no queda nada a medias).
