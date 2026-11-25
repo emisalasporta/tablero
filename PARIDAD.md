@@ -1,6 +1,6 @@
 # PARIDAD — todas las funciones de Trello y su estado
 
-Última actualización: 25/11/2026 (tanda 2.1: cuentas, espacios de trabajo, miembros, invitados, invitaciones y permisos).
+Última actualización: 25/11/2026 (tanda 2.2: listas, tarjetas, arrastre con mouse y dedo, y tiempo real).
 
 ## Cómo leer esta lista
 - **Estado:** `pendiente` · `hecha` · `no se puede` (con el porqué en la nota).
@@ -16,8 +16,8 @@
 
 | Estado | Cantidad |
 |---|---|
-| Hechas | 39 |
-| Pendientes (se pueden igualar) | 297 |
+| Hechas | 62 |
+| Pendientes (se pueden igualar) | 274 |
 | Pendientes pero parciales (⚠, no quedan idénticas) | 16 |
 | No se puede | 47 |
 
@@ -27,9 +27,9 @@
 |---|---|---|---|---|---|
 | A. Cuentas y perfil | 22 | 5 | 14 | 1 | 2 |
 | B. Espacios de trabajo | 28 | 17 | 9 | 0 | 2 |
-| C. Tableros | 42 | 14 | 23 | 2 | 3 |
-| D. Listas | 17 | 0 | 16 | 0 | 1 |
-| E. Tarjetas: lo básico | 22 | 0 | 22 | 0 | 0 |
+| C. Tableros | 42 | 15 | 22 | 2 | 3 |
+| D. Listas | 17 | 9 | 7 | 0 | 1 |
+| E. Tarjetas: lo básico | 22 | 8 | 14 | 0 | 0 |
 | F. Tarjetas: descripción y texto | 14 | 0 | 13 | 1 | 0 |
 | G. Tarjetas: miembros y etiquetas | 11 | 0 | 11 | 0 | 0 |
 | H. Tarjetas: checklists | 13 | 0 | 12 | 0 | 1 |
@@ -46,10 +46,10 @@
 | S. Inteligencia artificial de Atlassian | 5 | 0 | 0 | 0 | 5 |
 | T. Bandeja de entrada y Planificador | 12 | 0 | 9 | 1 | 2 |
 | U. Plantillas | 5 | 0 | 4 | 0 | 1 |
-| V. Teléfono, instalación y escritorio | 13 | 0 | 5 | 2 | 6 |
+| V. Teléfono, instalación y escritorio | 13 | 1 | 4 | 2 | 6 |
 | W. Importar, exportar e imprimir | 5 | 0 | 4 | 0 | 1 |
 | X. Apariencia y accesibilidad | 7 | 1 | 6 | 0 | 0 |
-| Y. Tiempo real | 5 | 0 | 5 | 0 | 0 |
+| Y. Tiempo real | 5 | 4 | 1 | 0 | 0 |
 | Z. Administración avanzada (Enterprise) | 6 | 0 | 2 | 0 | 4 |
 | AA. Requisitos propios de este proyecto (no son de Trello, pero se controlan acá) | 9 | 2 | 7 | 0 | 0 |
 <!-- RESUMEN-FIN -->
@@ -145,13 +145,13 @@
 | C26 | Seguir tablero (recibir avisos de todo) | pendiente | 6.1 | A | |
 | C27 | Menú del tablero | pendiente | 2.4 | A | |
 | C28 | Actividad del tablero (todo / solo comentarios, cargar más) | pendiente | 2.3 | A | |
-| C29 | Elementos archivados: tarjetas y listas, buscar, restaurar, borrar | pendiente | 2.4 | A | |
+| C29 | Elementos archivados: tarjetas y listas, buscar, restaurar, borrar | pendiente | 2.4 | A | Ya se ven y se restauran desde "Archivados". Faltan buscar y borrar |
 | C30 | Ajuste: mostrar u ocultar portadas | pendiente | 2.3 | V | |
 | C31 | Ajuste: mostrar el tilde de completada en el frente | pendiente | 2.3 | V | |
 | C32 | Ajuste: mostrar cantidad de tarjetas por lista | pendiente | 2.4 | V | |
 | C33 | Gestión de etiquetas del tablero | pendiente | 2.3 | A | |
 | C34 | Cabecera: avatares de miembros, filtro, estrella, visibilidad, compartir | pendiente | 2.2 | A | |
-| C35 | Dirección web corta del tablero y número de tarjeta | pendiente | 2.2 | V | |
+| C35 | Dirección web corta del tablero y número de tarjeta | hecha | 2.2 | V | El número se ve al abrir la tarjeta; la dirección propia de la tarjeta se usa desde la 2.3 |
 | C36 | Convertir tablero en plantilla y volver atrás | pendiente | 6.4 | A | |
 | C37 | Crear tarjetas enviando un correo al tablero | pendiente | 6.6 | A | ⚠ parcial: depende de configurar la recepción de correo en tu dominio (Cloudflare) |
 | C38 | Elegir lista y posición donde caen los correos | pendiente | 6.6 | V | |
@@ -163,17 +163,17 @@
 ## D. Listas
 | # | Función | Estado | Tanda | Fuente | Nota |
 |---|---|---|---|---|---|
-| D01 | Crear lista | pendiente | 2.2 | A | |
-| D02 | Renombrar lista | pendiente | 2.2 | A | |
-| D03 | Reordenar listas arrastrando | pendiente | 2.2 | V | |
-| D04 | Mover lista (elegir tablero y posición) | pendiente | 2.2 | A | |
-| D05 | Copiar lista con sus tarjetas | pendiente | 2.2 | A | |
-| D06 | Archivar y restaurar lista | pendiente | 2.2 | A | |
+| D01 | Crear lista | hecha | 2.2 | A |  |
+| D02 | Renombrar lista | hecha | 2.2 | A |  |
+| D03 | Reordenar listas arrastrando | hecha | 2.2 | V |  |
+| D04 | Mover lista (elegir tablero y posición) | hecha | 2.2 | A |  |
+| D05 | Copiar lista con sus tarjetas | hecha | 2.2 | A |  |
+| D06 | Archivar y restaurar lista | hecha | 2.2 | A |  |
 | D07 | Borrar lista archivada | pendiente | 2.4 | A | |
-| D08 | Mover todas las tarjetas de la lista | pendiente | 2.2 | A | |
-| D09 | Archivar todas las tarjetas de la lista | pendiente | 2.2 | A | |
-| D10 | Ordenar lista (alfabético, vencimiento, creación, votos, campos) | pendiente | 2.2 | A | |
-| D11 | Agregar tarjeta arriba o abajo desde el menú | pendiente | 2.2 | M | |
+| D08 | Mover todas las tarjetas de la lista | hecha | 2.2 | A |  |
+| D09 | Archivar todas las tarjetas de la lista | hecha | 2.2 | A |  |
+| D10 | Ordenar lista (alfabético, vencimiento, creación, votos, campos) | pendiente | 2.3 | A | Ya ordena por nombre y por fecha de creación. Faltan vencimiento, votos y campos, que llegan con esas funciones |
+| D11 | Agregar tarjeta arriba o abajo desde el menú | hecha | 2.2 | M |  |
 | D12 | Seguir lista | pendiente | 6.1 | A | |
 | D13 | Color de lista | pendiente | 6.4 | V | |
 | D14 | Colapsar y expandir lista | pendiente | 6.4 | V | |
@@ -184,15 +184,15 @@
 ## E. Tarjetas: lo básico
 | # | Función | Estado | Tanda | Fuente | Nota |
 |---|---|---|---|---|---|
-| E01 | Crear tarjeta | pendiente | 2.2 | A | |
-| E02 | Crear varias tarjetas pegando varias líneas | pendiente | 2.2 | M | |
-| E03 | Editar título | pendiente | 2.2 | A | |
+| E01 | Crear tarjeta | hecha | 2.2 | A |  |
+| E02 | Crear varias tarjetas pegando varias líneas | hecha | 2.2 | M |  |
+| E03 | Editar título | hecha | 2.2 | A |  |
 | E04 | Abrir tarjeta (dorso) con dirección web propia | pendiente | 2.3 | V | |
-| E05 | Arrastrar tarjeta dentro de la lista y entre listas | pendiente | 2.2 | V | |
-| E06 | Mover desde un menú (tablero, lista, posición) | pendiente | 2.2 | A | |
-| E07 | Mover a otro tablero conservando contenido | pendiente | 2.2 | A | |
-| E08 | Copiar tarjeta eligiendo qué conservar | pendiente | 2.2 | A | |
-| E09 | Archivar y restaurar tarjeta | pendiente | 2.2 | A | |
+| E05 | Arrastrar tarjeta dentro de la lista y entre listas | hecha | 2.2 | V |  |
+| E06 | Mover desde un menú (tablero, lista, posición) | hecha | 2.2 | A |  |
+| E07 | Mover a otro tablero conservando contenido | hecha | 2.2 | A | Al cambiar de tablero recibe número nuevo |
+| E08 | Copiar tarjeta eligiendo qué conservar | hecha | 2.2 | A | Por ahora lo único para conservar es la descripción; se suman opciones con cada cosa nueva de la tarjeta (2.3) |
+| E09 | Archivar y restaurar tarjeta | hecha | 2.2 | A |  |
 | E10 | Borrar tarjeta archivada | pendiente | 2.4 | A | |
 | E11 | Marcar tarjeta como completada (círculo) | pendiente | 2.3 | A | |
 | E12 | Edición rápida desde el frente (lápiz o clic derecho) | pendiente | 6.2 | A | |
@@ -497,9 +497,9 @@
 ## V. Teléfono, instalación y escritorio
 | # | Función | Estado | Tanda | Fuente | Nota |
 |---|---|---|---|---|---|
-| V01 | Uso completo desde el navegador del teléfono | pendiente | 2.2 | — | |
+| V01 | Uso completo desde el navegador del teléfono | pendiente | 2.4 | — | Listas y tarjetas ya se usan en tamaño de teléfono; se da por hecha al cerrar la fase 2 |
 | V02 | Instalable en la pantalla de inicio del iPhone y Android | pendiente | 2.4 | — | |
-| V03 | Arrastrar con el dedo (mantener apretado) | pendiente | 2.2 | M | |
+| V03 | Arrastrar con el dedo (mantener apretado) | hecha | 2.2 | M | Probado con dedo simulado; falta probarlo en un iPhone de verdad |
 | V04 | Sacar foto y adjuntarla | pendiente | 2.3 | A | |
 | V05 | App nativa en App Store y Google Play | no se puede | — | A | Se reemplaza por la app web instalable. Publicar en tiendas tiene costo anual y revisión de Apple |
 | V06 | Widgets de pantalla de inicio | no se puede | — | A | Solo las apps nativas pueden |
@@ -534,10 +534,10 @@
 ## Y. Tiempo real
 | # | Función | Estado | Tanda | Fuente | Nota |
 |---|---|---|---|---|---|
-| Y01 | Los cambios de otros aparecen al instante sin recargar | pendiente | 2.2 | V | |
-| Y02 | Mis cambios se ven al instante y se corrigen si el servidor los rechaza | pendiente | 2.2 | M | |
-| Y03 | Reconexión automática y puesta al día tras un corte | pendiente | 2.2 | M | |
-| Y04 | Orden estable cuando dos personas mueven a la vez | pendiente | 2.2 | V | |
+| Y01 | Los cambios de otros aparecen al instante sin recargar | hecha | 2.2 | V |  |
+| Y02 | Mis cambios se ven al instante y se corrigen si el servidor los rechaza | hecha | 2.2 | M |  |
+| Y03 | Reconexión automática y puesta al día tras un corte | hecha | 2.2 | M |  |
+| Y04 | Orden estable cuando dos personas mueven a la vez | hecha | 2.2 | V |  |
 | Y05 | Avisos y contador de no leídos en vivo | pendiente | 6.1 | V | |
 
 ## Z. Administración avanzada (Enterprise)

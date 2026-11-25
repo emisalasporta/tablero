@@ -1,19 +1,11 @@
-// Página de un tablero. En esta tanda: cabecera, quién lo ve, su gente y sus permisos.
-// Las listas y las tarjetas llegan en la tanda 2.2.
+// Página de un tablero: cabecera (quién lo ve, su gente, sus permisos) y, abajo, las listas con sus tarjetas.
 import { useState } from 'react';
-import { api, Avatar, AYUDA_VIS, Campo, CopiarEnlace, Dialogo, Enlace, Formulario, navegar, NOMBRE_ROL, NOMBRE_VIS, useAccion, useCarga, useSesion } from '../base.tsx';
+import { api, Avatar, AYUDA_VIS, Campo, CopiarEnlace, Dialogo, Enlace, Formulario, navegar, NOMBRE_ROL, NOMBRE_VIS, useAccion, useSesion } from '../base.tsx';
+import { useTablero } from '../tablero/datos.ts';
+import type { Datos, Permisos } from '../tablero/datos.ts';
+import { Listas } from '../tablero/Listas.tsx';
+import { DialogoArchivados, DialogoTarjeta } from '../tablero/Menus.tsx';
 import { Entrar } from './Entrar.tsx';
-
-interface Persona { id: string; usuario: string; nombre: string; iniciales: string }
-interface Permisos { comentar: string; invitar: string; union_libre: boolean; edicion_espacio: boolean }
-interface Puede { ver: boolean; editar: boolean; administrar: boolean; comentar: boolean; invitar: boolean; invitar_de_afuera: boolean; unirse: boolean; borrar: boolean }
-interface Datos {
-  tablero: { id: string; enlace: string; nombre: string; descripcion: string; visibilidad: string; cerrado: boolean; permisos: Permisos };
-  espacio: { id: string; nombre: string };
-  miembros: (Persona & { rol: string; invitado: boolean })[];
-  pedidos: { id: string; persona: Persona }[];
-  mi: { rol: string | null; rol_espacio: string | null; puede: Puede };
-}
 
 function Compartir({ d, alCambiar, alCerrar }: { d: Datos; alCambiar: () => void; alCerrar: () => void }) {
   const { yo } = useSesion();
@@ -119,9 +111,10 @@ function Ajustes({ d, alCambiar, alCerrar }: { d: Datos; alCambiar: () => void; 
 
 export function Tablero({ enlace }: { enlace: string }) {
   const { yo } = useSesion();
-  const datos = useCarga<Datos>(`/api/tableros/${enlace}`);
+  const datos = useTablero(enlace);
   const accion = useAccion();
-  const [abierto, setAbierto] = useState<'compartir' | 'ajustes' | null>(null);
+  const [abierto, setAbierto] = useState<'compartir' | 'ajustes' | 'archivados' | null>(null);
+  const [tarjetaAbierta, setTarjetaAbierta] = useState<string | null>(null);
   const [pedido, setPedido] = useState(false);
 
   if (datos.error) {
@@ -135,11 +128,13 @@ export function Tablero({ enlace }: { enlace: string }) {
         <Enlace a="/">Volver al inicio</Enlace>
       </div></main>
     );
+    if (datos.error.estado !== 404) return <main className="pagina"><h1>No se pudo abrir el tablero</h1><p className="suave">{datos.error.message}</p><div><button type="button" className="btn lleno" onClick={() => void datos.recargar()}>Probar de nuevo</button></div></main>;
     return <main className="pagina"><h1>No encontramos ese tablero</h1><p className="suave">Puede que lo hayan borrado o que el enlace esté mal.</p><Enlace a="/">Volver al inicio</Enlace></main>;
   }
   if (!datos.datos) return null;
   const d = datos.datos;
   const t = d.tablero;
+  const tarjeta = tarjetaAbierta ? d.tarjetas.find((c) => c.id === tarjetaAbierta) : undefined;
   return (
     <div className="tablero">
       {t.cerrado && <div className="franja">Este tablero está cerrado: se puede ver pero no editar.{d.mi.puede.administrar && <button type="button" className="btn chico" onClick={() => accion.hacer(async () => { await api('PATCH', `/api/tableros/${t.id}`, { cerrado: false }); datos.recargar(); })}>Reabrir</button>}</div>}
@@ -147,22 +142,22 @@ export function Tablero({ enlace }: { enlace: string }) {
         <h1>{t.nombre}</h1>
         <span className="chapa" title={AYUDA_VIS[t.visibilidad]}>{NOMBRE_VIS[t.visibilidad]}</span>
         {yo && <Enlace a={`/e/${d.espacio.id}`} className="suave">{d.espacio.nombre}</Enlace>}
+        {!datos.enLinea && <span className="chapa marcador" title="Lo que cambien otras personas no se ve hasta que vuelva la conexión">Sin conexión · reintentando</span>}
         <span className="hueco" />
         <span className="pila">{d.miembros.slice(0, 6).map((m) => <Avatar key={m.id} p={m} chica />)}</span>
         {d.miembros.length > 6 && <span className="chapa">+{d.miembros.length - 6}</span>}
         {d.mi.puede.unirse && <button type="button" className="btn" onClick={() => accion.hacer(async () => { await api('POST', `/api/tableros/${t.id}/unirse`); datos.recargar(); })}>Sumarme</button>}
         {yo && d.mi.rol !== null && <button type="button" className="btn lleno" onClick={() => setAbierto('compartir')}>Compartir{d.pedidos.length > 0 ? ` (${d.pedidos.length})` : ''}</button>}
         {yo && d.mi.rol === null && d.mi.puede.invitar && <button type="button" className="btn lleno" onClick={() => setAbierto('compartir')}>Compartir</button>}
+        <button type="button" className="btn" onClick={() => setAbierto('archivados')}>Archivados</button>
         {d.mi.puede.administrar && <button type="button" className="btn" onClick={() => setAbierto('ajustes')}>Ajustes</button>}
         {!yo && <Enlace a="/entrar" className="btn">Entrar</Enlace>}
       </div>
-      <div className="cuerpo">
-        {accion.error && <p className="error" role="alert">{accion.error}</p>}
-        <div className="vacio" style={{ borderColor: 'color-mix(in srgb, var(--lienzo-tinta) 25%, transparent)', color: 'var(--lienzo-tinta)', maxWidth: 520 }}>
-          <p><b>Acá van a ir las listas y las tarjetas.</b></p>
-          <p>Es lo próximo que se construye. Por ahora el tablero ya tiene su gente, su visibilidad y sus permisos.</p>
-        </div>
-      </div>
+      {accion.error && <p className="error en-tablero" role="alert">{accion.error}</p>}
+      <Listas d={d} ops={datos.ops} alAbrir={(c) => setTarjetaAbierta(c.id)} />
+      {datos.aviso && <div className="aviso-flotante" role="alert"><span>{datos.aviso}</span><button type="button" className="btn chico" onClick={datos.cerrarAviso}>Entendido</button></div>}
+      {tarjeta && <DialogoTarjeta d={d} tarjeta={tarjeta} ops={datos.ops} alCerrar={() => setTarjetaAbierta(null)} />}
+      {abierto === 'archivados' && <DialogoArchivados d={d} alCambiar={datos.recargar} alCerrar={() => setAbierto(null)} />}
       {abierto === 'compartir' && <Compartir d={d} alCambiar={datos.recargar} alCerrar={() => setAbierto(null)} />}
       {abierto === 'ajustes' && <Ajustes d={d} alCambiar={datos.recargar} alCerrar={() => setAbierto(null)} />}
     </div>

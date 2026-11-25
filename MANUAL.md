@@ -1,7 +1,7 @@
 # MANUAL — cómo se prueba, se publica, se respalda y se vuelve atrás
 
 Este archivo es para cualquier sesión de Claude (o persona) que retome el proyecto.
-Se actualiza al terminar cada tanda. Estado: **tanda 2.1** hecha (cuentas, espacios, miembros, invitaciones, permisos). Publicado en https://meetmydash.emilianosalasporta.cloud.
+Se actualiza al terminar cada tanda. Estado: **tanda 2.2** hecha (lo de la 2.1 más listas, tarjetas, arrastre y tiempo real). Publicado en https://meetmydash.emilianosalasporta.cloud.
 
 ## Qué hay en cada carpeta
 | Carpeta / archivo | Qué es |
@@ -11,27 +11,36 @@ Se actualiza al terminar cada tanda. Estado: **tanda 2.1** hecha (cuentas, espac
 | `web/` | Las pantallas (React + Vite). Se arman a `dist/web`. |
 | `pruebas/` | Pruebas automáticas (Vitest). |
 | `scripts/version.mjs` | Anota qué cambio se armó, para verlo en `/api/salud`. |
+| `scripts/paridad.mjs` | Recalcula el resumen de PARIDAD.md después de cambiar el estado de una fila: `node scripts/paridad.mjs`. |
 | `diseno/` | Muestras de diseño. No se publican. |
 | `Dockerfile` | Receta con la que Dokploy arma y publica. Corre las pruebas adentro. |
 | `PRIVADO.md` | Datos del servidor y claves. **Ignorado por git. No subir nunca.** |
 
-## Cómo está armado el servidor (desde la tanda 2.1)
+## Cómo está armado
 | Archivo | Qué hace |
 |---|---|
 | `servidor/permisos.ts` | **Único lugar** donde se decide quién puede qué (instalación → espacio → tablero). Si cambia una regla, se cambia acá y en `pruebas/tableros-permisos.test.ts`. |
 | `servidor/nucleo.ts` | Sesiones (galleta `mmd_sesion`), registro de actividad, membresías e invitaciones por enlace. |
 | `servidor/rutas/cuenta.ts` | Crear cuenta, entrar, perfil, contraseña, administración general. |
 | `servidor/rutas/espacios.ts` | Espacios de trabajo, miembros, invitados, enlaces, pedidos. |
-| `servidor/rutas/tableros.ts` | Tableros (por ahora: visibilidad, miembros, permisos, cerrar/borrar). |
+| `servidor/rutas/tableros.ts` | Tableros: visibilidad, miembros, permisos, cerrar/borrar. |
+| `servidor/rutas/contenido.ts` | Listas y tarjetas: crear, renombrar, ordenar, mover (también a otro tablero), copiar, archivar. Acá están las reglas de posición. |
+| `servidor/vivo.ts` | Tiempo real: una línea abierta (WebSocket) por pantalla que mira un tablero, en `/api/tableros/:id/vivo`. |
 | `web/src/base.tsx` | Base de las pantallas: pedidos al servidor, navegación, sesión, piezas comunes. |
 | `web/src/estilos.css` | Todos los colores y letras, como variables. Sale de `diseno/muestra.html` (diseño aprobado). |
 | `web/src/pantallas/` | Una pantalla por archivo. |
+| `web/src/tablero/datos.ts` | Los datos del tablero abierto: carga, avisos en vivo, reconexión y cambios que se ven al instante. |
+| `web/src/tablero/arrastre.ts` | El arrastre con mouse y con dedo (hecho a medida, sin librerías). |
+| `web/src/tablero/Listas.tsx`, `Menus.tsx` | Las listas y tarjetas en pantalla; menú de lista, tarjeta abierta y archivados. |
 
 Reglas de la casa:
 - La app es privada: la **primera cuenta** que se crea queda como administración general; las demás entran con enlace de invitación.
 - Contraseñas y códigos de sesión o invitación se guardan solo como huella (no legibles).
 - Toda acción que cambia algo llama a `registrarActividad` con quién la hizo.
 - Los errores salen siempre como `{ error: código, mensaje: texto para la persona }`.
+- **Orden de listas y tarjetas:** cada una guarda un número `posicion`, separado de a 65.536. Para meter algo entre dos se manda el número del medio; `"arriba"` y `"abajo"` también valen. Si dos quedan pegados, el servidor vuelve a numerar ese grupo solo.
+- **Tiempo real:** todo cambio de listas o tarjetas llama a `vivo.emitir(tablero, { tipo: 'cambio', listas, tarjetas })` con las filas completas ya cambiadas. La pantalla las reemplaza; lo archivado o lo que pasó a otro tablero sale de la vista. Cambios de cabecera (nombre, gente, permisos) mandan `{ tipo: 'tablero' }` y la pantalla vuelve a pedir todo. Antes de cada aviso se revisa de nuevo el permiso de cada pantalla conectada. Hay un latido cada 25 segundos; si la pantalla pasa un minuto sin recibirlo, se reconecta y vuelve a cargar.
+- Cada pedido de la pantalla lleva la cabecera `x-cliente` (un código por pestaña) y el aviso la devuelve en `origen`: así la pantalla reconoce el eco de sus propios cambios.
 - Las letras están dentro de la app (`@fontsource`): no se pide nada a servidores de terceros.
 
 ## Probar

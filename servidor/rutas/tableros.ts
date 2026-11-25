@@ -1,10 +1,12 @@
-// Tableros, por ahora solo lo que hace a permisos: crear, visibilidad, miembros, invitaciones y pedidos de acceso.
-// Listas y tarjetas llegan en la tanda 2.2.
+// Tableros: crear, visibilidad, miembros, invitaciones y pedidos de acceso.
+// Lo que va adentro (listas y tarjetas) está en contenido.ts.
 import type { FastifyInstance } from 'fastify';
 import type { DatabaseSync } from 'node:sqlite';
 import { buscarUsuario, cantidadAdminsTablero, crearInvitacion, exigirUsuario, fichaPublica, leerUsuario, registrarActividad, sumarAEspacio, sumarATablero } from '../nucleo.ts';
 import { capacidadesTablero, COMENTAR, contexto, leerEspacio, leerTablero, PERMISOS_TABLERO_INICIALES, puedeAdministrarEspacio, puedeAdministrarTablero, puedeBorrarTablero, puedeCrearTablero, puedeEditarTablero, puedeInvitarATablero, puedeUnirseSolo, puedeVerEspacio, puedeVerTablero, VIS_TABLERO } from '../permisos.ts';
 import type { PermisosTablero, RolTablero, Tablero, Usuario } from '../permisos.ts';
+import type { Vivo } from '../vivo.ts';
+import { contenidoTablero } from './contenido.ts';
 import { ahora, datoInvalido, ErrorApi, noAutenticado, noExiste, nuevoEnlace, nuevoId, opcion, sinPermiso, texto, textoOpcional } from '../util.ts';
 
 const ROLES_TABLERO = ['admin', 'normal', 'observador'] as const;
@@ -21,7 +23,9 @@ function validarPermisos(v: unknown, actuales: PermisosTablero): PermisosTablero
   };
 }
 
-export function rutasTableros(app: FastifyInstance, db: DatabaseSync) {
+export function rutasTableros(app: FastifyInstance, db: DatabaseSync, vivo: Vivo) {
+  /** Avisa a quienes miran el tablero que cambió algo de su cabecera (nombre, gente, permisos): vuelven a pedirlo. */
+  const avisar = (tableroId: string) => vivo.emitir(tableroId, { tipo: 'tablero' });
   const resumen = (t: Tablero) => ({ id: t.id, enlace: t.enlace, espacio_id: t.espacio_id, nombre: t.nombre, descripcion: t.descripcion, visibilidad: t.visibilidad, cerrado: t.cerrado === 1 });
 
   /** Trae tablero, espacio y contexto. Si la persona no puede verlo: 401 sin sesión, 403 "sin acceso" con sesión (para ofrecer pedir acceso). */
@@ -82,6 +86,7 @@ export function rutasTableros(app: FastifyInstance, db: DatabaseSync) {
                               FROM pedidos_acceso p JOIN usuarios u ON u.id = p.usuario_id WHERE p.tipo = 'tablero' AND p.destino_id = ? AND p.estado = 'pendiente' ORDER BY p.creado_en`).all(t.id) as unknown as (Usuario & { uid: string })[];
     return {
       tablero: { ...resumen(t), permisos: t.permisos },
+      ...contenidoTablero(db, t.id),
       espacio: { id: e.id, nombre: e.nombre },
       miembros: miembros.map((m) => ({ ...fichaPublica(m), rol: m.rol, invitado: !m.del_espacio })),
       pedidos: pedidos.map((p) => ({ id: p.id, creado_en: p.creado_en, persona: fichaPublica({ ...p, id: p.uid }) })),
@@ -109,6 +114,7 @@ export function rutasTableros(app: FastifyInstance, db: DatabaseSync) {
     if (cerrado !== t.cerrado) registrarActividad(db, cerrado ? 'tablero_cerrado' : 'tablero_reabierto', u.id, { espacio_id: e.id, tablero_id: t.id });
     if (nombre !== t.nombre) registrarActividad(db, 'tablero_renombrado', u.id, { espacio_id: e.id, tablero_id: t.id, datos: { antes: t.nombre, ahora: nombre } });
     const nuevo = leerTablero(db, t.id)!;
+    avisar(t.id);
     return { tablero: { ...resumen(nuevo), permisos: nuevo.permisos } };
   });
 
@@ -137,6 +143,7 @@ export function rutasTableros(app: FastifyInstance, db: DatabaseSync) {
     sumarATablero(db, t.id, persona.id, rol);
     db.prepare("UPDATE pedidos_acceso SET estado = 'aprobado', resuelto_por = ?, resuelto_en = ? WHERE tipo = 'tablero' AND destino_id = ? AND usuario_id = ? AND estado = 'pendiente'").run(u.id, ahora(), t.id, persona.id);
     registrarActividad(db, 'tablero_miembro_sumado', u.id, { espacio_id: e.id, tablero_id: t.id, datos: { usuario_id: persona.id, nombre: persona.nombre, rol } });
+    avisar(t.id);
     return reply.code(201).send({ miembro: { ...fichaPublica(persona), rol, invitado: deAfuera } });
   });
 
@@ -151,6 +158,7 @@ export function rutasTableros(app: FastifyInstance, db: DatabaseSync) {
     if (actual.rol === 'admin' && rol !== 'admin' && cantidadAdminsTablero(db, t.id) <= 1) throw new ErrorApi(409, 'ultimo_admin', 'El tablero tiene que tener al menos una persona que lo administre.');
     db.prepare('UPDATE tablero_miembros SET rol = ? WHERE tablero_id = ? AND usuario_id = ?').run(rol, t.id, uid);
     registrarActividad(db, 'tablero_miembro_cambiado', u.id, { espacio_id: e.id, tablero_id: t.id, datos: { usuario_id: uid, rol } });
+    avisar(t.id);
     return { ok: true, rol };
   });
 
@@ -168,6 +176,7 @@ export function rutasTableros(app: FastifyInstance, db: DatabaseSync) {
     if (actual.rol === 'admin' && cantidadAdminsTablero(db, t.id) <= 1) throw new ErrorApi(409, 'ultimo_admin', 'El tablero tiene que tener al menos una persona que lo administre. Nombrá a otra antes.');
     db.prepare('DELETE FROM tablero_miembros WHERE tablero_id = ? AND usuario_id = ?').run(t.id, uid);
     registrarActividad(db, 'tablero_miembro_quitado', u.id, { espacio_id: e.id, tablero_id: t.id, datos: { usuario_id: uid } });
+    avisar(t.id);
     return { ok: true };
   });
 
@@ -178,6 +187,7 @@ export function rutasTableros(app: FastifyInstance, db: DatabaseSync) {
     if (!puedeUnirseSolo(c, t)) throw sinPermiso('Este tablero no permite sumarse sin invitación.');
     sumarATablero(db, t.id, u.id, 'normal');
     registrarActividad(db, 'tablero_miembro_sumado', u.id, { espacio_id: e.id, tablero_id: t.id, datos: { usuario_id: u.id, nombre: u.nombre, rol: 'normal', se_unio: true } });
+    avisar(t.id);
     return { ok: true };
   });
 
@@ -243,6 +253,7 @@ export function rutasTableros(app: FastifyInstance, db: DatabaseSync) {
       }
     }
     db.prepare('UPDATE pedidos_acceso SET estado = ?, resuelto_por = ?, resuelto_en = ? WHERE id = ?').run(estado, u.id, ahora(), p.id);
+    if (p.tipo === 'tablero') avisar(p.destino_id);
     return { ok: true, estado };
   });
 }

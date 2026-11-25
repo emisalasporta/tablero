@@ -1,15 +1,19 @@
 // Arma el servidor: las rutas /api y las pantallas ya construidas (dist/web).
 import Fastify, { type FastifyInstance } from 'fastify';
 import fastifyStatic from '@fastify/static';
+import fastifyWebsocket from '@fastify/websocket';
 import fs from 'node:fs';
 import path from 'node:path';
 import type { DatabaseSync } from 'node:sqlite';
 import { identificar } from './nucleo.ts';
+import { contexto, leerTablero, puedeVerTablero } from './permisos.ts';
+import { rutasContenido } from './rutas/contenido.ts';
 import { rutasCuenta } from './rutas/cuenta.ts';
 import { rutasEspacios } from './rutas/espacios.ts';
 import { rutasTableros } from './rutas/tableros.ts';
-import { ErrorApi } from './util.ts';
+import { ErrorApi, noAutenticado, noExiste } from './util.ts';
 import { leerVersion } from './version.ts';
+import { Vivo } from './vivo.ts';
 
 export interface Dependencias {
   db: DatabaseSync;
@@ -53,7 +57,27 @@ export function crearApp({ db, zonaHoraria, dirWeb }: Dependencias): FastifyInst
 
   rutasCuenta(app, db);
   rutasEspacios(app, db);
-  rutasTableros(app, db);
+  const vivo = new Vivo(db);
+  app.addHook('onClose', async () => vivo.cerrar());
+  rutasTableros(app, db, vivo);
+  rutasContenido(app, db, vivo);
+
+  // Línea en vivo de un tablero. Solo se abre si la persona puede ver ese tablero.
+  app.register(fastifyWebsocket, { options: { maxPayload: 4096 } });
+  app.register(async (f) => {
+    f.get('/api/tableros/:id/vivo', {
+      websocket: true,
+      preValidation: async (req) => {
+        const t = leerTablero(db, (req.params as { id: string }).id);
+        if (!t) throw noExiste();
+        if (!puedeVerTablero(contexto(db, req.usuario, t.espacio_id, t.id), t)) throw req.usuario ? noExiste() : noAutenticado();
+      },
+    }, (socket, req) => {
+      const t = leerTablero(db, (req.params as { id: string }).id);
+      if (!t) return socket.close(4404, 'no existe');
+      vivo.entrar(t.id, socket, req.usuario?.id ?? null);
+    });
+  });
 
   app.setNotFoundHandler(async (req, reply) => {
     if (req.url.startsWith('/api/')) return reply.code(404).send({ error: 'no_existe', mensaje: 'Esa dirección no existe.' });

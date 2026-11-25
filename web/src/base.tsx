@@ -9,10 +9,12 @@ export class ErrorServidor extends Error {
   codigo: string;
   constructor(estado: number, codigo: string, mensaje: string) { super(mensaje); this.estado = estado; this.codigo = codigo; }
 }
+/** Identifica a esta pantalla abierta. Viaja en cada pedido para reconocer mis propios cambios cuando vuelven como aviso en vivo. */
+export const CLIENTE = Math.random().toString(36).slice(2, 12) + Date.now().toString(36);
 export async function api<T = any>(metodo: 'GET' | 'POST' | 'PATCH' | 'DELETE', url: string, cuerpo?: unknown): Promise<T> {
   let r: Response;
   try {
-    r = await fetch(url, { method: metodo, headers: cuerpo !== undefined ? { 'content-type': 'application/json' } : undefined, body: cuerpo !== undefined ? JSON.stringify(cuerpo) : undefined, credentials: 'same-origin' });
+    r = await fetch(url, { method: metodo, headers: cuerpo !== undefined ? { 'content-type': 'application/json', 'x-cliente': CLIENTE } : { 'x-cliente': CLIENTE }, body: cuerpo !== undefined ? JSON.stringify(cuerpo) : undefined, credentials: 'same-origin' });
   } catch {
     throw new ErrorServidor(0, 'sin_conexion', 'No hay conexión con el servidor. Revisá tu internet y probá de nuevo.');
   }
