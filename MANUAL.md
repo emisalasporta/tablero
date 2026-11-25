@@ -1,7 +1,7 @@
 # MANUAL — cómo se prueba, se publica, se respalda y se vuelve atrás
 
 Este archivo es para cualquier sesión de Claude (o persona) que retome el proyecto.
-Se actualiza al terminar cada tanda. Estado: **tanda 2.0** (esqueleto; todavía sin publicar).
+Se actualiza al terminar cada tanda. Estado: **tanda 2.0** (esqueleto publicado en Dokploy con dirección de prueba; publicación automática funcionando).
 
 ## Qué hay en cada carpeta
 | Carpeta / archivo | Qué es |
@@ -68,6 +68,15 @@ Con `DOKPLOY_URL` y `DOKPLOY_API_KEY` de `PRIVADO.md`, encabezado `x-api-key`:
 Pendiente (Fase 4): diario + copia fuera del servidor.
 
 ## Volver atrás
-Pendiente de ensayar (Fase 4). Procedimiento previsto:
-1. Código: `git revert <cambio>` y subir a `main` (se publica sola la versión anterior).
-2. Datos: frenar la app, reemplazar `tablero.db` por la copia `antes-de-NNN-…db`, arrancar.
+**Código (ensayado el 25/11/2026):**
+```bash
+git revert --no-edit HEAD
+```
+```bash
+git push
+```
+Se publica sola la versión anterior en menos de un minuto. Comprobar con `/api/salud`.
+
+Si lo que se subió tenía pruebas rotas no hace falta apurarse: Dokploy no lo publica y sigue la versión anterior (también ensayado). La aplicación figura con estado `error` en Dokploy hasta la siguiente publicación buena.
+
+**Datos (pendiente de ensayar, Fase 4):** frenar la app, reemplazar `tablero.db` por la copia `respaldos/antes-de-NNN-…db`, arrancar.

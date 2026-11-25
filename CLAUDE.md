@@ -56,5 +56,5 @@ Alex es Claude en mi chat y en Cowork. Tiene que poder manejar este proyecto de 
 
 ## Estado actual (lo actualiza Claude al terminar cada tanda)
 - Fase 1 hecha y aprobada el 25/11/2026. Emiliano aceptó adelantar una publicación de prueba vacía a la tanda 2.0.
-- En curso: tanda 2.0. Hecho: esqueleto con pruebas, repositorio público emisalasporta/tablero, pruebas corriendo en GitHub. Diseño aprobado por Emiliano el 25/11/2026: es diseno/muestra.html (azul y letras de emilianosalasporta.cloud, cada lista con fondo propio que contiene sus tarjetas); todas las pantallas salen de esos colores, letras y piezas. Falta: la publicación de prueba en Dokploy. Ver PLAN.md y MANUAL.md.
+- Tanda 2.0 terminada el 25/11/2026: esqueleto con pruebas, repositorio público emisalasporta/tablero, aplicación en Dokploy (creada por su API; datos en PRIVADO.md) con dirección de prueba, publicación automática al subir a main comprobada, y comprobado que una prueba rota frena la publicación. Diseño aprobado: diseno/muestra.html (azul y letras de emilianosalasporta.cloud, cada lista con fondo propio); todas las pantallas salen de ahí. Falta de la 2.0 solo el subdominio definitivo con HTTPS (necesita un clic de Emiliano en Cloudflare). Sigue: tanda 2.1. Ver PLAN.md y MANUAL.md.
 - La app se llama **meetmydash**; la carpeta y el repositorio se llaman `tablero`.

@@ -1,6 +1,6 @@
 # PARIDAD — todas las funciones de Trello y su estado
 
-Última actualización: 25/11/2026 (Fase 1: todo pendiente, nada construido).
+Última actualización: 25/11/2026 (tanda 2.0: esqueleto publicado, publicación automática y freno por pruebas comprobados).
 
 ## Cómo leer esta lista
 - **Estado:** `pendiente` · `hecha` · `no se puede` (con el porqué en la nota).
@@ -16,40 +16,40 @@
 
 | Estado | Cantidad |
 |---|---|
-| Hechas | 0 |
-| Pendientes (se pueden igualar) | 334 |
+| Hechas | 2 |
+| Pendientes (se pueden igualar) | 332 |
 | Pendientes pero parciales (⚠, no quedan idénticas) | 18 |
 | No se puede | 47 |
 
-| Sección | Total | Pendientes | Parciales | No se puede |
-|---|---|---|---|---|
-| A. Cuentas y perfil | 22 | 18 | 2 | 2 |
-| B. Espacios de trabajo | 28 | 25 | 1 | 2 |
-| C. Tableros | 42 | 37 | 2 | 3 |
-| D. Listas | 17 | 16 | 0 | 1 |
-| E. Tarjetas: lo básico | 22 | 22 | 0 | 0 |
-| F. Tarjetas: descripción y texto | 14 | 13 | 1 | 0 |
-| G. Tarjetas: miembros y etiquetas | 11 | 11 | 0 | 0 |
-| H. Tarjetas: checklists | 13 | 12 | 0 | 1 |
-| I. Tarjetas: fechas | 8 | 8 | 0 | 0 |
-| J. Tarjetas: adjuntos y portadas | 21 | 15 | 2 | 4 |
-| K. Tarjetas: comentarios y actividad | 12 | 10 | 1 | 1 |
-| L. Tarjetas especiales y extras | 23 | 20 | 1 | 2 |
-| M. Vistas | 15 | 15 | 0 | 0 |
-| N. Búsqueda y filtros | 14 | 13 | 0 | 1 |
-| O. Atajos de teclado | 9 | 9 | 0 | 0 |
-| P. Notificaciones | 14 | 11 | 2 | 1 |
-| Q. Automatización | 36 | 30 | 3 | 3 |
-| R. Power-Ups e integraciones | 11 | 4 | 0 | 7 |
-| S. Inteligencia artificial de Atlassian | 5 | 0 | 0 | 5 |
-| T. Bandeja de entrada y Planificador | 12 | 9 | 1 | 2 |
-| U. Plantillas | 5 | 4 | 0 | 1 |
-| V. Teléfono, instalación y escritorio | 13 | 5 | 2 | 6 |
-| W. Importar, exportar e imprimir | 5 | 4 | 0 | 1 |
-| X. Apariencia y accesibilidad | 7 | 7 | 0 | 0 |
-| Y. Tiempo real | 5 | 5 | 0 | 0 |
-| Z. Administración avanzada (Enterprise) | 6 | 2 | 0 | 4 |
-| AA. Requisitos propios de este proyecto (no son de Trello, pero se controlan acá) | 9 | 9 | 0 | 0 |
+| Sección | Total | Hechas | Pendientes | Parciales | No se puede |
+|---|---|---|---|---|---|
+| A. Cuentas y perfil | 22 | 0 | 18 | 2 | 2 |
+| B. Espacios de trabajo | 28 | 0 | 25 | 1 | 2 |
+| C. Tableros | 42 | 0 | 37 | 2 | 3 |
+| D. Listas | 17 | 0 | 16 | 0 | 1 |
+| E. Tarjetas: lo básico | 22 | 0 | 22 | 0 | 0 |
+| F. Tarjetas: descripción y texto | 14 | 0 | 13 | 1 | 0 |
+| G. Tarjetas: miembros y etiquetas | 11 | 0 | 11 | 0 | 0 |
+| H. Tarjetas: checklists | 13 | 0 | 12 | 0 | 1 |
+| I. Tarjetas: fechas | 8 | 0 | 8 | 0 | 0 |
+| J. Tarjetas: adjuntos y portadas | 21 | 0 | 15 | 2 | 4 |
+| K. Tarjetas: comentarios y actividad | 12 | 0 | 10 | 1 | 1 |
+| L. Tarjetas especiales y extras | 23 | 0 | 20 | 1 | 2 |
+| M. Vistas | 15 | 0 | 15 | 0 | 0 |
+| N. Búsqueda y filtros | 14 | 0 | 13 | 0 | 1 |
+| O. Atajos de teclado | 9 | 0 | 9 | 0 | 0 |
+| P. Notificaciones | 14 | 0 | 11 | 2 | 1 |
+| Q. Automatización | 36 | 0 | 30 | 3 | 3 |
+| R. Power-Ups e integraciones | 11 | 0 | 4 | 0 | 7 |
+| S. Inteligencia artificial de Atlassian | 5 | 0 | 0 | 0 | 5 |
+| T. Bandeja de entrada y Planificador | 12 | 0 | 9 | 1 | 2 |
+| U. Plantillas | 5 | 0 | 4 | 0 | 1 |
+| V. Teléfono, instalación y escritorio | 13 | 0 | 5 | 2 | 6 |
+| W. Importar, exportar e imprimir | 5 | 0 | 4 | 0 | 1 |
+| X. Apariencia y accesibilidad | 7 | 0 | 7 | 0 | 0 |
+| Y. Tiempo real | 5 | 0 | 5 | 0 | 0 |
+| Z. Administración avanzada (Enterprise) | 6 | 0 | 2 | 0 | 4 |
+| AA. Requisitos propios de este proyecto (no son de Trello, pero se controlan acá) | 9 | 2 | 7 | 0 | 0 |
 <!-- RESUMEN-FIN -->
 
 ---
@@ -554,9 +554,9 @@
 | AA01 | Puerta MCP con acceso de administrador a todo | pendiente | 3 | — | |
 | AA02 | Usuario "Alex" y su nombre en la actividad | pendiente | 3 | — | |
 | AA03 | Prueba que verifica que cada función tiene su herramienta MCP | pendiente | 3 | — | |
-| AA04 | Publicación automática al subir a main | pendiente | 4 | — | |
-| AA05 | Pruebas que frenan la publicación si fallan | pendiente | 2.0 | — | Receta lista y probada en esta Mac; falta comprobarlo en Dokploy con una publicación rota a propósito |
+| AA04 | Publicación automática al subir a main | hecha | 4 | — | Comprobado el 25/11/2026: un cambio subido a main quedó publicado en unos 30 segundos |
+| AA05 | Pruebas que frenan la publicación si fallan | hecha | 2.0 | — | Comprobado el 25/11/2026 con una prueba rota a propósito: Dokploy marcó error y siguió la versión anterior |
 | AA06 | Respaldo diario + copia fuera del servidor | pendiente | 4 | — | |
-| AA07 | Vuelta atrás documentada y ensayada | pendiente | 4 | — | |
+| AA07 | Vuelta atrás documentada y ensayada | pendiente | 4 | — | Vuelta atrás del código ya ensayada (revertir y subir). Falta ensayar la de los datos, en la Fase 4 |
 | AA08 | Acceso de Alex a Dokploy (estado, errores, republicar) | pendiente | 4 | — | |
 | AA09 | MANUAL.md al día | pendiente | 4 | — | |
