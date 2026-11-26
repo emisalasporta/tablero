@@ -10,8 +10,9 @@ describe('chequeo de salud', () => {
   let db: DatabaseSync;
 
   beforeEach(() => {
-    ({ db } = abrirDb(carpetaTemporal()));
-    app = crearApp({ db, zonaHoraria: 'America/Argentina/Buenos_Aires' });
+    const dir = carpetaTemporal();
+    ({ db } = abrirDb(dir));
+    app = crearApp({ db, zonaHoraria: 'America/Argentina/Buenos_Aires', dirArchivos: `${dir}/archivos` });
   });
   afterEach(async () => { await app.close(); db.close(); });
 

@@ -51,8 +51,11 @@ export interface Espacio {
 }
 export interface Tablero {
   id: string; enlace: string; espacio_id: string; nombre: string; descripcion: string; visibilidad: VisTablero;
-  permisos: PermisosTablero; cerrado: number; creado_por: string | null; creado_en: string;
+  permisos: PermisosTablero; ajustes: AjustesTablero; cerrado: number; creado_por: string | null; creado_en: string;
 }
+/** Cómo se ve el tablero: si los frentes muestran la portada y el círculo de completada. */
+export interface AjustesTablero { portadas: boolean; tilde: boolean }
+export const AJUSTES_TABLERO_INICIALES: AjustesTablero = { portadas: true, tilde: true };
 
 /** Qué es una persona respecto de un espacio y (si corresponde) de un tablero. */
 export interface Contexto {
@@ -69,8 +72,8 @@ export function leerEspacio(db: DatabaseSync, id: string): Espacio | null {
   return f ? { ...f, ajustes: { ...AJUSTES_ESPACIO_INICIALES, ...JSON.parse(f.ajustes) } } : null;
 }
 export function leerTablero(db: DatabaseSync, idOEnlace: string): Tablero | null {
-  const f = db.prepare('SELECT * FROM tableros WHERE id = ? OR enlace = ?').get(idOEnlace, idOEnlace) as (Omit<Tablero, 'permisos'> & { permisos: string }) | undefined;
-  return f ? { ...f, permisos: { ...PERMISOS_TABLERO_INICIALES, ...JSON.parse(f.permisos) } } : null;
+  const f = db.prepare('SELECT * FROM tableros WHERE id = ? OR enlace = ?').get(idOEnlace, idOEnlace) as (Omit<Tablero, 'permisos' | 'ajustes'> & { permisos: string; ajustes: string }) | undefined;
+  return f ? { ...f, permisos: { ...PERMISOS_TABLERO_INICIALES, ...JSON.parse(f.permisos) }, ajustes: { ...AJUSTES_TABLERO_INICIALES, ...JSON.parse(f.ajustes || '{}') } } : null;
 }
 
 export function contexto(db: DatabaseSync, usuario: Usuario | null, espacioId: string, tableroId?: string): Contexto {

@@ -1,10 +1,13 @@
 // Página de un tablero: cabecera (quién lo ve, su gente, sus permisos) y, abajo, las listas con sus tarjetas.
-import { useState } from 'react';
-import { api, Avatar, AYUDA_VIS, Campo, CopiarEnlace, Dialogo, Enlace, Formulario, navegar, NOMBRE_ROL, NOMBRE_VIS, useAccion, useSesion } from '../base.tsx';
+import { useEffect, useState } from 'react';
+import { api, Avatar, AYUDA_VIS, Campo, CopiarEnlace, Dialogo, Enlace, ErrorServidor, Formulario, navegar, NOMBRE_ROL, NOMBRE_VIS, useAccion, useSesion } from '../base.tsx';
 import { useTablero } from '../tablero/datos.ts';
 import type { Datos, Permisos } from '../tablero/datos.ts';
 import { Listas } from '../tablero/Listas.tsx';
-import { DialogoArchivados, DialogoTarjeta } from '../tablero/Menus.tsx';
+import { DialogoArchivados } from '../tablero/Menus.tsx';
+import { describir, hace } from '../tablero/piezas.tsx';
+import type { Actividad } from '../tablero/piezas.tsx';
+import { DialogoTarjeta, PanelEtiquetas } from '../tablero/Tarjeta.tsx';
 import { Entrar } from './Entrar.tsx';
 
 function Compartir({ d, alCambiar, alCerrar }: { d: Datos; alCambiar: () => void; alCerrar: () => void }) {
@@ -79,10 +82,11 @@ function Ajustes({ d, alCambiar, alCerrar }: { d: Datos; alCambiar: () => void; 
   const [nombre, setNombre] = useState(t.nombre);
   const [vis, setVis] = useState(t.visibilidad);
   const [p, setP] = useState<Permisos>(t.permisos);
+  const [aj, setAj] = useState(t.ajustes);
   const accion = useAccion();
   return (
     <Dialogo titulo="Ajustes del tablero" alCerrar={alCerrar}>
-      <Formulario boton="Guardar" alEnviar={async () => { await api('PATCH', `/api/tableros/${t.id}`, { nombre, visibilidad: vis, permisos: p }); alCambiar(); alCerrar(); }}>
+      <Formulario boton="Guardar" alEnviar={async () => { await api('PATCH', `/api/tableros/${t.id}`, { nombre, visibilidad: vis, permisos: p, ajustes: aj }); alCambiar(); alCerrar(); }}>
         <Campo rotulo="Nombre"><input id="ta-nombre" type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} required maxLength={200} /></Campo>
         <Campo rotulo="Quién lo ve" ayuda={AYUDA_VIS[vis]}>
           <select id="ta-vis" value={vis} onChange={(e) => setVis(e.target.value)}>{['privado', 'espacio', 'publico'].map((v) => <option key={v} value={v}>{NOMBRE_VIS[v]}</option>)}</select>
@@ -95,6 +99,8 @@ function Ajustes({ d, alCambiar, alCerrar }: { d: Datos; alCambiar: () => void; 
         </Campo>
         <label className="fila" style={{ flexWrap: 'nowrap', alignItems: 'flex-start' }}><input id="ta-edicion" type="checkbox" checked={p.edicion_espacio} onChange={(e) => setP({ ...p, edicion_espacio: e.target.checked })} /><span>Los miembros del espacio pueden editar sin estar sumados al tablero <small className="suave">(no aplica si es privado)</small></span></label>
         <label className="fila" style={{ flexWrap: 'nowrap', alignItems: 'flex-start' }}><input id="ta-union" type="checkbox" checked={p.union_libre} onChange={(e) => setP({ ...p, union_libre: e.target.checked })} /><span>Los miembros del espacio pueden sumarse solos <small className="suave">(no aplica si es privado)</small></span></label>
+        <label className="fila" style={{ flexWrap: 'nowrap', alignItems: 'flex-start' }}><input id="ta-portadas" type="checkbox" checked={aj.portadas} onChange={(e) => setAj({ ...aj, portadas: e.target.checked })} /><span>Mostrar las portadas en las tarjetas del tablero</span></label>
+        <label className="fila" style={{ flexWrap: 'nowrap', alignItems: 'flex-start' }}><input id="ta-tilde" type="checkbox" checked={aj.tilde} onChange={(e) => setAj({ ...aj, tilde: e.target.checked })} /><span>Mostrar el círculo para marcar como completada en cada tarjeta</span></label>
       </Formulario>
       <div className="columna" style={{ gap: 8, borderTop: '1px solid var(--linea)', paddingTop: 14 }}>
         <p><b>{t.cerrado ? 'Tablero cerrado' : 'Cerrar el tablero'}</b></p>
@@ -109,17 +115,58 @@ function Ajustes({ d, alCambiar, alCerrar }: { d: Datos; alCambiar: () => void; 
   );
 }
 
-export function Tablero({ enlace }: { enlace: string }) {
-  const { yo } = useSesion();
-  const datos = useTablero(enlace);
+/** Actividad del tablero: todo lo que pasó, o solo los comentarios. Se carga de a 50. */
+function DialogoActividad({ d, alAbrir, alCerrar }: { d: Datos; alAbrir: (enlace: string) => void; alCerrar: () => void }) {
+  const [solo, setSolo] = useState(false);
+  const [filas, setFilas] = useState<Actividad[]>([]);
+  const [hayMas, setHayMas] = useState(false);
   const accion = useAccion();
-  const [abierto, setAbierto] = useState<'compartir' | 'ajustes' | 'archivados' | null>(null);
-  const [tarjetaAbierta, setTarjetaAbierta] = useState<string | null>(null);
-  const [pedido, setPedido] = useState(false);
+  const traer = (desde: Actividad[]) => accion.hacer(async () => {
+    const antes = desde.length ? `&antes=${encodeURIComponent(desde[desde.length - 1].creado_en)}` : '';
+    const r = await api<{ actividad: Actividad[]; hay_mas: boolean }>('GET', `/api/tableros/${d.tablero.id}/actividad?${solo ? 'solo=comentarios' : ''}${antes}`);
+    setFilas([...desde, ...r.actividad]); setHayMas(r.hay_mas);
+  });
+  useEffect(() => { void traer([]); }, [solo]);
+  return (
+    <Dialogo titulo="Actividad del tablero" alCerrar={alCerrar}>
+      <div className="pestanas" role="tablist"><button type="button" role="tab" aria-selected={!solo} onClick={() => setSolo(false)}>Todo</button><button type="button" role="tab" aria-selected={solo} onClick={() => setSolo(true)}>Solo comentarios</button></div>
+      {accion.error && <p className="error" role="alert">{accion.error}</p>}
+      {!accion.ocupado && filas.length === 0 && <p className="suave">Todavía no hay nada.</p>}
+      <ul className="linea">{filas.map((a) => (
+        <li key={a.id} className="hecho-menor">{a.actor ? <Avatar p={a.actor} chica /> : <span className="per chica" />}
+          <p><b>{a.actor?.nombre ?? 'Alguien'}</b> {describir(a, false)} <small className="suave" title={new Date(a.creado_en).toLocaleString('es-AR')}>· {hace(a.creado_en)}</small>
+            {a.tarjeta_enlace && <> · <button type="button" className="como-enlace" onClick={() => alAbrir(a.tarjeta_enlace!)}>abrir tarjeta</button></>}</p></li>
+      ))}</ul>
+      {hayMas && <div><button type="button" className="btn" disabled={accion.ocupado} onClick={() => void traer(filas)}>Cargar más</button></div>}
+    </Dialogo>
+  );
+}
 
-  if (datos.error) {
-    if (datos.error.estado === 401) return <Entrar volverA={`/t/${enlace}`} />;
-    if (datos.error.codigo === 'sin_acceso') return (
+export function Tablero({ enlace, deTarjeta }: { enlace?: string; /** Código de una tarjeta: se abre sobre su tablero. */ deTarjeta?: string }) {
+  const { yo } = useSesion();
+  // Cuál es el tablero: viene en la dirección, o se averigua a partir de la tarjeta.
+  const [tableroDe, setTableroDe] = useState<string | null>(enlace ?? null);
+  const [errorTarjeta, setErrorTarjeta] = useState<ErrorServidor | null>(null);
+  useEffect(() => { if (enlace) { setTableroDe(enlace); setErrorTarjeta(null); } }, [enlace]);
+  useEffect(() => {
+    if (!deTarjeta) return;
+    let vigente = true;
+    api<{ tablero: { enlace: string } }>('GET', `/api/tarjetas/${deTarjeta}`)
+      .then((r) => { if (vigente) { setTableroDe(r.tablero.enlace); setErrorTarjeta(null); } })
+      .catch((e) => { if (vigente) setErrorTarjeta(e instanceof ErrorServidor ? e : new ErrorServidor(0, 'error', 'No se pudo abrir la tarjeta.')); });
+    return () => { vigente = false; };
+  }, [deTarjeta]);
+  const datos = useTablero(tableroDe);
+  const accion = useAccion();
+  const [abierto, setAbierto] = useState<'compartir' | 'ajustes' | 'archivados' | 'actividad' | 'etiquetas' | null>(null);
+  const [pedido, setPedido] = useState(false);
+  const aca = enlace ? `/t/${enlace}` : `/c/${deTarjeta}`;
+  const falla = datos.error ?? (tableroDe ? null : errorTarjeta);
+
+  if (falla) {
+    if (falla.estado === 401) return <Entrar volverA={aca} />;
+    if (falla.codigo === 'sin_acceso' && !enlace) return <main className="pagina"><h1>Esta tarjeta está en un tablero privado</h1><p className="suave">Pedile a quien te pasó el enlace que te sume al tablero.</p><Enlace a="/">Volver al inicio</Enlace></main>;
+    if (falla.codigo === 'sin_acceso') return (
       <main className="pagina angosta"><div className="panel angosto">
         <h1>Este tablero es privado</h1>
         <p className="suave">Estás como {yo?.nombre}. Podés pedir acceso y alguien del tablero lo va a ver.</p>
@@ -128,13 +175,14 @@ export function Tablero({ enlace }: { enlace: string }) {
         <Enlace a="/">Volver al inicio</Enlace>
       </div></main>
     );
-    if (datos.error.estado !== 404) return <main className="pagina"><h1>No se pudo abrir el tablero</h1><p className="suave">{datos.error.message}</p><div><button type="button" className="btn lleno" onClick={() => void datos.recargar()}>Probar de nuevo</button></div></main>;
-    return <main className="pagina"><h1>No encontramos ese tablero</h1><p className="suave">Puede que lo hayan borrado o que el enlace esté mal.</p><Enlace a="/">Volver al inicio</Enlace></main>;
+    if (falla.estado !== 404) return <main className="pagina"><h1>No se pudo abrir el tablero</h1><p className="suave">{falla.message}</p><div><button type="button" className="btn lleno" onClick={() => void datos.recargar()}>Probar de nuevo</button></div></main>;
+    return <main className="pagina"><h1>{enlace ? 'No encontramos ese tablero' : 'No encontramos esa tarjeta'}</h1><p className="suave">Puede que lo hayan borrado o que el enlace esté mal.</p><Enlace a="/">Volver al inicio</Enlace></main>;
   }
   if (!datos.datos) return null;
   const d = datos.datos;
   const t = d.tablero;
-  const tarjeta = tarjetaAbierta ? d.tarjetas.find((c) => c.id === tarjetaAbierta) : undefined;
+  const abrirTarjeta = (codigo: string) => navegar(`/c/${codigo}`);
+  const cerrarTarjeta = () => navegar(`/t/${t.enlace}`);
   return (
     <div className="tablero">
       {t.cerrado && <div className="franja">Este tablero está cerrado: se puede ver pero no editar.{d.mi.puede.administrar && <button type="button" className="btn chico" onClick={() => accion.hacer(async () => { await api('PATCH', `/api/tableros/${t.id}`, { cerrado: false }); datos.recargar(); })}>Reabrir</button>}</div>}
@@ -149,14 +197,18 @@ export function Tablero({ enlace }: { enlace: string }) {
         {d.mi.puede.unirse && <button type="button" className="btn" onClick={() => accion.hacer(async () => { await api('POST', `/api/tableros/${t.id}/unirse`); datos.recargar(); })}>Sumarme</button>}
         {yo && d.mi.rol !== null && <button type="button" className="btn lleno" onClick={() => setAbierto('compartir')}>Compartir{d.pedidos.length > 0 ? ` (${d.pedidos.length})` : ''}</button>}
         {yo && d.mi.rol === null && d.mi.puede.invitar && <button type="button" className="btn lleno" onClick={() => setAbierto('compartir')}>Compartir</button>}
+        <button type="button" className="btn" onClick={() => setAbierto('etiquetas')}>Etiquetas</button>
+        <button type="button" className="btn" onClick={() => setAbierto('actividad')}>Actividad</button>
         <button type="button" className="btn" onClick={() => setAbierto('archivados')}>Archivados</button>
         {d.mi.puede.administrar && <button type="button" className="btn" onClick={() => setAbierto('ajustes')}>Ajustes</button>}
         {!yo && <Enlace a="/entrar" className="btn">Entrar</Enlace>}
       </div>
       {accion.error && <p className="error en-tablero" role="alert">{accion.error}</p>}
-      <Listas d={d} ops={datos.ops} alAbrir={(c) => setTarjetaAbierta(c.id)} />
+      <Listas d={d} ops={datos.ops} alAbrir={(c) => abrirTarjeta(c.enlace)} />
       {datos.aviso && <div className="aviso-flotante" role="alert"><span>{datos.aviso}</span><button type="button" className="btn chico" onClick={datos.cerrarAviso}>Entendido</button></div>}
-      {tarjeta && <DialogoTarjeta d={d} tarjeta={tarjeta} ops={datos.ops} alCerrar={() => setTarjetaAbierta(null)} />}
+      {deTarjeta && <DialogoTarjeta key={deTarjeta} d={d} cual={deTarjeta} frente={d.tarjetas.find((c) => c.enlace === deTarjeta || c.id === deTarjeta)} ops={datos.ops} alCambiarTablero={datos.recargar} alCerrar={cerrarTarjeta} />}
+      {abierto === 'actividad' && <DialogoActividad d={d} alAbrir={(c) => { setAbierto(null); abrirTarjeta(c); }} alCerrar={() => setAbierto(null)} />}
+      {abierto === 'etiquetas' && <Dialogo titulo="Etiquetas del tablero" alCerrar={() => setAbierto(null)}><PanelEtiquetas d={d} alCambiar={datos.recargar} /></Dialogo>}
       {abierto === 'archivados' && <DialogoArchivados d={d} alCambiar={datos.recargar} alCerrar={() => setAbierto(null)} />}
       {abierto === 'compartir' && <Compartir d={d} alCambiar={datos.recargar} alCerrar={() => setAbierto(null)} />}
       {abierto === 'ajustes' && <Ajustes d={d} alCambiar={datos.recargar} alCerrar={() => setAbierto(null)} />}

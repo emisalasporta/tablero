@@ -5,6 +5,8 @@ export interface Config {
   puerto: number;
   dirDatos: string;
   zonaHoraria: string;
+  /** Tope de cada archivo adjunto, en MB. Cloudflare (plan gratis) no deja pasar más de 100. */
+  maxAdjuntoMb: number;
 }
 
 export function leerConfig(env: NodeJS.ProcessEnv = process.env): Config {
@@ -12,5 +14,6 @@ export function leerConfig(env: NodeJS.ProcessEnv = process.env): Config {
     puerto: Number(env.PORT ?? 3000),
     dirDatos: path.resolve(env.DATA_DIR ?? './datos'),
     zonaHoraria: env.TZ ?? 'America/Argentina/Buenos_Aires',
+    maxAdjuntoMb: Number(env.MAX_ADJUNTO_MB ?? 100),
   };
 }

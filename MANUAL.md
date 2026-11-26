@@ -25,13 +25,19 @@ Se actualiza al terminar cada tanda. Estado: **tanda 2.2** hecha (lo de la 2.1 m
 | `servidor/rutas/espacios.ts` | Espacios de trabajo, miembros, invitados, enlaces, pedidos. |
 | `servidor/rutas/tableros.ts` | Tableros: visibilidad, miembros, permisos, cerrar/borrar. |
 | `servidor/rutas/contenido.ts` | Listas y tarjetas: crear, renombrar, ordenar, mover (también a otro tablero), copiar, archivar. Acá están las reglas de posición. |
+| `servidor/rutas/tarjeta.ts` | La tarjeta por dentro: etiquetas, miembros, checklists, adjuntos, comentarios, reacciones y actividad. Las fechas, la portada y "completada" se cambian con `PATCH /api/tarjetas/:id` (en `contenido.ts`). |
+| `servidor/rutas/fotos.ts` | Foto de perfil y logo del espacio. |
+| `servidor/archivos.ts` | Guardar, copiar, entregar y borrar archivos subidos. Único lugar que toca el disco. |
 | `servidor/vivo.ts` | Tiempo real: una línea abierta (WebSocket) por pantalla que mira un tablero, en `/api/tableros/:id/vivo`. |
 | `web/src/base.tsx` | Base de las pantallas: pedidos al servidor, navegación, sesión, piezas comunes. |
 | `web/src/estilos.css` | Todos los colores y letras, como variables. Sale de `diseno/muestra.html` (diseño aprobado). |
 | `web/src/pantallas/` | Una pantalla por archivo. |
 | `web/src/tablero/datos.ts` | Los datos del tablero abierto: carga, avisos en vivo, reconexión y cambios que se ven al instante. |
 | `web/src/tablero/arrastre.ts` | El arrastre con mouse y con dedo (hecho a medida, sin librerías). |
-| `web/src/tablero/Listas.tsx`, `Menus.tsx` | Las listas y tarjetas en pantalla; menú de lista, tarjeta abierta y archivados. |
+| `web/src/tablero/Listas.tsx`, `Menus.tsx` | Las listas y el frente de cada tarjeta; menú de lista, mover/copiar y archivados. |
+| `web/src/tablero/Tarjeta.tsx` | La tarjeta abierta, con todos sus menús. |
+| `web/src/tablero/formato.tsx` | Texto con formato: cómo se muestra (`Texto`) y la caja para escribirlo (`Editor`). |
+| `web/src/tablero/piezas.tsx` | Íconos, colores de etiquetas, fechas y el texto de cada renglón de actividad. |
 
 Reglas de la casa:
 - La app es privada: la **primera cuenta** que se crea queda como administración general; las demás entran con enlace de invitación.
@@ -41,6 +47,12 @@ Reglas de la casa:
 - **Orden de listas y tarjetas:** cada una guarda un número `posicion`, separado de a 65.536. Para meter algo entre dos se manda el número del medio; `"arriba"` y `"abajo"` también valen. Si dos quedan pegados, el servidor vuelve a numerar ese grupo solo.
 - **Tiempo real:** todo cambio de listas o tarjetas llama a `vivo.emitir(tablero, { tipo: 'cambio', listas, tarjetas })` con las filas completas ya cambiadas. La pantalla las reemplaza; lo archivado o lo que pasó a otro tablero sale de la vista. Cambios de cabecera (nombre, gente, permisos) mandan `{ tipo: 'tablero' }` y la pantalla vuelve a pedir todo. Antes de cada aviso se revisa de nuevo el permiso de cada pantalla conectada. Hay un latido cada 25 segundos; si la pantalla pasa un minuto sin recibirlo, se reconecta y vuelve a cargar.
 - Cada pedido de la pantalla lleva la cabecera `x-cliente` (un código por pestaña) y el aviso la devuelve en `origen`: así la pantalla reconoce el eco de sus propios cambios.
+- **Tarjeta por dentro:** cada cambio termina en `listo(req, tarjetaId)`, que vuelve a leer la tarjeta y la avisa en vivo con sus cuentas (comentarios, adjuntos, ítems). La tarjeta abierta se vuelve a pedir entera (`GET /api/tarjetas/:id`) cada vez que llega un aviso de ella. Los cambios en las etiquetas del tablero mandan `{ tipo: 'tablero' }`.
+- **Archivos subidos:** viven en `DATA_DIR/archivos/` (`adjuntos/` y `fotos/`), nunca en el repositorio. El nombre en disco es un código al azar del servidor; lo que escribe la persona nunca se usa como ruta. Se suben como cuerpo crudo (`content-type: application/octet-stream`; nombre y tipo en la dirección) y se van guardando en disco sin cargarlos en memoria.
+- **Seguridad de adjuntos:** solo los baja quien puede ver la tarjeta. Dentro de la app solo se muestran imágenes (comprobadas mirando sus primeros bytes), PDF, audio, video y texto plano; cualquier otra cosa (una página web, por ejemplo) se entrega siempre como descarga. Las fotos de perfil y logos se piden por un nombre al azar y son visibles sin sesión.
+- **Texto con formato:** nunca se inserta HTML escrito por la gente. `formato.tsx` arma el texto pieza por pieza y solo acepta enlaces `http`, `https` y `mailto`.
+- **Dirección de una tarjeta:** `/c/<código>`. Es la misma pantalla del tablero con la tarjeta abierta encima.
+- Después de `npm run build` hay que reiniciar el servidor: solo conoce los archivos de pantallas que había al arrancar.
 - Las letras están dentro de la app (`@fontsource`): no se pide nada a servidores de terceros.
 
 ## Probar
@@ -67,6 +79,7 @@ Abre en http://localhost:3000. Para trabajar en las pantallas con recarga autom�
 | `PORT` | Puerto | `3000` |
 | `DATA_DIR` | Carpeta de datos (base, adjuntos, respaldos) | `./datos` (en Docker: `/app/data`) |
 | `TZ` | Zona horaria | `America/Argentina/Buenos_Aires` |
+| `MAX_ADJUNTO_MB` | Tope de cada archivo adjunto, en MB. Cloudflare (plan gratis) no deja pasar más de 100 | `100` |
 
 ## Cómo saber qué versión está publicada
 `GET /api/salud` devuelve `version`, `commit` (los primeros 12 caracteres del cambio) y `armada_en`.
@@ -90,6 +103,7 @@ Con `DOKPLOY_URL` y `DOKPLOY_API_KEY` de `PRIVADO.md`, encabezado `x-api-key`:
 
 ## Datos y migraciones
 - Base: `DATA_DIR/tablero.db` (SQLite). Al arrancar se aplican las migraciones pendientes, cada una en una transacción (si falla, no queda nada a medias).
+- Archivos subidos: `DATA_DIR/archivos/`. Un respaldo completo es la base **más** esa carpeta. Al arrancar y al borrar un tablero se limpian los adjuntos que quedaron sin tarjeta.
 - Antes de aplicar migraciones sobre una base que ya existía se guarda una copia en `DATA_DIR/respaldos/antes-de-NNN-<fecha>.db`.
 
 ## Respaldo

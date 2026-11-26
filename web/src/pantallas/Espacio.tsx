@@ -1,12 +1,12 @@
 // Página de un espacio de trabajo: sus tableros, su gente y sus ajustes.
 import { useState } from 'react';
-import { api, Avatar, Campo, CopiarEnlace, Formulario, navegar, NOMBRE_VIS, useAccion, useCarga, useRuta, useSesion } from '../base.tsx';
+import { api, subir, Avatar, Campo, CopiarEnlace, Formulario, navegar, NOMBRE_VIS, useAccion, useCarga, useRuta, useSesion } from '../base.tsx';
 import { GrillaTableros } from './Inicio.tsx';
 import type { ListaTableros } from './Inicio.tsx';
 
 interface Ajustes { crear: Record<string, string>; borrar: Record<string, string>; invitados: string }
-interface DatosEspacio { espacio: { id: string; nombre: string; descripcion: string; sitio_web: string; visibilidad: string; ajustes?: Ajustes }; mi: { rol: string | null; invitado: boolean; administra: boolean } }
-interface Persona { id: string; usuario: string; nombre: string; iniciales: string; email?: string }
+interface DatosEspacio { espacio: { id: string; nombre: string; descripcion: string; sitio_web: string; logo: string | null; visibilidad: string; ajustes?: Ajustes }; mi: { rol: string | null; invitado: boolean; administra: boolean } }
+interface Persona { id: string; usuario: string; nombre: string; iniciales: string; avatar?: string | null; email?: string }
 interface DatosMiembros { miembros: (Persona & { rol: string; desactivado: boolean })[]; invitados: (Persona & { tableros: number })[]; pedidos: { id: string; persona: Persona }[] }
 
 function Miembros({ id, administra }: { id: string; administra: boolean }) {
@@ -137,6 +137,15 @@ function AjustesEspacio({ d, alGuardar }: { d: DatosEspacio; alGuardar: () => vo
         </Formulario>
       </div>
       <div className="panel">
+        <h3>Logo</h3>
+        <div className="fila">
+          {e.logo ? <img className="logo" src={`/api/fotos/${e.logo}`} alt="Logo actual" /> : <span className="suave">Este espacio no tiene logo.</span>}
+          <label className="como-boton btn">{e.logo ? 'Cambiar logo' : 'Subir logo'}<input type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden onChange={(ev) => { const f = ev.target.files?.[0]; if (f) void accion.hacer(async () => { await subir(`/api/espacios/${e.id}/logo`, f); alGuardar(); }); }} /></label>
+          {e.logo && <button type="button" className="btn peligro" onClick={() => accion.hacer(async () => { await api('DELETE', `/api/espacios/${e.id}/logo`); alGuardar(); })}>Quitar</button>}
+        </div>
+        <p className="suave" style={{ fontSize: 13 }}>Una imagen PNG, JPG, GIF o WebP de hasta 5 MB.</p>
+      </div>
+      <div className="panel">
         <h3>Borrar el espacio</h3>
         <p className="suave">Solo se puede si no tiene tableros abiertos. No se puede deshacer.</p>
         {accion.error && <p className="error" role="alert">{accion.error}</p>}
@@ -163,6 +172,7 @@ export function Espacio({ id }: { id: string }) {
     <main className="pagina">
       <div className="columna" style={{ gap: 8 }}>
         <div className="encabezado">
+          {e.logo && <img className="logo" src={`/api/fotos/${e.logo}`} alt="" />}
           <h1>{e.nombre}</h1>
           <span className="chapa">{e.visibilidad === 'publico' ? 'Espacio público' : 'Espacio privado'}</span>
           {mi.invitado && <span className="chapa">Sos invitado</span>}

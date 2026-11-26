@@ -22,6 +22,24 @@ export async function api<T = any>(metodo: 'GET' | 'POST' | 'PATCH' | 'DELETE', 
   if (!r.ok) throw new ErrorServidor(r.status, datos.error ?? 'error', datos.mensaje ?? 'Algo salió mal.');
   return datos as T;
 }
+/** Sube un archivo crudo al servidor. `alAvanzar` recibe de 0 a 1 mientras sube. */
+export function subir<T = any>(url: string, archivo: Blob, alAvanzar?: (parte: number) => void): Promise<T> {
+  return new Promise((ok, mal) => {
+    const x = new XMLHttpRequest();
+    x.open('POST', url);
+    x.setRequestHeader('content-type', 'application/octet-stream');
+    x.setRequestHeader('x-cliente', CLIENTE);
+    x.upload.onprogress = (e) => { if (e.lengthComputable) alAvanzar?.(e.loaded / e.total); };
+    x.onerror = () => mal(new ErrorServidor(0, 'sin_conexion', 'No se pudo subir el archivo. Revisá tu internet y probá de nuevo.'));
+    x.onload = () => {
+      let datos: any = {};
+      try { datos = JSON.parse(x.responseText); } catch { /* respuesta sin cuerpo */ }
+      if (x.status >= 200 && x.status < 300) ok(datos as T);
+      else mal(new ErrorServidor(x.status, datos.error ?? 'error', datos.mensaje ?? (x.status === 413 ? 'El archivo es demasiado grande.' : 'No se pudo subir el archivo.')));
+    };
+    x.send(archivo);
+  });
+}
 export const mensajeDe = (e: unknown): string => (e instanceof Error ? e.message : 'Algo salió mal.');
 
 /** Carga datos del servidor y los vuelve a pedir cuando cambia la dirección o se llama a `recargar`. */
@@ -59,7 +77,7 @@ export function Enlace({ a, className, children, title }: { a: string; className
 }
 
 // ---------- sesión ----------
-export interface Yo { id: string; usuario: string; nombre: string; iniciales: string; email: string; bio: string; zona_horaria: string; es_admin_general: boolean; debe_cambiar_clave: boolean }
+export interface Yo { id: string; usuario: string; nombre: string; iniciales: string; avatar?: string | null; email: string; bio: string; zona_horaria: string; es_admin_general: boolean; debe_cambiar_clave: boolean }
 interface Sesion { yo: Yo | null; cargando: boolean; poner: (y: Yo | null) => void; recargar: () => Promise<void> }
 const ContextoSesion = createContext<Sesion>({ yo: null, cargando: true, poner: () => {}, recargar: async () => {} });
 export const useSesion = () => useContext(ContextoSesion);
@@ -86,7 +104,8 @@ export function ponerTema(t: Tema) {
 
 // ---------- piezas ----------
 const COLORES_PERSONA = ['#3F6FB5', '#A8507A', '#6B7A2A', '#3A3F4B', '#8A5A2B', '#2C7A7B', '#6B4FA8', '#B0483C'];
-export function Avatar({ p, chica }: { p: { id: string; nombre: string; iniciales: string }; chica?: boolean }) {
+export function Avatar({ p, chica }: { p: { id: string; nombre: string; iniciales: string; avatar?: string | null }; chica?: boolean }) {
+  if (p.avatar) return <img className={'per' + (chica ? ' chica' : '')} src={`/api/fotos/${p.avatar}`} alt={p.nombre} title={p.nombre} />;
   let suma = 0;
   for (const c of p.id) suma = (suma + c.charCodeAt(0)) % COLORES_PERSONA.length;
   return <span className={'per' + (chica ? ' chica' : '')} style={{ background: COLORES_PERSONA[suma] }} title={p.nombre}>{p.iniciales}</span>;
@@ -96,7 +115,7 @@ export function Campo({ rotulo, ayuda, children }: { rotulo: string; ayuda?: str
   return <label className="campo"><span>{rotulo}</span>{children}{ayuda && <small>{ayuda}</small>}</label>;
 }
 
-export function Dialogo({ titulo, alCerrar, children }: { titulo: string; alCerrar: () => void; children: ReactNode }) {
+export function Dialogo({ titulo, alCerrar, children, ancho }: { titulo: string; alCerrar: () => void; children: ReactNode; ancho?: boolean }) {
   useEffect(() => {
     const tecla = (e: KeyboardEvent) => { if (e.key === 'Escape') alCerrar(); };
     document.addEventListener('keydown', tecla);
@@ -104,7 +123,7 @@ export function Dialogo({ titulo, alCerrar, children }: { titulo: string; alCerr
   }, [alCerrar]);
   return (
     <div className="velo" onMouseDown={(e) => { if (e.target === e.currentTarget) alCerrar(); }}>
-      <div className="dialogo" role="dialog" aria-modal="true" aria-label={titulo}>
+      <div className={'dialogo' + (ancho ? ' ancho' : '')} role="dialog" aria-modal="true" aria-label={titulo}>
         <header><h2>{titulo}</h2><button type="button" className="btn plano chico" onClick={alCerrar} aria-label="Cerrar">✕</button></header>
         {children}
       </div>

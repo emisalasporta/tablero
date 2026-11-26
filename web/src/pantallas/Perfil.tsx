@@ -1,6 +1,6 @@
 // Mi cuenta: perfil, correo, contraseña, tema. Y, para la administración general, la gente de la instalación.
 import { useState } from 'react';
-import { api, Avatar, Campo, CopiarEnlace, Formulario, leerTema, ponerTema, useAccion, useCarga, useSesion } from '../base.tsx';
+import { api, subir, Avatar, Campo, CopiarEnlace, Formulario, leerTema, ponerTema, useAccion, useCarga, useSesion } from '../base.tsx';
 import type { Tema, Yo } from '../base.tsx';
 
 function AdminGeneral() {
@@ -44,10 +44,21 @@ export function Perfil() {
   const [nueva, setNueva] = useState('');
   const [okClave, setOkClave] = useState(false);
   const [tema, setTema] = useState<Tema>(leerTema());
+  const foto = useAccion();
   return (
     <main className="pagina" style={{ maxWidth: 640 }}>
       <div className="encabezado"><Avatar p={yo} /><h1>Tu cuenta</h1></div>
       {yo.debe_cambiar_clave && <p className="error">Entraste con una contraseña temporal. Cambiala acá abajo.</p>}
+      <div className="panel">
+        <h2>Foto</h2>
+        <div className="fila">
+          <span className="foto-grande"><Avatar p={yo} /></span>
+          <label className="como-boton btn">{yo.avatar ? 'Cambiar foto' : 'Subir foto'}<input type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden onChange={(e) => { const f = e.target.files?.[0]; if (f) void foto.hacer(async () => { await subir('/api/yo/avatar', f); await sesion.recargar(); }); }} /></label>
+          {yo.avatar && <button type="button" className="btn peligro" onClick={() => foto.hacer(async () => { await api('DELETE', '/api/yo/avatar'); await sesion.recargar(); })}>Quitar</button>}
+        </div>
+        {foto.error && <p className="error" role="alert">{foto.error}</p>}
+        <p className="suave" style={{ fontSize: 13 }}>Una imagen PNG, JPG, GIF o WebP de hasta 5 MB. Sin foto se muestran tus iniciales.</p>
+      </div>
       <div className="panel">
         <Formulario boton="Guardar perfil" secundario={okPerfil ? <span className="ok">Guardado</span> : undefined} alEnviar={async () => {
           setOkPerfil(false);

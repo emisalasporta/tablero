@@ -6,6 +6,7 @@ import { buscarUsuario, cantidadAdminsTablero, crearInvitacion, exigirUsuario, f
 import { capacidadesTablero, COMENTAR, contexto, leerEspacio, leerTablero, PERMISOS_TABLERO_INICIALES, puedeAdministrarEspacio, puedeAdministrarTablero, puedeBorrarTablero, puedeCrearTablero, puedeEditarTablero, puedeInvitarATablero, puedeUnirseSolo, puedeVerEspacio, puedeVerTablero, VIS_TABLERO } from '../permisos.ts';
 import type { PermisosTablero, RolTablero, Tablero, Usuario } from '../permisos.ts';
 import type { Vivo } from '../vivo.ts';
+import type { Archivos } from '../archivos.ts';
 import { contenidoTablero } from './contenido.ts';
 import { ahora, datoInvalido, ErrorApi, noAutenticado, noExiste, nuevoEnlace, nuevoId, opcion, sinPermiso, texto, textoOpcional } from '../util.ts';
 
@@ -23,7 +24,7 @@ function validarPermisos(v: unknown, actuales: PermisosTablero): PermisosTablero
   };
 }
 
-export function rutasTableros(app: FastifyInstance, db: DatabaseSync, vivo: Vivo) {
+export function rutasTableros(app: FastifyInstance, db: DatabaseSync, vivo: Vivo, archivos: Archivos) {
   /** Avisa a quienes miran el tablero que cambió algo de su cabecera (nombre, gente, permisos): vuelven a pedirlo. */
   const avisar = (tableroId: string) => vivo.emitir(tableroId, { tipo: 'tablero' });
   const resumen = (t: Tablero) => ({ id: t.id, enlace: t.enlace, espacio_id: t.espacio_id, nombre: t.nombre, descripcion: t.descripcion, visibilidad: t.visibilidad, cerrado: t.cerrado === 1 });
@@ -85,7 +86,7 @@ export function rutasTableros(app: FastifyInstance, db: DatabaseSync, vivo: Vivo
     const pedidos = !administra ? [] : db.prepare(`SELECT p.id, p.creado_en, u.id AS uid, u.usuario, u.nombre, u.iniciales, u.avatar, u.es_robot
                               FROM pedidos_acceso p JOIN usuarios u ON u.id = p.usuario_id WHERE p.tipo = 'tablero' AND p.destino_id = ? AND p.estado = 'pendiente' ORDER BY p.creado_en`).all(t.id) as unknown as (Usuario & { uid: string })[];
     return {
-      tablero: { ...resumen(t), permisos: t.permisos },
+      tablero: { ...resumen(t), permisos: t.permisos, ajustes: t.ajustes },
       ...contenidoTablero(db, t.id),
       espacio: { id: e.id, nombre: e.nombre },
       miembros: miembros.map((m) => ({ ...fichaPublica(m), rol: m.rol, invitado: !m.del_espacio })),
@@ -98,7 +99,7 @@ export function rutasTableros(app: FastifyInstance, db: DatabaseSync, vivo: Vivo
     const u = exigirUsuario(req);
     const { t, e, c } = abrir((req.params as { id: string }).id, u);
     const b = (req.body ?? {}) as Record<string, unknown>;
-    const tocaAjustes = b.visibilidad !== undefined || b.permisos !== undefined || b.cerrado !== undefined;
+    const tocaAjustes = b.visibilidad !== undefined || b.permisos !== undefined || b.cerrado !== undefined || b.ajustes !== undefined;
     if (tocaAjustes && !puedeAdministrarTablero(c)) throw sinPermiso('Solo quien administra el tablero puede cambiar eso.');
     // Reabrir un tablero cerrado es lo único que se puede hacer sobre un tablero cerrado.
     if (!tocaAjustes && !puedeEditarTablero(c, t)) throw sinPermiso('No podés editar este tablero.');
@@ -108,14 +109,16 @@ export function rutasTableros(app: FastifyInstance, db: DatabaseSync, vivo: Vivo
     if (vis !== t.visibilidad && !puedeCrearTablero(contexto(db, u, e.id), e, vis)) throw sinPermiso('En este espacio no podés tener tableros con esa visibilidad.');
     const permisos = b.permisos === undefined ? t.permisos : validarPermisos(b.permisos, t.permisos);
     const cerrado = b.cerrado === undefined ? t.cerrado : b.cerrado ? 1 : 0;
-    db.prepare('UPDATE tableros SET nombre = ?, descripcion = ?, visibilidad = ?, permisos = ?, cerrado = ? WHERE id = ?')
-      .run(nombre, descripcion, vis, JSON.stringify(permisos), cerrado, t.id);
+    const aj = (typeof b.ajustes === 'object' && b.ajustes !== null ? b.ajustes : {}) as Record<string, unknown>;
+    const ajustes = { portadas: typeof aj.portadas === 'boolean' ? aj.portadas : t.ajustes.portadas, tilde: typeof aj.tilde === 'boolean' ? aj.tilde : t.ajustes.tilde };
+    db.prepare('UPDATE tableros SET nombre = ?, descripcion = ?, visibilidad = ?, permisos = ?, cerrado = ?, ajustes = ? WHERE id = ?')
+      .run(nombre, descripcion, vis, JSON.stringify(permisos), cerrado, JSON.stringify(ajustes), t.id);
     if (vis !== t.visibilidad) registrarActividad(db, 'tablero_visibilidad', u.id, { espacio_id: e.id, tablero_id: t.id, datos: { antes: t.visibilidad, ahora: vis } });
     if (cerrado !== t.cerrado) registrarActividad(db, cerrado ? 'tablero_cerrado' : 'tablero_reabierto', u.id, { espacio_id: e.id, tablero_id: t.id });
     if (nombre !== t.nombre) registrarActividad(db, 'tablero_renombrado', u.id, { espacio_id: e.id, tablero_id: t.id, datos: { antes: t.nombre, ahora: nombre } });
     const nuevo = leerTablero(db, t.id)!;
     avisar(t.id);
-    return { tablero: { ...resumen(nuevo), permisos: nuevo.permisos } };
+    return { tablero: { ...resumen(nuevo), permisos: nuevo.permisos, ajustes: nuevo.ajustes } };
   });
 
   app.delete('/api/tableros/:id', async (req) => {
@@ -124,6 +127,7 @@ export function rutasTableros(app: FastifyInstance, db: DatabaseSync, vivo: Vivo
     if (!puedeBorrarTablero(c, t, e)) throw sinPermiso('No podés borrar este tablero.');
     if (!t.cerrado) throw new ErrorApi(409, 'no_cerrado', 'Primero hay que cerrar el tablero; después se puede borrar.');
     db.prepare('DELETE FROM tableros WHERE id = ?').run(t.id);
+    archivos.barrer(db);
     registrarActividad(db, 'tablero_borrado', u.id, { espacio_id: e.id, datos: { nombre: t.nombre } });
     return { ok: true };
   });

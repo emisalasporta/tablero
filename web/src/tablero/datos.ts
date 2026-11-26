@@ -8,14 +8,21 @@ import { api, CLIENTE, ErrorServidor, mensajeDe } from '../base.tsx';
 export const SALTO = 65536;
 
 export interface Lista { id: string; tablero_id: string; nombre: string; posicion: number; archivada: boolean }
-export interface Tarjeta { id: string; enlace: string; numero: number; tablero_id: string; lista_id: string; titulo: string; posicion: number; archivada: boolean; tiene_descripcion: boolean }
-export interface Persona { id: string; usuario: string; nombre: string; iniciales: string }
+export interface Portada { color: string | null; adjunto: string | null; tamano: 'media' | 'completa'; tono: 'claro' | 'oscuro' }
+export interface Tarjeta {
+  id: string; enlace: string; numero: number; tablero_id: string; lista_id: string; titulo: string; posicion: number; archivada: boolean; tiene_descripcion: boolean;
+  inicio: string | null; vence: string | null; completada: boolean; portada: Portada | null;
+  etiquetas: string[]; miembros: string[]; n_comentarios: number; n_adjuntos: number; n_items: number; n_hechos: number;
+}
+export interface Etiqueta { id: string; nombre: string; color: string }
+export interface Persona { id: string; usuario: string; nombre: string; iniciales: string; avatar?: string | null }
 export interface Permisos { comentar: string; invitar: string; union_libre: boolean; edicion_espacio: boolean }
 export interface Puede { ver: boolean; editar: boolean; administrar: boolean; comentar: boolean; invitar: boolean; invitar_de_afuera: boolean; unirse: boolean; borrar: boolean }
 export interface Datos {
-  tablero: { id: string; enlace: string; nombre: string; descripcion: string; visibilidad: string; cerrado: boolean; permisos: Permisos };
+  tablero: { id: string; enlace: string; nombre: string; descripcion: string; visibilidad: string; cerrado: boolean; permisos: Permisos; ajustes: { portadas: boolean; tilde: boolean } };
   listas: Lista[];
   tarjetas: Tarjeta[];
+  etiquetas: Etiqueta[];
   espacio: { id: string; nombre: string };
   miembros: (Persona & { rol: string; invitado: boolean })[];
   pedidos: { id: string; persona: Persona }[];
@@ -51,7 +58,8 @@ export function posicionEntre(orden: { posicion: number }[], indice: number): nu
 
 export type Ops = ReturnType<typeof useTablero>['ops'];
 
-export function useTablero(enlace: string) {
+/** `enlace` vacío: todavía no se sabe qué tablero es (se abrió por la dirección de una tarjeta). */
+export function useTablero(enlace: string | null) {
   const [datos, setDatos] = useState<Datos | null>(null);
   const [error, setError] = useState<ErrorServidor | null>(null);
   const [enLinea, setEnLinea] = useState(true);
@@ -66,6 +74,7 @@ export function useTablero(enlace: string) {
   const hayDatos = useRef(false);
 
   const cargar = useCallback(async () => {
+    if (!enlace) return;
     const esta = ++vuelta.current;
     cola.current = [];
     try {
@@ -87,6 +96,10 @@ export function useTablero(enlace: string) {
   }, [enlace]);
 
   useEffect(() => {
+    if (!enlace) return;
+    // Al pasar de un tablero a otro no tiene que quedar a la vista el anterior.
+    hayDatos.current = false; definitivo.current = false;
+    setDatos((d) => (d && d.tablero.enlace !== enlace && d.tablero.id !== enlace ? null : d));
     let activo = true;
     let ws: WebSocket | null = null;
     let reloj = 0;
@@ -164,6 +177,8 @@ export function useTablero(enlace: string) {
   }, [cargar]);
 
   const ops = useMemo(() => ({
+    /** Aplica en pantalla un cambio que ya hizo el servidor (lo usa la tarjeta abierta con cada respuesta). */
+    aplicar: (c: Cambio) => setDatos((d) => d && mezclar(d, c)),
     crearLista: (nombre: string) => hacer([], null, async () => ({ listas: [(await api('POST', `/api/tableros/${enlace}/listas`, { nombre })).lista] })),
     cambiarLista: (id: string, cambios: { nombre?: string; posicion?: number; archivada?: boolean; tablero_id?: string }) =>
       hacer([id], (d) => { const l = d.listas.find((x) => x.id === id); return l ? mezclar(d, { listas: [{ ...l, ...cambios }] }) : d; },
@@ -171,12 +186,12 @@ export function useTablero(enlace: string) {
     copiarLista: (id: string, nombre: string) => hacer([], null, async () => { const r = await api('POST', `/api/listas/${id}/copiar`, { nombre }); return { listas: [r.lista], tarjetas: r.tarjetas }; }),
     pasarTarjetas: (id: string, listaId: string) => hacer([], null, () => api('POST', `/api/listas/${id}/mover-tarjetas`, { lista_id: listaId })),
     archivarTarjetas: (id: string) => hacer([], (d) => ({ ...d, tarjetas: d.tarjetas.filter((t) => t.lista_id !== id) }), () => api('POST', `/api/listas/${id}/archivar-tarjetas`)),
-    ordenarLista: (id: string, por: 'nombre' | 'nuevas' | 'viejas') => hacer([], null, () => api('POST', `/api/listas/${id}/ordenar`, { por })),
+    ordenarLista: (id: string, por: 'nombre' | 'nuevas' | 'viejas' | 'vence') => hacer([], null, () => api('POST', `/api/listas/${id}/ordenar`, { por })),
     crearTarjetas: (listaId: string, titulos: string[], posicion: 'arriba' | 'abajo') => hacer([], null, () => api('POST', `/api/listas/${listaId}/tarjetas`, { titulos, posicion })),
-    cambiarTarjeta: (id: string, cambios: { titulo?: string; lista_id?: string; posicion?: number; archivada?: boolean }, tableroDestino?: string) =>
+    cambiarTarjeta: (id: string, cambios: { titulo?: string; lista_id?: string; posicion?: number; archivada?: boolean; completada?: boolean }, tableroDestino?: string) =>
       hacer([id], (d) => { const t = d.tarjetas.find((x) => x.id === id); return t ? mezclar(d, { tarjetas: [{ ...t, ...cambios, tablero_id: tableroDestino ?? t.tablero_id }] }) : d; },
         async () => ({ tarjetas: [(await api('PATCH', `/api/tarjetas/${id}`, cambios)).tarjeta] })),
-    copiarTarjeta: (id: string, cuerpo: { titulo: string; lista_id: string; posicion: number; conservar: { descripcion: boolean } }) =>
+    copiarTarjeta: (id: string, cuerpo: { titulo: string; lista_id: string; posicion: number; conservar: Record<string, boolean> }) =>
       hacer([], null, async () => ({ tarjetas: [(await api('POST', `/api/tarjetas/${id}/copiar`, cuerpo)).tarjeta] })),
   }), [enlace, hacer]);
 

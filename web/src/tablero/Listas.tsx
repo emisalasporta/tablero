@@ -5,7 +5,44 @@ import { crearMotor } from './arrastre.ts';
 import type { Arrastre, Motor } from './arrastre.ts';
 import { posicionEntre } from './datos.ts';
 import type { Datos, Lista, Ops, Tarjeta } from './datos.ts';
+import { Avatar } from '../base.tsx';
 import { MenuLista } from './Menus.tsx';
+import { ChipEtiqueta, estadoVence, fechaCorta, Icono } from './piezas.tsx';
+
+/** El frente de una tarjeta: portada, etiquetas, título e insignias. */
+function Frente({ t, d, nombres, alAlternarNombres, alCompletar }: { t: Tarjeta; d: Datos; nombres: boolean; alAlternarNombres: () => void; alCompletar?: () => void }) {
+  const portada = d.tablero.ajustes.portadas ? t.portada : null;
+  const etiquetas = d.etiquetas.filter((e) => t.etiquetas.includes(e.id));
+  const miembros = d.miembros.filter((m) => t.miembros.includes(m.id));
+  const estado = estadoVence(t.vence, t.completada);
+  const completa = portada?.tamano === 'completa';
+  const circulo = (d.tablero.ajustes.tilde || t.completada) && (
+    <button type="button" className={'circulo' + (t.completada ? ' hecho' : '')} disabled={!alCompletar} aria-pressed={t.completada} aria-label={t.completada ? 'Marcar como pendiente' : 'Marcar como completada'}
+      onPointerDown={(e) => e.stopPropagation()} onClick={(e) => { e.stopPropagation(); alCompletar?.(); }}>{t.completada && <Icono n="tilde" />}</button>
+  );
+  const titulo = <div className="tit-fila">{circulo}<span className="tit">{t.titulo}</span></div>;
+  if (portada && completa) return (
+    <div className={`cubierta ${portada.adjunto ? 'imagen' : `et c-${portada.color} i-2`} tono-${portada.tono}`} style={portada.adjunto ? { backgroundImage: `url(/api/adjuntos/${portada.adjunto}/archivo)` } : undefined}>{titulo}</div>
+  );
+  const hayInsignias = t.vence || t.inicio || t.tiene_descripcion || t.n_comentarios > 0 || t.n_adjuntos > 0 || t.n_items > 0 || miembros.length > 0;
+  return (
+    <>
+      {portada && (portada.adjunto ? <img className="portada" src={`/api/adjuntos/${portada.adjunto}/archivo`} alt="" loading="lazy" draggable={false} /> : <div className={`portada et c-${portada.color} i-2`} />)}
+      {etiquetas.length > 0 && <div className="ets" onPointerDown={(e) => e.stopPropagation()} onClick={(e) => { e.stopPropagation(); alAlternarNombres(); }} title="Tocá para mostrar u ocultar los nombres">{etiquetas.map((e) => <ChipEtiqueta key={e.id} e={e} conNombre={nombres} />)}</div>}
+      {titulo}
+      {hayInsignias && (
+        <div className="insignias">
+          {(t.vence || t.inicio) && <span className={`ins fecha ${estado}`} title={estado ? `Vencimiento: ${estado}` : 'Fechas'}><Icono n="reloj" />{t.vence ? fechaCorta(t.vence).split(',')[0] : fechaCorta(t.inicio!)}</span>}
+          {t.tiene_descripcion && <span className="ins" title="Tiene descripción"><Icono n="texto" /></span>}
+          {t.n_comentarios > 0 && <span className="ins" title="Comentarios"><Icono n="burbuja" />{t.n_comentarios}</span>}
+          {t.n_adjuntos > 0 && <span className="ins" title="Adjuntos"><Icono n="clip" />{t.n_adjuntos}</span>}
+          {t.n_items > 0 && <span className={'ins' + (t.n_hechos === t.n_items ? ' fecha hecha' : '')} title="Ítems de checklist hechos"><Icono n="lista" />{t.n_hechos}/{t.n_items}</span>}
+          {miembros.length > 0 && <span className="pila">{miembros.slice(0, 4).map((m) => <Avatar key={m.id} p={m} chica />)}</span>}
+        </div>
+      )}
+    </>
+  );
+}
 
 /** Caja para escribir tarjetas nuevas. Queda abierta para seguir cargando; si se pegan varios renglones ofrece crear una por renglón. */
 function Componer({ alCrear, alCerrar }: { alCrear: (titulos: string[]) => void; alCerrar: () => void }) {
@@ -77,6 +114,9 @@ export function Listas({ d, ops, alAbrir }: { d: Datos; ops: Ops; alAbrir: (t: T
   const arrRef = useRef<Arrastre | null>(null);
   const [menu, setMenu] = useState<{ lista: string; ancla: DOMRect } | null>(null);
   const [componer, setComponer] = useState<{ lista: string; arriba: boolean } | null>(null);
+  // Mostrar u ocultar los nombres de las etiquetas en los frentes: es una preferencia de cada persona en su dispositivo.
+  const [nombres, setNombres] = useState(() => { try { return localStorage.getItem('etiquetas-nombres') !== 'no'; } catch { return true; } });
+  const alternarNombres = () => setNombres((v) => { try { localStorage.setItem('etiquetas-nombres', v ? 'no' : 'si'); } catch { /* vale para esta visita */ } return !v; });
 
   const porLista = useMemo(() => {
     const m = new Map<string, Tarjeta[]>();
@@ -123,11 +163,11 @@ export function Listas({ d, ops, alAbrir }: { d: Datos; ops: Ops; alAbrir: (t: T
       const arriba = arr?.tipo === 'tarjeta' && arr.id === t.id;
       if (aca && !arriba && sitio++ === arr.indice) hueco();
       hojas.push(
-        <div key={t.id} className={'hoja' + (arriba ? ' levantada' : '')} data-tarjeta={t.id} role="button" tabIndex={0}
+        <div key={t.id} className={'hoja' + (arriba ? ' levantada' : '') + (t.completada ? ' completada' : '')} data-tarjeta={t.id} role="button" tabIndex={0}
           onPointerDown={puede ? (e) => motor.apretar(e, 'tarjeta', t.id, e.currentTarget) : undefined}
           onClick={() => { if (!motor.recien()) alAbrir(t); }}
           onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); alAbrir(t); } }}>
-          <span className="tit">{t.titulo}</span>
+          <Frente t={t} d={d} nombres={nombres} alAlternarNombres={alternarNombres} alCompletar={puede ? () => void ops.cambiarTarjeta(t.id, { completada: !t.completada }) : undefined} />
         </div>,
       );
     }

@@ -32,7 +32,9 @@ function Pantalla() {
   if (cargando) return null;
   // Direcciones que se pueden abrir sin haber iniciado sesión.
   if (partes[0] === 'invitacion' && partes[1]) return <Invitacion token={partes[1]} />;
-  if (partes[0] === 't' && partes[1]) return <Tablero key={partes[1]} enlace={partes[1]} />;
+  // Un tablero (/t/…) o una tarjeta abierta sobre su tablero (/c/…): es la misma pantalla, para que abrir y cerrar una tarjeta no la rearme.
+  if (partes[0] === 't' && partes[1]) return <Tablero enlace={partes[1]} />;
+  if (partes[0] === 'c' && partes[1]) return <Tablero deTarjeta={partes[1]} />;
   if (!yo) return <Entrar volverA={camino === '/entrar' ? '/' : ruta} />;
   if (partes[0] === 'e' && partes[1]) return <Espacio key={partes[1]} id={partes[1]} />;
   if (partes[0] === 'perfil') return <Perfil />;

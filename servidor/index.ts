@@ -9,7 +9,8 @@ const { db, migracion } = abrirDb(config.dirDatos);
 if (migracion.aplicadas.length) {
   console.log(`Migraciones aplicadas: ${migracion.aplicadas.join(', ')}` + (migracion.copiaPrevia ? ` (copia previa: ${migracion.copiaPrevia})` : ''));
 }
-const app = crearApp({ db, zonaHoraria: config.zonaHoraria, dirWeb: path.join(import.meta.dirname, '..', 'dist', 'web') });
+const app = crearApp({ db, zonaHoraria: config.zonaHoraria, dirWeb: path.join(import.meta.dirname, '..', 'dist', 'web'),
+  dirArchivos: path.join(config.dirDatos, 'archivos'), maxAdjuntoMb: config.maxAdjuntoMb });
 
 await app.listen({ port: config.puerto, host: '0.0.0.0' });
 console.log(`meetmydash escuchando en el puerto ${config.puerto} · datos en ${config.dirDatos}`);

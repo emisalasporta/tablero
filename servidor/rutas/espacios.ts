@@ -1,6 +1,7 @@
 // Espacios de trabajo: crear, ajustes, miembros, invitados, invitaciones y pedidos de acceso.
 import type { FastifyInstance } from 'fastify';
 import type { DatabaseSync } from 'node:sqlite';
+import type { Archivos } from '../archivos.ts';
 import { aceptarInvitacion, buscarUsuario, cantidadAdminsEspacio, crearInvitacion, exigirUsuario, fichaPublica, leerInvitacion, leerUsuario, registrarActividad, sumarAEspacio } from '../nucleo.ts';
 import { AJUSTES_ESPACIO_INICIALES, contexto, leerEspacio, puedeAdministrarEspacio, puedeVerEspacio, QUIEN, VIS_TABLERO } from '../permisos.ts';
 import type { AjustesEspacio, Espacio, RolEspacio, Usuario } from '../permisos.ts';
@@ -23,7 +24,7 @@ function validarAjustes(v: unknown, actuales: AjustesEspacio): AjustesEspacio {
   return nuevo;
 }
 
-export function rutasEspacios(app: FastifyInstance, db: DatabaseSync) {
+export function rutasEspacios(app: FastifyInstance, db: DatabaseSync, archivos: Archivos) {
   /** Trae el espacio y verifica que la persona pueda verlo. Si no puede, responde como si no existiera. */
   function abrir(id: string, u: Usuario | null) {
     const e = leerEspacio(db, id);
@@ -94,6 +95,8 @@ export function rutasEspacios(app: FastifyInstance, db: DatabaseSync) {
     const abiertos = (db.prepare('SELECT count(*) AS n FROM tableros WHERE espacio_id = ? AND cerrado = 0').get(e.id) as { n: number }).n;
     if (abiertos > 0) throw new ErrorApi(409, 'tiene_tableros', `El espacio tiene ${abiertos} tablero(s) abierto(s). Cerralos o movelos antes de borrarlo.`);
     db.prepare('DELETE FROM espacios WHERE id = ?').run(e.id);
+    archivos.borrarFoto(e.logo);
+    archivos.barrer(db);
     return { ok: true };
   });
 

@@ -16,26 +16,26 @@
 
 | Estado | Cantidad |
 |---|---|
-| Hechas | 62 |
-| Pendientes (se pueden igualar) | 274 |
-| Pendientes pero parciales (⚠, no quedan idénticas) | 16 |
+| Hechas | 130 |
+| Pendientes (se pueden igualar) | 207 |
+| Pendientes pero parciales (⚠, no quedan idénticas) | 15 |
 | No se puede | 47 |
 
 "Hecha" quiere decir: construida, con pruebas automáticas que pasan, y publicada.
 
 | Sección | Total | Hechas | Pendientes | Parciales | No se puede |
 |---|---|---|---|---|---|
-| A. Cuentas y perfil | 22 | 5 | 14 | 1 | 2 |
-| B. Espacios de trabajo | 28 | 17 | 9 | 0 | 2 |
-| C. Tableros | 42 | 15 | 22 | 2 | 3 |
+| A. Cuentas y perfil | 22 | 6 | 13 | 1 | 2 |
+| B. Espacios de trabajo | 28 | 18 | 8 | 0 | 2 |
+| C. Tableros | 42 | 19 | 18 | 2 | 3 |
 | D. Listas | 17 | 9 | 7 | 0 | 1 |
-| E. Tarjetas: lo básico | 22 | 8 | 14 | 0 | 0 |
-| F. Tarjetas: descripción y texto | 14 | 0 | 13 | 1 | 0 |
-| G. Tarjetas: miembros y etiquetas | 11 | 0 | 11 | 0 | 0 |
-| H. Tarjetas: checklists | 13 | 0 | 12 | 0 | 1 |
-| I. Tarjetas: fechas | 8 | 0 | 8 | 0 | 0 |
-| J. Tarjetas: adjuntos y portadas | 21 | 0 | 15 | 2 | 4 |
-| K. Tarjetas: comentarios y actividad | 12 | 0 | 10 | 1 | 1 |
+| E. Tarjetas: lo básico | 22 | 12 | 10 | 0 | 0 |
+| F. Tarjetas: descripción y texto | 14 | 10 | 3 | 1 | 0 |
+| G. Tarjetas: miembros y etiquetas | 11 | 6 | 5 | 0 | 0 |
+| H. Tarjetas: checklists | 13 | 12 | 0 | 0 | 1 |
+| I. Tarjetas: fechas | 8 | 5 | 3 | 0 | 0 |
+| J. Tarjetas: adjuntos y portadas | 21 | 15 | 1 | 1 | 4 |
+| K. Tarjetas: comentarios y actividad | 12 | 9 | 1 | 1 | 1 |
 | L. Tarjetas especiales y extras | 23 | 0 | 20 | 1 | 2 |
 | M. Vistas | 15 | 0 | 15 | 0 | 0 |
 | N. Búsqueda y filtros | 14 | 0 | 13 | 0 | 1 |
@@ -46,7 +46,7 @@
 | S. Inteligencia artificial de Atlassian | 5 | 0 | 0 | 0 | 5 |
 | T. Bandeja de entrada y Planificador | 12 | 0 | 9 | 1 | 2 |
 | U. Plantillas | 5 | 0 | 4 | 0 | 1 |
-| V. Teléfono, instalación y escritorio | 13 | 1 | 4 | 2 | 6 |
+| V. Teléfono, instalación y escritorio | 13 | 2 | 3 | 2 | 6 |
 | W. Importar, exportar e imprimir | 5 | 0 | 4 | 0 | 1 |
 | X. Apariencia y accesibilidad | 7 | 1 | 6 | 0 | 0 |
 | Y. Tiempo real | 5 | 4 | 1 | 0 | 0 |
@@ -66,7 +66,7 @@
 | A05 | Cuenta unificada de Atlassian | no se puede | — | A | Es propio de Atlassian; no aplica |
 | A06 | Verificación en dos pasos | pendiente | 6.7 | A | Con app de códigos (tipo Google Authenticator) |
 | A07 | Perfil: nombre, nombre de usuario, iniciales, biografía | hecha | 2.1 | V | |
-| A08 | Foto de perfil (subir imagen o iniciales) | pendiente | 2.1 | V | Iniciales ya están; subir foto pasa a la tanda 2.3, junto con los adjuntos |
+| A08 | Foto de perfil (subir imagen o iniciales) | hecha | 2.1 | V | |
 | A09 | Cambiar correo y contraseña | hecha | 2.1 | A | |
 | A10 | Idioma de la app | pendiente | 6.7 | A | ⚠ parcial: español e inglés (Trello tiene decenas) |
 | A11 | Zona horaria y formato de fecha/hora | pendiente | 2.1 | A | Zona horaria ya está; falta el formato de fecha y hora |
@@ -86,7 +86,7 @@
 | # | Función | Estado | Tanda | Fuente | Nota |
 |---|---|---|---|---|---|
 | B01 | Crear espacio de trabajo | hecha | 2.1 | A | |
-| B02 | Editar nombre, descripción, sitio web y logo | pendiente | 2.1 | V | Nombre, descripción y sitio web ya están; falta el logo (tanda 2.3) |
+| B02 | Editar nombre, descripción, sitio web y logo | hecha | 2.1 | V | |
 | B03 | Visibilidad del espacio: privado o público | hecha | 2.1 | V | |
 | B04 | Roles en el espacio: administrador y miembro normal | hecha | 2.1 | V | |
 | B05 | El administrador del espacio administra todos sus tableros, también los privados | hecha | 2.1 | A | |
@@ -144,12 +144,12 @@
 | C25 | Copiar tablero (con o sin tarjetas) | pendiente | 2.4 | A | |
 | C26 | Seguir tablero (recibir avisos de todo) | pendiente | 6.1 | A | |
 | C27 | Menú del tablero | pendiente | 2.4 | A | |
-| C28 | Actividad del tablero (todo / solo comentarios, cargar más) | pendiente | 2.3 | A | |
+| C28 | Actividad del tablero (todo / solo comentarios, cargar más) | hecha | 2.3 | A | |
 | C29 | Elementos archivados: tarjetas y listas, buscar, restaurar, borrar | pendiente | 2.4 | A | Ya se ven y se restauran desde "Archivados". Faltan buscar y borrar |
-| C30 | Ajuste: mostrar u ocultar portadas | pendiente | 2.3 | V | |
-| C31 | Ajuste: mostrar el tilde de completada en el frente | pendiente | 2.3 | V | |
+| C30 | Ajuste: mostrar u ocultar portadas | hecha | 2.3 | V | |
+| C31 | Ajuste: mostrar el tilde de completada en el frente | hecha | 2.3 | V | |
 | C32 | Ajuste: mostrar cantidad de tarjetas por lista | pendiente | 2.4 | V | |
-| C33 | Gestión de etiquetas del tablero | pendiente | 2.3 | A | |
+| C33 | Gestión de etiquetas del tablero | hecha | 2.3 | A | |
 | C34 | Cabecera: avatares de miembros, filtro, estrella, visibilidad, compartir | pendiente | 2.2 | A | |
 | C35 | Dirección web corta del tablero y número de tarjeta | hecha | 2.2 | V | El número se ve al abrir la tarjeta; la dirección propia de la tarjeta se usa desde la 2.3 |
 | C36 | Convertir tablero en plantilla y volver atrás | pendiente | 6.4 | A | |
@@ -172,7 +172,7 @@
 | D07 | Borrar lista archivada | pendiente | 2.4 | A | |
 | D08 | Mover todas las tarjetas de la lista | hecha | 2.2 | A |  |
 | D09 | Archivar todas las tarjetas de la lista | hecha | 2.2 | A |  |
-| D10 | Ordenar lista (alfabético, vencimiento, creación, votos, campos) | pendiente | 2.3 | A | Ya ordena por nombre y por fecha de creación. Faltan vencimiento, votos y campos, que llegan con esas funciones |
+| D10 | Ordenar lista (alfabético, vencimiento, creación, votos, campos) | pendiente | 2.3 | A | Ya ordena por nombre, por fecha de creación y por vencimiento. Faltan votos y campos, que llegan con esas funciones |
 | D11 | Agregar tarjeta arriba o abajo desde el menú | hecha | 2.2 | M |  |
 | D12 | Seguir lista | pendiente | 6.1 | A | |
 | D13 | Color de lista | pendiente | 6.4 | V | |
@@ -187,19 +187,19 @@
 | E01 | Crear tarjeta | hecha | 2.2 | A |  |
 | E02 | Crear varias tarjetas pegando varias líneas | hecha | 2.2 | M |  |
 | E03 | Editar título | hecha | 2.2 | A |  |
-| E04 | Abrir tarjeta (dorso) con dirección web propia | pendiente | 2.3 | V | |
+| E04 | Abrir tarjeta (dorso) con dirección web propia | hecha | 2.3 | V | Cada tarjeta tiene su dirección (/c/código); abrirla y cerrarla cambia la dirección y funciona el botón Atrás |
 | E05 | Arrastrar tarjeta dentro de la lista y entre listas | hecha | 2.2 | V |  |
 | E06 | Mover desde un menú (tablero, lista, posición) | hecha | 2.2 | A |  |
 | E07 | Mover a otro tablero conservando contenido | hecha | 2.2 | A | Al cambiar de tablero recibe número nuevo |
-| E08 | Copiar tarjeta eligiendo qué conservar | hecha | 2.2 | A | Por ahora lo único para conservar es la descripción; se suman opciones con cada cosa nueva de la tarjeta (2.3) |
+| E08 | Copiar tarjeta eligiendo qué conservar | hecha | 2.2 | A | Se elige si conservar descripción, etiquetas, miembros, checklists y adjuntos |
 | E09 | Archivar y restaurar tarjeta | hecha | 2.2 | A |  |
 | E10 | Borrar tarjeta archivada | pendiente | 2.4 | A | |
-| E11 | Marcar tarjeta como completada (círculo) | pendiente | 2.3 | A | |
+| E11 | Marcar tarjeta como completada (círculo) | hecha | 2.3 | A | |
 | E12 | Edición rápida desde el frente (lápiz o clic derecho) | pendiente | 6.2 | A | |
 | E13 | Selección múltiple (hasta 20) para mover o copiar en grupo | pendiente | 6.2 | A | |
-| E14 | Insignias en el frente (comentarios, adjuntos, checklist, fecha, descripción, seguir, votos, ubicación) | pendiente | 2.3 | V | |
+| E14 | Insignias en el frente (comentarios, adjuntos, checklist, fecha, descripción, seguir, votos, ubicación) | hecha | 2.3 | V | ⚠ parcial: fecha, descripción, comentarios, adjuntos, checklist y miembros. Seguir, votos y ubicación llegan con esas funciones |
 | E15 | Seguir tarjeta | pendiente | 6.1 | A | |
-| E16 | Compartir: enlace a tarjeta, a comentario y a una acción | pendiente | 2.3 | A | |
+| E16 | Compartir: enlace a tarjeta, a comentario y a una acción | hecha | 2.3 | A | ⚠ parcial: enlace a la tarjeta y a un comentario; a una acción suelta, no |
 | E17 | Compartir: código QR e incrustar en otra página | pendiente | 6.7 | M | |
 | E18 | Deshacer, rehacer y repetir la última acción | pendiente | 6.2 | A | |
 | E19 | Fusionar tarjetas | pendiente | 6.4 | V | |
@@ -210,103 +210,103 @@
 ## F. Tarjetas: descripción y texto
 | # | Función | Estado | Tanda | Fuente | Nota |
 |---|---|---|---|---|---|
-| F01 | Descripción con editor con formato | pendiente | 2.3 | A | |
-| F02 | Títulos (6 niveles), negrita, cursiva, tachado | pendiente | 2.3 | A | |
-| F03 | Listas con viñetas y numeradas, con sangría | pendiente | 2.3 | A | |
-| F04 | Enlaces, citas, divisor | pendiente | 2.3 | A | |
-| F05 | Código en línea y bloque de código | pendiente | 2.3 | A | |
-| F06 | Imágenes dentro del texto | pendiente | 2.3 | A | |
-| F07 | Escribir con Markdown y que se convierta solo | pendiente | 2.3 | A | |
-| F08 | Atajos de teclado del editor | pendiente | 2.3 | A | |
+| F01 | Descripción con editor con formato | hecha | 2.3 | A | ⚠ parcial: no es un editor visual. Se escribe con botones o marcas y se ve con formato al guardar |
+| F02 | Títulos (6 niveles), negrita, cursiva, tachado | hecha | 2.3 | A | |
+| F03 | Listas con viñetas y numeradas, con sangría | hecha | 2.3 | A | |
+| F04 | Enlaces, citas, divisor | hecha | 2.3 | A | |
+| F05 | Código en línea y bloque de código | hecha | 2.3 | A | |
+| F06 | Imágenes dentro del texto | hecha | 2.3 | A | Pegando una imagen copiada (se adjunta sola) o por su dirección |
+| F07 | Escribir con Markdown y que se convierta solo | hecha | 2.3 | A | ⚠ parcial: se convierte al guardar, no mientras se escribe |
+| F08 | Atajos de teclado del editor | hecha | 2.3 | A | Ctrl+B, Ctrl+I, Ctrl+K, Ctrl+Mayús+S y Ctrl+Enter para guardar |
 | F09 | Menú rápido con `/` | pendiente | 6.2 | A | |
-| F10 | Emojis con `:nombre:` y selector | pendiente | 2.3 | A | |
+| F10 | Emojis con `:nombre:` y selector | hecha | 2.3 | A | ⚠ parcial: 40 emojis con nombre en español (:pulgar:, :fuego:…), no el catálogo entero |
 | F11 | Emojis propios del espacio | pendiente | 6.7 | V | |
 | F12 | Enlace mostrado como dirección, título, tarjeta o incrustado | pendiente | 6.4 | A | ⚠ parcial: incrustado solo para sitios que lo permiten (YouTube, etc.) |
-| F13 | Menciones con @ en la descripción | pendiente | 2.3 | A | |
+| F13 | Menciones con @ en la descripción | hecha | 2.3 | A | Se sugiere al escribir @ y queda resaltada. El aviso a la persona llega con las notificaciones (Fase 6) |
 | F14 | Ver el Markdown del texto | pendiente | 6.7 | A | |
 
 ## G. Tarjetas: miembros y etiquetas
 | # | Función | Estado | Tanda | Fuente | Nota |
 |---|---|---|---|---|---|
-| G01 | Asignar y quitar miembros | pendiente | 2.3 | V | |
+| G01 | Asignar y quitar miembros | hecha | 2.3 | V | Se asigna a quienes están en el tablero |
 | G02 | Asignarme con un atajo | pendiente | 6.2 | M | |
 | G03 | Al asignarte quedás siguiendo la tarjeta | pendiente | 6.1 | A | |
-| G04 | Etiquetas con color y nombre opcional, varias por tarjeta | pendiente | 2.3 | V | |
-| G05 | 30 colores de etiqueta + sin color | pendiente | 2.3 | V | Paleta propia, misma cantidad |
-| G06 | Crear, renombrar, recolorear y borrar etiquetas | pendiente | 2.3 | A | |
-| G07 | Mostrar u ocultar nombres de etiquetas en el frente | pendiente | 2.3 | A | |
+| G04 | Etiquetas con color y nombre opcional, varias por tarjeta | hecha | 2.3 | V | |
+| G05 | 30 colores de etiqueta + sin color | hecha | 2.3 | V | Diez tonos por tres intensidades, más sin color |
+| G06 | Crear, renombrar, recolorear y borrar etiquetas | hecha | 2.3 | A | |
+| G07 | Mostrar u ocultar nombres de etiquetas en el frente | hecha | 2.3 | A | Tocando una etiqueta en el frente; es una preferencia de cada dispositivo |
 | G08 | Modo daltónico (patrones en etiquetas y portadas) | pendiente | 6.7 | A | |
-| G09 | Buscar etiquetas al asignar | pendiente | 2.3 | M | |
+| G09 | Buscar etiquetas al asignar | hecha | 2.3 | M | Aparece el buscador cuando hay más de cinco |
 | G10 | Sugerencia de etiquetas recientes por lista | pendiente | 6.4 | A | |
 | G11 | Al mover a otro tablero, las etiquetas se recrean en destino | pendiente | 2.2 | A | |
 
 ## H. Tarjetas: checklists
 | # | Función | Estado | Tanda | Fuente | Nota |
 |---|---|---|---|---|---|
-| H01 | Agregar, renombrar y borrar checklist | pendiente | 2.3 | V | |
-| H02 | Agregar, editar, tildar y borrar ítems | pendiente | 2.3 | A | |
-| H03 | Pegar varias líneas crea un ítem por línea | pendiente | 2.3 | A | |
-| H04 | Reordenar ítems y pasarlos a otra checklist | pendiente | 2.3 | A | |
-| H05 | Reordenar checklists | pendiente | 2.3 | V | |
-| H06 | Barra de progreso y contador en el frente | pendiente | 2.3 | A | |
-| H07 | Ocultar ítems tildados | pendiente | 2.3 | A | |
-| H08 | Copiar ítems de otra checklist del tablero | pendiente | 2.3 | A | |
-| H09 | Convertir ítem en tarjeta | pendiente | 2.3 | A | |
-| H10 | Asignar persona a un ítem | pendiente | 2.3 | A | |
-| H11 | Fecha de vencimiento en un ítem | pendiente | 2.3 | A | |
-| H12 | Formato, enlaces y menciones en ítems | pendiente | 2.3 | A | |
+| H01 | Agregar, renombrar y borrar checklist | hecha | 2.3 | V | |
+| H02 | Agregar, editar, tildar y borrar ítems | hecha | 2.3 | A | |
+| H03 | Pegar varias líneas crea un ítem por línea | hecha | 2.3 | A | |
+| H04 | Reordenar ítems y pasarlos a otra checklist | hecha | 2.3 | A | Con el menú del ítem (subir, bajar, pasar a otra); arrastrarlos queda para más adelante |
+| H05 | Reordenar checklists | hecha | 2.3 | V | Con flechas; arrastrarlas queda para más adelante |
+| H06 | Barra de progreso y contador en el frente | hecha | 2.3 | A | |
+| H07 | Ocultar ítems tildados | hecha | 2.3 | A | |
+| H08 | Copiar ítems de otra checklist del tablero | hecha | 2.3 | A | |
+| H09 | Convertir ítem en tarjeta | hecha | 2.3 | A | |
+| H10 | Asignar persona a un ítem | hecha | 2.3 | A | |
+| H11 | Fecha de vencimiento en un ítem | hecha | 2.3 | A | |
+| H12 | Formato, enlaces y menciones en ítems | hecha | 2.3 | A | Formato y enlaces; las menciones quedan resaltadas |
 | H13 | Generar ítems con IA | no se puede | — | A | Ver sección S |
 
 ## I. Tarjetas: fechas
 | # | Función | Estado | Tanda | Fuente | Nota |
 |---|---|---|---|---|---|
-| I01 | Fecha de inicio | pendiente | 2.3 | V | |
-| I02 | Fecha y hora de vencimiento | pendiente | 2.3 | V | |
-| I03 | Vencimiento cumplido | pendiente | 2.3 | V | |
+| I01 | Fecha de inicio | hecha | 2.3 | V | |
+| I02 | Fecha y hora de vencimiento | hecha | 2.3 | V | |
+| I03 | Vencimiento cumplido | hecha | 2.3 | V | Al marcar la tarjeta como completada, el vencimiento se muestra cumplido |
 | I04 | Recordatorio (opciones relativas al vencimiento) | pendiente | 6.1 | V | |
-| I05 | Colores de la fecha según cercanía (por vencer, vencida, cumplida) | pendiente | 2.3 | A | |
-| I06 | Quitar fechas | pendiente | 2.3 | A | |
+| I05 | Colores de la fecha según cercanía (por vencer, vencida, cumplida) | hecha | 2.3 | A | |
+| I06 | Quitar fechas | hecha | 2.3 | A | |
 | I07 | Vencimiento que se repite | pendiente | 6.4 | V | |
 | I08 | Las archivadas no avisan | pendiente | 6.1 | A | |
 
 ## J. Tarjetas: adjuntos y portadas
 | # | Función | Estado | Tanda | Fuente | Nota |
 |---|---|---|---|---|---|
-| J01 | Adjuntar archivo desde la computadora o el teléfono | pendiente | 2.3 | A | Tope por archivo: propongo 250 MB como Trello pago |
-| J02 | Adjuntar un enlace | pendiente | 2.3 | A | |
-| J03 | Adjuntar otra tarjeta o tablero de la app | pendiente | 2.3 | V | |
-| J04 | Soltar archivos sobre la tarjeta | pendiente | 2.3 | A | |
-| J05 | Pegar imagen del portapapeles | pendiente | 2.3 | A | |
-| J06 | Renombrar, comentar, descargar y borrar adjunto | pendiente | 2.3 | A | |
-| J07 | Vista previa de imágenes y documentos comunes | pendiente | 2.3 | A | ⚠ parcial: imágenes, PDF, audio y video; otros formatos se descargan |
-| J08 | Miniaturas en varias medidas | pendiente | 2.3 | V | |
-| J09 | Adjuntos privados: solo los ve quien puede ver la tarjeta | pendiente | 2.3 | A | |
-| J10 | Reordenar adjuntos | pendiente | 2.3 | V | |
+| J01 | Adjuntar archivo desde la computadora o el teléfono | hecha | 2.3 | A | ⚠ parcial: tope de 100 MB por archivo (Cloudflare no deja pasar más en el plan actual); se cambia con la variable MAX_ADJUNTO_MB |
+| J02 | Adjuntar un enlace | hecha | 2.3 | A | |
+| J03 | Adjuntar otra tarjeta o tablero de la app | hecha | 2.3 | V | ⚠ parcial: se adjunta pegando su enlace; todavía no se muestra como tarjeta en miniatura |
+| J04 | Soltar archivos sobre la tarjeta | hecha | 2.3 | A | |
+| J05 | Pegar imagen del portapapeles | hecha | 2.3 | A | |
+| J06 | Renombrar, comentar, descargar y borrar adjunto | hecha | 2.3 | A | ⚠ parcial: renombrar, bajar y borrar. Falta comentar un adjunto puntual |
+| J07 | Vista previa de imágenes y documentos comunes | hecha | 2.3 | A | ⚠ parcial: imágenes, audio y video se ven adentro de la app; PDF y texto se abren en otra pestaña; el resto se baja |
+| J08 | Miniaturas en varias medidas | pendiente | 2.3 | V | Por ahora se usa la imagen original achicada en pantalla; las miniaturas livianas quedan para la tanda 2.4 |
+| J09 | Adjuntos privados: solo los ve quien puede ver la tarjeta | hecha | 2.3 | A | Probado: sin acceso a la tarjeta, el archivo responde como si no existiera |
+| J10 | Reordenar adjuntos | hecha | 2.3 | V | Con flechas |
 | J11 | Selector de Google Drive, Dropbox, Box, OneDrive | no se puede | — | A | Cada uno exige registrar la app ante esa empresa. Se puede pegar el enlace del archivo |
 | J12 | Adjuntar de Jira y Confluence | no se puede | — | A | Integración de Atlassian |
-| J13 | Portada de color | pendiente | 2.3 | V | |
-| J14 | Portada con imagen subida o con un adjunto | pendiente | 2.3 | V | |
+| J13 | Portada de color | hecha | 2.3 | V | |
+| J14 | Portada con imagen subida o con un adjunto | hecha | 2.3 | V | |
 | J15 | Portada con foto de Unsplash | pendiente | 6.7 | A | ⚠ parcial: misma clave de C19 |
-| J16 | Portada tamaño media o completa; texto claro u oscuro | pendiente | 2.3 | V | |
-| J17 | La primera imagen adjunta pasa a ser portada | pendiente | 2.3 | A | |
-| J18 | GIF animado en la portada | pendiente | 2.3 | A | |
-| J19 | Quitar portada | pendiente | 2.3 | A | |
+| J16 | Portada tamaño media o completa; texto claro u oscuro | hecha | 2.3 | V | |
+| J17 | La primera imagen adjunta pasa a ser portada | hecha | 2.3 | A | |
+| J18 | GIF animado en la portada | hecha | 2.3 | A | |
+| J19 | Quitar portada | hecha | 2.3 | A | |
 | J20 | Portada generada con IA | no se puede | — | A | Ver sección S |
 | J21 | Aviso de archivo peligroso | no se puede | — | V | Requiere un servicio antivirus externo |
 
 ## K. Tarjetas: comentarios y actividad
 | # | Función | Estado | Tanda | Fuente | Nota |
 |---|---|---|---|---|---|
-| K01 | Comentar con formato | pendiente | 2.3 | A | |
-| K02 | Editar y borrar comentario propio; el administrador borra ajenos | pendiente | 2.3 | A | |
-| K03 | Mencionar con @usuario | pendiente | 2.3 | A | |
-| K04 | Mencionar @card (miembros de la tarjeta) y @board (todo el tablero) | pendiente | 2.3 | A | Con nombres propios en español |
-| K05 | Reacciones con emoji | pendiente | 2.3 | V | |
-| K06 | Adjuntar al comentar | pendiente | 2.3 | A | |
-| K07 | Enlace directo a un comentario | pendiente | 2.3 | A | |
-| K08 | Indicador "está escribiendo" | pendiente | 2.3 | A | |
-| K09 | Actividad de la tarjeta con quién, qué y cuándo | pendiente | 2.3 | A | |
-| K10 | Mostrar u ocultar detalles de actividad | pendiente | 2.3 | A | |
+| K01 | Comentar con formato | hecha | 2.3 | A | |
+| K02 | Editar y borrar comentario propio; el administrador borra ajenos | hecha | 2.3 | A | |
+| K03 | Mencionar con @usuario | hecha | 2.3 | A | Se sugiere al escribir @ y queda resaltada. El aviso llega con las notificaciones (Fase 6) |
+| K04 | Mencionar @card (miembros de la tarjeta) y @board (todo el tablero) | hecha | 2.3 | A | @tarjeta y @tablero. El aviso llega con las notificaciones (Fase 6) |
+| K05 | Reacciones con emoji | hecha | 2.3 | V | |
+| K06 | Adjuntar al comentar | hecha | 2.3 | A | ⚠ parcial: pegar una imagen en el comentario la adjunta a la tarjeta y la muestra en el texto |
+| K07 | Enlace directo a un comentario | hecha | 2.3 | A | |
+| K08 | Indicador "está escribiendo" | pendiente | 2.3 | A | Pasa a la tanda 2.4 |
+| K09 | Actividad de la tarjeta con quién, qué y cuándo | hecha | 2.3 | A | |
+| K10 | Mostrar u ocultar detalles de actividad | hecha | 2.3 | A | |
 | K11 | Comentar respondiendo al correo de la tarjeta | pendiente | 6.6 | A | ⚠ parcial: misma dependencia que C37 |
 | K12 | Escribir o resumir con IA en comentarios y descripción | no se puede | — | A | Ver sección S |
 
@@ -500,7 +500,7 @@
 | V01 | Uso completo desde el navegador del teléfono | pendiente | 2.4 | — | Listas y tarjetas ya se usan en tamaño de teléfono; se da por hecha al cerrar la fase 2 |
 | V02 | Instalable en la pantalla de inicio del iPhone y Android | pendiente | 2.4 | — | |
 | V03 | Arrastrar con el dedo (mantener apretado) | hecha | 2.2 | M | Probado con dedo simulado; falta probarlo en un iPhone de verdad |
-| V04 | Sacar foto y adjuntarla | pendiente | 2.3 | A | |
+| V04 | Sacar foto y adjuntarla | hecha | 2.3 | A | El botón Adjuntar ofrece la cámara en el teléfono. Falta probarlo en un iPhone de verdad |
 | V05 | App nativa en App Store y Google Play | no se puede | — | A | Se reemplaza por la app web instalable. Publicar en tiendas tiene costo anual y revisión de Apple |
 | V06 | Widgets de pantalla de inicio | no se puede | — | A | Solo las apps nativas pueden |
 | V07 | Siri y Atajos de iOS | no se puede | — | A | Idem. Alternativa posible: un Atajo que envíe a la bandeja por correo (T03) |

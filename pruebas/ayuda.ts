@@ -31,6 +31,18 @@ export class Persona {
     try { json = r.json(); } catch { /* sin cuerpo */ }
     return { estado: r.statusCode, json };
   }
+  /** Sube un archivo crudo, como hace la pantalla. */
+  async subir(url: string, contenido: Buffer) {
+    const r = await this.app.inject({ method: 'POST', url, headers: { ...(this.galleta ? { cookie: this.galleta } : {}), 'content-type': 'application/octet-stream' }, payload: contenido });
+    let json: any = null;
+    try { json = r.json(); } catch { /* sin cuerpo */ }
+    return { estado: r.statusCode, json };
+  }
+  /** Baja un archivo: devuelve el estado, las cabeceras y los bytes. */
+  async bajar(url: string, cabeceras: Record<string, string> = {}) {
+    const r = await this.app.inject({ method: 'GET', url, headers: { ...(this.galleta ? { cookie: this.galleta } : {}), ...cabeceras } });
+    return { estado: r.statusCode, cabeceras: r.headers, cuerpo: r.rawPayload };
+  }
   get = (url: string) => this.pedir('GET', url);
   post = (url: string, cuerpo: unknown = {}) => this.pedir('POST', url, cuerpo);
   patch = (url: string, cuerpo: unknown = {}) => this.pedir('PATCH', url, cuerpo);
@@ -42,8 +54,9 @@ export interface Mundo { app: FastifyInstance; db: DatabaseSync; cerrar: () => P
   registrar: (nombre: string) => Promise<Persona>; }
 
 export function crearMundo(): Mundo {
-  const { db } = abrirDb(carpetaTemporal());
-  const app = crearApp({ db, zonaHoraria: 'America/Argentina/Buenos_Aires' });
+  const dir = carpetaTemporal();
+  const { db } = abrirDb(dir);
+  const app = crearApp({ db, zonaHoraria: 'America/Argentina/Buenos_Aires', dirArchivos: path.join(dir, 'archivos'), maxAdjuntoMb: 1 });
   let primera: Persona | null = null;
   const registrar = async (nombre: string) => {
     const p = new Persona(app);
