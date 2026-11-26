@@ -1,10 +1,11 @@
 // Página de un tablero: cabecera (quién lo ve, su gente, sus permisos) y, abajo, las listas con sus tarjetas.
 import { useEffect, useState } from 'react';
-import { api, Avatar, AYUDA_VIS, Campo, CopiarEnlace, Dialogo, Enlace, ErrorServidor, Formulario, navegar, NOMBRE_ROL, NOMBRE_VIS, useAccion, useSesion } from '../base.tsx';
+import { api, subir, pintarFondo, FONDOS, Avatar, AYUDA_VIS, Campo, CopiarEnlace, Dialogo, Enlace, ErrorServidor, Formulario, navegar, NOMBRE_ROL, NOMBRE_VIS, useAccion, useSesion } from '../base.tsx';
 import { useTablero } from '../tablero/datos.ts';
 import type { Datos, Permisos } from '../tablero/datos.ts';
 import { Listas } from '../tablero/Listas.tsx';
-import { DialogoArchivados } from '../tablero/Menus.tsx';
+import { DialogoArchivados, Flotante } from '../tablero/Menus.tsx';
+import { Editor, Texto } from '../tablero/formato.tsx';
 import { describir, hace } from '../tablero/piezas.tsx';
 import type { Actividad } from '../tablero/piezas.tsx';
 import { DialogoTarjeta, PanelEtiquetas } from '../tablero/Tarjeta.tsx';
@@ -86,7 +87,7 @@ function Ajustes({ d, alCambiar, alCerrar }: { d: Datos; alCambiar: () => void; 
   const accion = useAccion();
   return (
     <Dialogo titulo="Ajustes del tablero" alCerrar={alCerrar}>
-      <Formulario boton="Guardar" alEnviar={async () => { await api('PATCH', `/api/tableros/${t.id}`, { nombre, visibilidad: vis, permisos: p, ajustes: aj }); alCambiar(); alCerrar(); }}>
+      <Formulario boton="Guardar" alEnviar={async () => { await api('PATCH', `/api/tableros/${t.id}`, { nombre, visibilidad: vis, permisos: p, ajustes: { portadas: aj.portadas, tilde: aj.tilde, conteo: aj.conteo } }); alCambiar(); alCerrar(); }}>
         <Campo rotulo="Nombre"><input id="ta-nombre" type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} required maxLength={200} /></Campo>
         <Campo rotulo="Quién lo ve" ayuda={AYUDA_VIS[vis]}>
           <select id="ta-vis" value={vis} onChange={(e) => setVis(e.target.value)}>{['privado', 'espacio', 'publico'].map((v) => <option key={v} value={v}>{NOMBRE_VIS[v]}</option>)}</select>
@@ -100,6 +101,7 @@ function Ajustes({ d, alCambiar, alCerrar }: { d: Datos; alCambiar: () => void; 
         <label className="fila" style={{ flexWrap: 'nowrap', alignItems: 'flex-start' }}><input id="ta-edicion" type="checkbox" checked={p.edicion_espacio} onChange={(e) => setP({ ...p, edicion_espacio: e.target.checked })} /><span>Los miembros del espacio pueden editar sin estar sumados al tablero <small className="suave">(no aplica si es privado)</small></span></label>
         <label className="fila" style={{ flexWrap: 'nowrap', alignItems: 'flex-start' }}><input id="ta-union" type="checkbox" checked={p.union_libre} onChange={(e) => setP({ ...p, union_libre: e.target.checked })} /><span>Los miembros del espacio pueden sumarse solos <small className="suave">(no aplica si es privado)</small></span></label>
         <label className="fila" style={{ flexWrap: 'nowrap', alignItems: 'flex-start' }}><input id="ta-portadas" type="checkbox" checked={aj.portadas} onChange={(e) => setAj({ ...aj, portadas: e.target.checked })} /><span>Mostrar las portadas en las tarjetas del tablero</span></label>
+        <label className="fila" style={{ flexWrap: 'nowrap', alignItems: 'flex-start' }}><input id="ta-conteo" type="checkbox" checked={aj.conteo} onChange={(e) => setAj({ ...aj, conteo: e.target.checked })} /><span>Mostrar cuántas tarjetas tiene cada lista</span></label>
         <label className="fila" style={{ flexWrap: 'nowrap', alignItems: 'flex-start' }}><input id="ta-tilde" type="checkbox" checked={aj.tilde} onChange={(e) => setAj({ ...aj, tilde: e.target.checked })} /><span>Mostrar el círculo para marcar como completada en cada tarjeta</span></label>
       </Formulario>
       <div className="columna" style={{ gap: 8, borderTop: '1px solid var(--linea)', paddingTop: 14 }}>
@@ -111,6 +113,51 @@ function Ajustes({ d, alCambiar, alCerrar }: { d: Datos; alCambiar: () => void; 
           {t.cerrado && d.mi.puede.borrar && <button type="button" className="btn peligro" onClick={() => accion.hacer(async () => { await api('DELETE', `/api/tableros/${t.id}`); navegar(`/e/${d.espacio.id}`); })}>Borrar para siempre</button>}
         </div>
       </div>
+    </Dialogo>
+  );
+}
+
+/** Fondo del tablero: uno de los degradados de la casa o una foto propia. */
+function DialogoFondo({ d, alCambiar, alCerrar }: { d: Datos; alCambiar: () => void; alCerrar: () => void }) {
+  const accion = useAccion();
+  const f = d.tablero.ajustes.fondo;
+  const poner = (fondo: { valor: string } | null) => accion.hacer(async () => { await api('PATCH', `/api/tableros/${d.tablero.id}`, { ajustes: { fondo } }); alCambiar(); });
+  return (
+    <Dialogo titulo="Fondo del tablero" alCerrar={alCerrar}>
+      {accion.error && <p className="error" role="alert">{accion.error}</p>}
+      <div className="fondos" role="radiogroup" aria-label="Fondos">
+        {FONDOS.map(([k, nombre]) => <button type="button" key={k} role="radio" aria-checked={f.tipo === 'color' && f.valor === k} className={`fondo-${k}`} disabled={accion.ocupado} onClick={() => poner({ valor: k })}><span>{nombre}</span></button>)}
+      </div>
+      <div className="fila">
+        <label className="como-boton btn">{f.tipo === 'foto' ? 'Cambiar la foto' : 'Subir una foto propia'}<input type="file" accept="image/png,image/jpeg,image/gif,image/webp" hidden onChange={(e) => { const a = e.target.files?.[0]; if (a) void accion.hacer(async () => { await subir(`/api/tableros/${d.tablero.id}/fondo`, a); alCambiar(); }); }} /></label>
+        {f.tipo !== 'ninguno' && <button type="button" className="btn peligro" disabled={accion.ocupado} onClick={() => poner(null)}>Quitar el fondo</button>}
+      </div>
+      <p className="suave" style={{ fontSize: 13 }}>La foto puede pesar hasta 5 MB. Encima de un fondo, el nombre del tablero y sus botones se ven siempre en claro.</p>
+    </Dialogo>
+  );
+}
+
+/** "Acerca de este tablero": su descripción, con formato. */
+function DialogoAcerca({ d, alCambiar, alCerrar }: { d: Datos; alCambiar: () => void; alCerrar: () => void }) {
+  const [texto, setTexto] = useState<string | null>(null);
+  const accion = useAccion();
+  const t = d.tablero;
+  const guardar = () => accion.hacer(async () => { await api('PATCH', `/api/tableros/${t.id}`, { descripcion: texto ?? '' }); alCambiar(); setTexto(null); });
+  return (
+    <Dialogo titulo="Acerca de este tablero" alCerrar={alCerrar}>
+      <p className="suave">En el espacio {d.espacio.nombre} · {NOMBRE_VIS[t.visibilidad]}</p>
+      {accion.error && <p className="error" role="alert">{accion.error}</p>}
+      {texto !== null ? (
+        <>
+          <Editor valor={texto} alCambiar={setTexto} personas={d.miembros} rotulo="Descripción del tablero" filas={8} auto alEnviar={() => void guardar()} alCancelar={() => setTexto(null)} />
+          <div className="fila"><button type="button" className="btn lleno" disabled={accion.ocupado} onClick={() => void guardar()}>Guardar</button><button type="button" className="btn plano" onClick={() => setTexto(null)}>Cancelar</button></div>
+        </>
+      ) : (
+        <>
+          {t.descripcion ? <Texto valor={t.descripcion} /> : <p className="suave">Este tablero todavía no tiene descripción.</p>}
+          {d.mi.puede.editar && <div><button type="button" className="btn" onClick={() => setTexto(t.descripcion)}>{t.descripcion ? 'Editar' : 'Agregar una descripción'}</button></div>}
+        </>
+      )}
     </Dialogo>
   );
 }
@@ -158,7 +205,8 @@ export function Tablero({ enlace, deTarjeta }: { enlace?: string; /** Código de
   }, [deTarjeta]);
   const datos = useTablero(tableroDe);
   const accion = useAccion();
-  const [abierto, setAbierto] = useState<'compartir' | 'ajustes' | 'archivados' | 'actividad' | 'etiquetas' | null>(null);
+  const [abierto, setAbierto] = useState<'compartir' | 'ajustes' | 'archivados' | 'actividad' | 'etiquetas' | 'fondo' | 'acerca' | null>(null);
+  const [menu, setMenu] = useState<DOMRect | null>(null);
   const [pedido, setPedido] = useState(false);
   const aca = enlace ? `/t/${enlace}` : `/c/${deTarjeta}`;
   const falla = datos.error ?? (tableroDe ? null : errorTarjeta);
@@ -181,13 +229,17 @@ export function Tablero({ enlace, deTarjeta }: { enlace?: string; /** Código de
   if (!datos.datos) return null;
   const d = datos.datos;
   const t = d.tablero;
+  const fondo = pintarFondo(t.ajustes.fondo);
+  const elegir = (cual: NonNullable<typeof abierto>) => () => { setMenu(null); setAbierto(cual); };
   const abrirTarjeta = (codigo: string) => navegar(`/c/${codigo}`);
   const cerrarTarjeta = () => navegar(`/t/${t.enlace}`);
   return (
-    <div className="tablero">
+    <div className={'tablero' + fondo.clase} style={fondo.estilo}>
       {t.cerrado && <div className="franja">Este tablero está cerrado: se puede ver pero no editar.{d.mi.puede.administrar && <button type="button" className="btn chico" onClick={() => accion.hacer(async () => { await api('PATCH', `/api/tableros/${t.id}`, { cerrado: false }); datos.recargar(); })}>Reabrir</button>}</div>}
       <div className="cab">
         <h1>{t.nombre}</h1>
+        {yo && <button type="button" className={'estrella' + (d.mi.favorito ? ' puesta' : '')} aria-pressed={d.mi.favorito} title={d.mi.favorito ? 'Quitar de favoritos' : 'Marcar como favorito'} aria-label={d.mi.favorito ? 'Quitar de favoritos' : 'Marcar como favorito'}
+          onClick={() => accion.hacer(async () => { await api('POST', `/api/tableros/${t.id}/favorito`, { favorito: !d.mi.favorito }); datos.recargar(); })}>{d.mi.favorito ? '★' : '☆'}</button>}
         <span className="chapa" title={AYUDA_VIS[t.visibilidad]}>{NOMBRE_VIS[t.visibilidad]}</span>
         {yo && <Enlace a={`/e/${d.espacio.id}`} className="suave">{d.espacio.nombre}</Enlace>}
         {!datos.enLinea && <span className="chapa marcador" title="Lo que cambien otras personas no se ve hasta que vuelva la conexión">Sin conexión · reintentando</span>}
@@ -197,16 +249,30 @@ export function Tablero({ enlace, deTarjeta }: { enlace?: string; /** Código de
         {d.mi.puede.unirse && <button type="button" className="btn" onClick={() => accion.hacer(async () => { await api('POST', `/api/tableros/${t.id}/unirse`); datos.recargar(); })}>Sumarme</button>}
         {yo && d.mi.rol !== null && <button type="button" className="btn lleno" onClick={() => setAbierto('compartir')}>Compartir{d.pedidos.length > 0 ? ` (${d.pedidos.length})` : ''}</button>}
         {yo && d.mi.rol === null && d.mi.puede.invitar && <button type="button" className="btn lleno" onClick={() => setAbierto('compartir')}>Compartir</button>}
-        <button type="button" className="btn" onClick={() => setAbierto('etiquetas')}>Etiquetas</button>
-        <button type="button" className="btn" onClick={() => setAbierto('actividad')}>Actividad</button>
-        <button type="button" className="btn" onClick={() => setAbierto('archivados')}>Archivados</button>
-        {d.mi.puede.administrar && <button type="button" className="btn" onClick={() => setAbierto('ajustes')}>Ajustes</button>}
+        <button type="button" className="btn" aria-haspopup="menu" onClick={(e) => setMenu(e.currentTarget.getBoundingClientRect())}>Menú</button>
         {!yo && <Enlace a="/entrar" className="btn">Entrar</Enlace>}
       </div>
       {accion.error && <p className="error en-tablero" role="alert">{accion.error}</p>}
       <Listas d={d} ops={datos.ops} alAbrir={(c) => abrirTarjeta(c.enlace)} />
       {datos.aviso && <div className="aviso-flotante" role="alert"><span>{datos.aviso}</span><button type="button" className="btn chico" onClick={datos.cerrarAviso}>Entendido</button></div>}
       {deTarjeta && <DialogoTarjeta key={deTarjeta} d={d} cual={deTarjeta} frente={d.tarjetas.find((c) => c.enlace === deTarjeta || c.id === deTarjeta)} ops={datos.ops} alCambiarTablero={datos.recargar} alCerrar={cerrarTarjeta} />}
+      {menu && (
+        <Flotante ancla={menu} titulo="Menú del tablero" alCerrar={() => setMenu(null)}>
+          <div className="opciones">
+            <button type="button" onClick={elegir('acerca')}>Acerca de este tablero</button>
+            <button type="button" onClick={elegir('actividad')}>Actividad</button>
+            <button type="button" onClick={elegir('archivados')}>Elementos archivados</button>
+            <hr />
+            <button type="button" onClick={elegir('etiquetas')}>Etiquetas</button>
+            {d.mi.puede.administrar && <button type="button" onClick={elegir('fondo')}>Cambiar el fondo</button>}
+            {d.mi.puede.administrar && <button type="button" onClick={elegir('ajustes')}>Ajustes y permisos</button>}
+            <hr />
+            <button type="button" onClick={() => { void navigator.clipboard?.writeText(`${location.origin}/t/${t.enlace}`).catch(() => {}); setMenu(null); }}>Copiar el enlace del tablero</button>
+          </div>
+        </Flotante>
+      )}
+      {abierto === 'fondo' && <DialogoFondo d={d} alCambiar={datos.recargar} alCerrar={() => setAbierto(null)} />}
+      {abierto === 'acerca' && <DialogoAcerca d={d} alCambiar={datos.recargar} alCerrar={() => setAbierto(null)} />}
       {abierto === 'actividad' && <DialogoActividad d={d} alAbrir={(c) => { setAbierto(null); abrirTarjeta(c); }} alCerrar={() => setAbierto(null)} />}
       {abierto === 'etiquetas' && <Dialogo titulo="Etiquetas del tablero" alCerrar={() => setAbierto(null)}><PanelEtiquetas d={d} alCambiar={datos.recargar} /></Dialogo>}
       {abierto === 'archivados' && <DialogoArchivados d={d} alCambiar={datos.recargar} alCerrar={() => setAbierto(null)} />}

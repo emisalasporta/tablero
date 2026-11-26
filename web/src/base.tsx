@@ -67,13 +67,13 @@ export function navegar(a: string, reemplazar = false) {
   window.scrollTo(0, 0);
 }
 export const useRuta = (): string => useSyncExternalStore(suscribir, () => location.pathname + location.search);
-export function Enlace({ a, className, children, title }: { a: string; className?: string; children: ReactNode; title?: string }) {
+export function Enlace({ a, className, children, title, estilo }: { a: string; className?: string; children: ReactNode; title?: string; estilo?: { backgroundImage: string } }) {
   const alHacerClic = (e: MouseEvent) => {
     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
     e.preventDefault();
     navegar(a);
   };
-  return <a href={a} className={className} onClick={alHacerClic} title={title}>{children}</a>;
+  return <a href={a} className={className} style={estilo} onClick={alHacerClic} title={title}>{children}</a>;
 }
 
 // ---------- sesión ----------
@@ -168,6 +168,15 @@ export function CopiarEnlace({ url }: { url: string }) {
     try { await navigator.clipboard.writeText(url); setCopiado(true); setTimeout(() => setCopiado(false), 2000); } catch { /* se puede seleccionar a mano */ }
   };
   return <div className="columna" style={{ gap: 8 }}><div className="codigo">{url}</div><div><button type="button" className="btn chico" onClick={copiar}>{copiado ? 'Copiado' : 'Copiar enlace'}</button></div></div>;
+}
+
+// ---------- fondos de tablero ----------
+export interface Fondo { tipo: 'ninguno' | 'color' | 'foto'; valor: string }
+export const FONDOS: [string, string][] = [['oceano', 'Océano'], ['atardecer', 'Atardecer'], ['bosque', 'Bosque'], ['uva', 'Uva'], ['grafito', 'Grafito'], ['arena', 'Arena'], ['aurora', 'Aurora'], ['coral', 'Coral']];
+/** Clase y estilo para pintar un fondo (en el tablero y en su ficha del inicio). */
+export function pintarFondo(f?: Fondo): { clase: string; estilo?: { backgroundImage: string } } {
+  if (!f || f.tipo === 'ninguno') return { clase: '' };
+  return f.tipo === 'color' ? { clase: ` con-fondo fondo-${f.valor}` } : { clase: ' con-fondo con-foto', estilo: { backgroundImage: `url(/api/fotos/${f.valor})` } };
 }
 
 export const NOMBRE_VIS: Record<string, string> = { privado: 'Privado', espacio: 'Del espacio', publico: 'Público' };

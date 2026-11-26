@@ -11,6 +11,8 @@ Se actualiza al terminar cada tanda. Estado: **tanda 2.2** hecha (lo de la 2.1 m
 | `web/` | Las pantallas (React + Vite). Se arman a `dist/web`. |
 | `pruebas/` | Pruebas automáticas (Vitest). |
 | `scripts/version.mjs` | Anota qué cambio se armó, para verlo en `/api/salud`. |
+| `scripts/iconos.mjs` | Dibuja los íconos de la app instalada (`web/public/icono-*.png`). Solo hace falta correrlo si cambia el dibujo. |
+| `web/public/` | Lo que se publica tal cual: los íconos y `app.webmanifest` (los datos para instalar la app en el teléfono). |
 | `scripts/paridad.mjs` | Recalcula el resumen de PARIDAD.md después de cambiar el estado de una fila: `node scripts/paridad.mjs`. |
 | `diseno/` | Muestras de diseño. No se publican. |
 | `Dockerfile` | Receta con la que Dokploy arma y publica. Corre las pruebas adentro. |
@@ -51,6 +53,9 @@ Reglas de la casa:
 - **Archivos subidos:** viven en `DATA_DIR/archivos/` (`adjuntos/` y `fotos/`), nunca en el repositorio. El nombre en disco es un código al azar del servidor; lo que escribe la persona nunca se usa como ruta. Se suben como cuerpo crudo (`content-type: application/octet-stream`; nombre y tipo en la dirección) y se van guardando en disco sin cargarlos en memoria.
 - **Seguridad de adjuntos:** solo los baja quien puede ver la tarjeta. Dentro de la app solo se muestran imágenes (comprobadas mirando sus primeros bytes), PDF, audio, video y texto plano; cualquier otra cosa (una página web, por ejemplo) se entrega siempre como descarga. Las fotos de perfil y logos se piden por un nombre al azar y son visibles sin sesión.
 - **Texto con formato:** nunca se inserta HTML escrito por la gente. `formato.tsx` arma el texto pieza por pieza y solo acepta enlaces `http`, `https` y `mailto`.
+- **Fondos:** viven en los ajustes del tablero (`ajustes.fondo`): uno de los degradados de `FONDOS` (en `permisos.ts`, con su clase `.fondo-…` en `estilos.css`) o una foto subida a `POST /api/tableros/:id/fondo`.
+- **Favoritos y recientes:** tabla `tablero_usuario`, una fila por persona y tablero. Abrir un tablero con sesión anota la fecha. `GET /api/yo/tableros` solo devuelve los que la persona todavía puede ver.
+- **Borrar para siempre:** `DELETE /api/tarjetas/:id` y `DELETE /api/listas/:id` solo aceptan cosas ya archivadas.
 - **Dirección de una tarjeta:** `/c/<código>`. Es la misma pantalla del tablero con la tarjeta abierta encima.
 - Después de `npm run build` hay que reiniciar el servidor: solo conoce los archivos de pantallas que había al arrancar.
 - Las letras están dentro de la app (`@fontsource`): no se pide nada a servidores de terceros.

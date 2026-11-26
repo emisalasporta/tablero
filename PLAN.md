@@ -103,6 +103,7 @@ Cada tanda termina con: pruebas en verde, PARIDAD.md actualizada, y una demostra
 | 2.2 | Tableros, listas y tarjetas: crear, renombrar, ordenar, **arrastrar** (mouse y dedo), archivar, mover, copiar. **Tiempo real** entre pantallas. |
 | 2.3 | Tarjeta abierta: descripción con formato, etiquetas, miembros, fechas (inicio, vencimiento, completada), checklists, portadas, adjuntos, comentarios con menciones y reacciones, actividad. |
 | 2.4 | Instalable en iPhone (PWA), modo claro/oscuro, fondos de tablero, tableros favoritos y recientes, menú del tablero, elementos archivados. |
+| 2.5 | Lo que quedó de la fase 2: copiar un tablero, moverlo a otro espacio, página de tableros del espacio con búsqueda, conmutador de tableros y botón Crear, novedades en el inicio, miniaturas livianas de imágenes, aviso de "está escribiendo", arrastrar ítems de checklist y reordenar favoritos. |
 
 ### Fase 3 — La puerta de Alex
 Servidor MCP con todas las herramientas, usuario "Alex", clave propia, actividad con su nombre, prueba que verifica cobertura total.

@@ -278,8 +278,56 @@ describe('fotos y ajustes de vista', () => {
   });
 
   it('el tablero guarda si muestra portadas y el tilde de completada', async () => {
-    expect((await ana.get(`/api/tableros/${tablero}`)).json.tablero.ajustes).toEqual({ portadas: true, tilde: true });
+    expect((await ana.get(`/api/tableros/${tablero}`)).json.tablero.ajustes).toMatchObject({ portadas: true, tilde: true });
     await ana.patch(`/api/tableros/${tablero}`, { ajustes: { portadas: false } });
-    expect((await ana.get(`/api/tableros/${tablero}`)).json.tablero.ajustes).toEqual({ portadas: false, tilde: true });
+    expect((await ana.get(`/api/tableros/${tablero}`)).json.tablero.ajustes).toMatchObject({ portadas: false, tilde: true });
+  });
+});
+
+describe('fondos, favoritos, recientes y borrado definitivo', () => {
+  it('el fondo puede ser un degradado de la casa o una foto; lo cambia quien administra', async () => {
+    expect((await ana.patch(`/api/tableros/${tablero}`, { ajustes: { fondo: { valor: 'oceano' }, conteo: false } })).json.tablero.ajustes).toMatchObject({ conteo: false, fondo: { tipo: 'color', valor: 'oceano' } });
+    expect((await ana.patch(`/api/tableros/${tablero}`, { ajustes: { fondo: { valor: 'inventado' } } })).estado).toBe(400);
+    const r = await ana.subir(`/api/tableros/${tablero}/fondo`, PNG);
+    expect(r.json.fondo.tipo).toBe('foto');
+    expect((await m.anonimo.bajar(`/api/fotos/${r.json.fondo.valor}`)).estado).toBe(200);
+    // Al quitar el fondo, la foto se borra del disco.
+    expect((await ana.patch(`/api/tableros/${tablero}`, { ajustes: { fondo: null } })).json.tablero.ajustes.fondo).toEqual({ tipo: 'ninguno', valor: '' });
+    expect((await m.anonimo.bajar(`/api/fotos/${r.json.fondo.valor}`)).estado).toBe(404);
+    const beto = await m.registrar('Beto');
+    await ana.post(`/api/tableros/${tablero}/miembros`, { quien: 'beto@prueba.test', rol: 'normal' });
+    expect((await beto.subir(`/api/tableros/${tablero}/fondo`, PNG)).estado).toBe(403);
+  });
+
+  it('favoritos y recientes son de cada persona', async () => {
+    const beto = await m.registrar('Beto');
+    await ana.post(`/api/espacios/${espacio}/miembros`, { quien: 'beto@prueba.test' });
+    expect((await ana.get('/api/yo/tableros')).json).toEqual({ favoritos: [], recientes: [] });
+    await ana.get(`/api/tableros/${tablero}`);
+    await ana.post(`/api/tableros/${tablero}/favorito`, { favorito: true });
+    const mios = (await ana.get('/api/yo/tableros')).json;
+    expect(mios.favoritos.map((t: any) => t.nombre)).toEqual(['Obra']);
+    expect(mios.recientes.map((t: any) => t.nombre)).toEqual(['Obra']);
+    expect((await ana.get(`/api/tableros/${tablero}`)).json.mi.favorito).toBe(true);
+    expect((await beto.get('/api/yo/tableros')).json).toEqual({ favoritos: [], recientes: [] });
+    await ana.post(`/api/tableros/${tablero}/favorito`, { favorito: false });
+    expect((await ana.get('/api/yo/tableros')).json.favoritos).toEqual([]);
+    // Si dejo de poder verlo, desaparece de mis recientes.
+    await beto.get(`/api/tableros/${tablero}`);
+    await ana.patch(`/api/tableros/${tablero}`, { visibilidad: 'privado' });
+    expect((await beto.get('/api/yo/tableros')).json.recientes).toEqual([]);
+  });
+
+  it('solo se borra para siempre lo que ya está archivado, y se lleva sus archivos', async () => {
+    const r = await ana.subir(`/api/tarjetas/${tarjeta}/adjuntos?nombre=a.txt&tipo=text/plain`, Buffer.from('hola'));
+    expect((await ana.del(`/api/tarjetas/${tarjeta}`)).estado).toBe(409);
+    await ana.patch(`/api/tarjetas/${tarjeta}`, { archivada: true });
+    expect((await ana.del(`/api/tarjetas/${tarjeta}`)).estado).toBe(200);
+    expect((await ana.get(`/api/tarjetas/${tarjeta}`)).estado).toBe(404);
+    expect((await ana.bajar(`/api/adjuntos/${r.json.adjunto.id}/archivo`)).estado).toBe(404);
+    expect((await ana.del(`/api/listas/${lista}`)).estado).toBe(409);
+    await ana.patch(`/api/listas/${lista}`, { archivada: true });
+    expect((await ana.del(`/api/listas/${lista}`)).estado).toBe(200);
+    expect((await ana.get(`/api/tableros/${tablero}/archivados`)).json).toEqual({ listas: [], tarjetas: [] });
   });
 });

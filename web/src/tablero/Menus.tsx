@@ -2,7 +2,7 @@
 // y los elementos archivados. La tarjeta abierta está en Tarjeta.tsx.
 import { useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { api, Campo, Dialogo, useAccion, useCarga } from '../base.tsx';
+import { api, Campo, Dialogo, Enlace, useAccion, useCarga } from '../base.tsx';
 import { posicionEntre } from './datos.ts';
 import type { Datos, Lista, Ops, Tarjeta } from './datos.ts';
 
@@ -182,17 +182,24 @@ export function DialogoArchivados({ d, alCambiar, alCerrar }: { d: Datos; alCamb
   const lista = useCarga<Archivados>(`/api/tableros/${d.tablero.id}/archivados`);
   const accion = useAccion();
   const puede = d.mi.puede.editar;
+  const [q, setQ] = useState('');
   const restaurar = (url: string) => accion.hacer(async () => { await api('PATCH', url, { archivada: false }); lista.recargar(); alCambiar(); });
-  const a = lista.datos;
+  const borrar = (url: string, que: string) => { if (window.confirm(`¿Borrar ${que} para siempre? No se puede deshacer.`)) void accion.hacer(async () => { await api('DELETE', url); lista.recargar(); }); };
+  const coincide = (texto: string) => texto.toLowerCase().includes(q.trim().toLowerCase());
+  const a = lista.datos && { listas: lista.datos.listas.filter((l) => coincide(l.nombre)), tarjetas: lista.datos.tarjetas.filter((t) => coincide(t.titulo)) };
+  const hay = !!lista.datos && lista.datos.listas.length + lista.datos.tarjetas.length > 0;
   return (
     <Dialogo titulo="Archivados" alCerrar={alCerrar}>
       {accion.error && <p className="error" role="alert">{accion.error}</p>}
-      {a && a.listas.length === 0 && a.tarjetas.length === 0 && <p className="suave">No hay nada archivado en este tablero.</p>}
+      {lista.datos && !hay && <p className="suave">No hay nada archivado en este tablero.</p>}
+      {hay && <input type="text" value={q} placeholder="Buscar en lo archivado" aria-label="Buscar en lo archivado" onChange={(e) => setQ(e.target.value)} />}
+      {hay && a && a.listas.length + a.tarjetas.length === 0 && <p className="suave">Nada coincide con esa búsqueda.</p>}
       {a && a.listas.length > 0 && (
         <div className="columna" style={{ gap: 6 }}>
           <p className="rotulo">Listas ({a.listas.length})</p>
           <ul className="renglones">{a.listas.map((l) => (
-            <li key={l.id}><span className="quien"><b>{l.nombre}</b></span>{puede && <button type="button" className="btn chico" disabled={accion.ocupado} onClick={() => restaurar(`/api/listas/${l.id}`)}>Restaurar</button>}</li>
+            <li key={l.id}><span className="quien"><b>{l.nombre}</b></span>{puede && <button type="button" className="btn chico" disabled={accion.ocupado} onClick={() => restaurar(`/api/listas/${l.id}`)}>Restaurar</button>}
+              {puede && <button type="button" className="btn chico peligro" disabled={accion.ocupado} onClick={() => borrar(`/api/listas/${l.id}`, `la lista "${l.nombre}" con todas sus tarjetas`)}>Borrar</button>}</li>
           ))}</ul>
         </div>
       )}
@@ -200,8 +207,9 @@ export function DialogoArchivados({ d, alCambiar, alCerrar }: { d: Datos; alCamb
         <div className="columna" style={{ gap: 6 }}>
           <p className="rotulo">Tarjetas ({a.tarjetas.length})</p>
           <ul className="renglones">{a.tarjetas.map((t) => (
-            <li key={t.id}><span className="quien"><b>{t.titulo}</b><small>en {t.lista_nombre}{t.lista_archivada ? ' (lista archivada: restaurala para verla)' : ''}</small></span>
-              {puede && <button type="button" className="btn chico" disabled={accion.ocupado} onClick={() => restaurar(`/api/tarjetas/${t.id}`)}>Restaurar</button>}</li>
+            <li key={t.id}><span className="quien"><b><Enlace a={`/c/${t.enlace}`}>{t.titulo}</Enlace></b><small>en {t.lista_nombre}{t.lista_archivada ? ' (lista archivada: restaurala para verla)' : ''}</small></span>
+              {puede && <button type="button" className="btn chico" disabled={accion.ocupado} onClick={() => restaurar(`/api/tarjetas/${t.id}`)}>Restaurar</button>}
+              {puede && <button type="button" className="btn chico peligro" disabled={accion.ocupado} onClick={() => borrar(`/api/tarjetas/${t.id}`, `la tarjeta "${t.titulo}"`)}>Borrar</button>}</li>
           ))}</ul>
         </div>
       )}

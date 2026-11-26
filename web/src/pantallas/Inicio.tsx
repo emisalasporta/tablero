@@ -1,9 +1,16 @@
 // Inicio: mis espacios de trabajo y sus tableros. También el diálogo para crear un tablero.
 import { useState } from 'react';
-import { api, AYUDA_VIS, Campo, Dialogo, Enlace, Formulario, navegar, NOMBRE_VIS, useCarga } from '../base.tsx';
+import { api, AYUDA_VIS, Campo, Dialogo, Enlace, Formulario, navegar, NOMBRE_VIS, pintarFondo, useCarga } from '../base.tsx';
+import type { Fondo } from '../base.tsx';
 
 export interface EspacioResumen { id: string; nombre: string; descripcion: string; visibilidad: string; rol: string | null; invitado: boolean }
-export interface TableroResumen { id: string; enlace: string; nombre: string; visibilidad: string; cerrado: boolean; mi_rol: string | null }
+export interface TableroResumen { id: string; enlace: string; nombre: string; visibilidad: string; cerrado: boolean; mi_rol: string | null; fondo?: Fondo; espacio?: string }
+
+/** La ficha de un tablero, pintada con su fondo. */
+export function Ficha({ t, abajo }: { t: TableroResumen; abajo: string }) {
+  const f = pintarFondo(t.fondo);
+  return <Enlace a={`/t/${t.enlace}`} className={'ficha' + f.clase} estilo={f.estilo}><b>{t.nombre}</b><span className="chapa">{abajo}</span></Enlace>;
+}
 export interface ListaTableros { tableros: TableroResumen[]; puede_crear: Record<string, boolean> }
 
 export function CrearTablero({ espacio, puedeCrear, alCerrar }: { espacio: { id: string; nombre: string }; puedeCrear: Record<string, boolean>; alCerrar: () => void }) {
@@ -36,7 +43,7 @@ export function GrillaTableros({ espacio, lista }: { espacio: { id: string; nomb
       {abiertos.length === 0 && !puede ? <p className="suave">Todavía no hay tableros que puedas ver acá.</p> : (
         <div className="grilla">
           {abiertos.map((t) => (
-            <Enlace key={t.id} a={`/t/${t.enlace}`} className="ficha"><b>{t.nombre}</b><span className="chapa">{NOMBRE_VIS[t.visibilidad]}</span></Enlace>
+            <Ficha key={t.id} t={t} abajo={NOMBRE_VIS[t.visibilidad]} />
           ))}
           {puede && <button type="button" className="ficha nueva" onClick={() => setCreando(true)}><b>+ Tablero nuevo</b></button>}
         </div>
@@ -90,9 +97,13 @@ export function CrearEspacio({ alCerrar }: { alCerrar: () => void }) {
 
 export function Inicio() {
   const espacios = useCarga<{ espacios: EspacioResumen[] }>('/api/espacios');
+  const mios = useCarga<{ favoritos: TableroResumen[]; recientes: TableroResumen[] }>('/api/yo/tableros');
   const [creando, setCreando] = useState(false);
+  const recientes = mios.datos?.recientes.filter((t) => !mios.datos!.favoritos.some((f) => f.id === t.id)) ?? [];
   return (
     <main className="pagina">
+      {(mios.datos?.favoritos.length ?? 0) > 0 && <section className="columna"><h2>★ Favoritos</h2><div className="grilla">{mios.datos!.favoritos.map((t) => <Ficha key={t.id} t={t} abajo={t.espacio ?? ''} />)}</div></section>}
+      {recientes.length > 0 && <section className="columna"><h2>Vistos hace poco</h2><div className="grilla">{recientes.slice(0, 4).map((t) => <Ficha key={t.id} t={t} abajo={t.espacio ?? ''} />)}</div></section>}
       <div className="encabezado"><h1>Tus espacios de trabajo</h1><span className="hueco" /><button type="button" className="btn" onClick={() => setCreando(true)}>Espacio nuevo</button></div>
       {espacios.error && <p className="error">{espacios.error.message}</p>}
       {espacios.datos?.espacios.length === 0 && (

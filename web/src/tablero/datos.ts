@@ -19,14 +19,14 @@ export interface Persona { id: string; usuario: string; nombre: string; iniciale
 export interface Permisos { comentar: string; invitar: string; union_libre: boolean; edicion_espacio: boolean }
 export interface Puede { ver: boolean; editar: boolean; administrar: boolean; comentar: boolean; invitar: boolean; invitar_de_afuera: boolean; unirse: boolean; borrar: boolean }
 export interface Datos {
-  tablero: { id: string; enlace: string; nombre: string; descripcion: string; visibilidad: string; cerrado: boolean; permisos: Permisos; ajustes: { portadas: boolean; tilde: boolean } };
+  tablero: { id: string; enlace: string; nombre: string; descripcion: string; visibilidad: string; cerrado: boolean; permisos: Permisos; ajustes: { portadas: boolean; tilde: boolean; conteo: boolean; fondo: { tipo: 'ninguno' | 'color' | 'foto'; valor: string } } };
   listas: Lista[];
   tarjetas: Tarjeta[];
   etiquetas: Etiqueta[];
   espacio: { id: string; nombre: string };
   miembros: (Persona & { rol: string; invitado: boolean })[];
   pedidos: { id: string; persona: Persona }[];
-  mi: { rol: string | null; rol_espacio: string | null; puede: Puede };
+  mi: { rol: string | null; rol_espacio: string | null; favorito: boolean; puede: Puede };
 }
 export interface Cambio { listas?: Lista[]; tarjetas?: Tarjeta[] }
 

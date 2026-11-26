@@ -61,7 +61,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
 
 /* ---------- armazón ---------- */
 .app { min-height: 100%; display: flex; flex-direction: column; }
-.barra { display: flex; align-items: center; gap: 12px; height: 52px; padding: 0 max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
+.barra { display: flex; align-items: center; gap: 12px; height: calc(52px + env(safe-area-inset-top, 0px)); flex: none; padding: env(safe-area-inset-top, 0px) max(16px, env(safe-area-inset-right)) 0 max(16px, env(safe-area-inset-left));
   background: var(--superficie); border-bottom: 1px solid var(--linea); position: sticky; top: 0; z-index: 20; }
 .marca { font: 700 16px/1 var(--f-titulo); letter-spacing: 0.06em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; color: var(--tinta); white-space: nowrap; }
 .marca:hover { text-decoration: none; }
@@ -131,6 +131,31 @@ input:focus, textarea:focus, select:focus { outline: 2px solid var(--acento); ou
 .tablero .cab .btn.lleno { background: var(--acento); color: var(--sobre-acento); border-color: var(--acento); }
 .franja { background: var(--marcador); color: var(--sobre-marcador); padding: 8px 16px; font-weight: 600; font-size: 14px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
 .franja .btn { color: var(--tinta); }
+
+/* fondos: ocho degradados de la casa, o una foto. Encima, el texto va siempre en claro. */
+.fondo-oceano { background-image: linear-gradient(135deg, oklch(42% 0.14 255), oklch(62% 0.13 215)); }
+.fondo-atardecer { background-image: linear-gradient(135deg, oklch(50% 0.17 25), oklch(68% 0.15 70)); }
+.fondo-bosque { background-image: linear-gradient(135deg, oklch(36% 0.08 165), oklch(58% 0.12 140)); }
+.fondo-uva { background-image: linear-gradient(135deg, oklch(36% 0.13 300), oklch(56% 0.17 340)); }
+.fondo-grafito { background-image: linear-gradient(135deg, oklch(24% 0.02 260), oklch(42% 0.03 260)); }
+.fondo-arena { background-image: linear-gradient(135deg, oklch(52% 0.07 70), oklch(70% 0.08 95)); }
+.fondo-aurora { background-image: linear-gradient(135deg, oklch(45% 0.13 200), oklch(60% 0.16 320)); }
+.fondo-coral { background-image: linear-gradient(135deg, oklch(55% 0.18 10), oklch(66% 0.14 45)); }
+.con-fondo { --lienzo-tinta: oklch(98% 0.01 250); color: var(--lienzo-tinta); background-size: cover; background-position: center; }
+.tablero.con-foto { box-shadow: inset 0 130px 90px -60px rgba(0, 0, 0, 0.5); }
+.tablero.con-fondo .cab .suave, .tablero.con-fondo .cab a { color: var(--lienzo-tinta); }
+.tablero.con-fondo .cab .btn:not(.lleno), .tablero.con-fondo .lista.nueva:not(.abierta) { background: rgba(0, 0, 0, 0.32); border-color: rgba(255, 255, 255, 0.28); color: var(--lienzo-tinta); }
+.tablero.con-fondo .cab .chapa:not(.marcador) { background: rgba(0, 0, 0, 0.32); color: var(--lienzo-tinta); }
+.ficha.con-fondo { border-color: transparent; }
+.ficha.con-foto { box-shadow: inset 0 0 0 200px rgba(0, 0, 0, 0.28); }
+.ficha.con-fondo .chapa { background: rgba(0, 0, 0, 0.32); color: var(--lienzo-tinta); }
+.fondos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.fondos button { border: 0; border-radius: 8px; min-height: 64px; padding: 6px; display: flex; align-items: flex-end; cursor: pointer; color: oklch(98% 0.01 250); font: 600 12px var(--f-texto); }
+.fondos button[aria-checked="true"] { outline: 3px solid var(--acento); outline-offset: 2px; }
+.estrella { border: 0; background: none; font-size: 20px; line-height: 1; color: inherit; cursor: pointer; padding: 4px; border-radius: 6px; opacity: .75; }
+.estrella:hover, .estrella.puesta { opacity: 1; }
+.estrella.puesta { color: var(--aviso); }
+.tablero.con-fondo .estrella.puesta { color: oklch(88% 0.16 95); }
 
 /* El tablero ocupa justo el alto de la pantalla: las listas se desplazan por dentro, no la página. */
 .app:has(> .tablero) { height: 100dvh; min-height: 0; }
@@ -355,5 +380,6 @@ button.mini { cursor: zoom-in; }
   .dialogo.tarjeta { min-height: 100dvh; border-radius: 0; border: 0; padding: 16px; padding-bottom: max(24px, env(safe-area-inset-bottom)); }
   .t-portada { margin: -16px -16px 0; }
   .colores { gap: 4px; }
+  .fondos { grid-template-columns: repeat(2, 1fr); }
   .flotante { left: 0 !important; right: 0; top: auto !important; bottom: 0; width: auto !important; max-height: 80dvh !important; border-radius: var(--r-panel) var(--r-panel) 0 0; padding-bottom: max(12px, env(safe-area-inset-bottom)); }
 }

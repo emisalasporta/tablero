@@ -16,9 +16,9 @@
 
 | Estado | Cantidad |
 |---|---|
-| Hechas | 130 |
-| Pendientes (se pueden igualar) | 207 |
-| Pendientes pero parciales (⚠, no quedan idénticas) | 15 |
+| Hechas | 145 |
+| Pendientes (se pueden igualar) | 193 |
+| Pendientes pero parciales (⚠, no quedan idénticas) | 14 |
 | No se puede | 47 |
 
 "Hecha" quiere decir: construida, con pruebas automáticas que pasan, y publicada.
@@ -27,9 +27,9 @@
 |---|---|---|---|---|---|
 | A. Cuentas y perfil | 22 | 6 | 13 | 1 | 2 |
 | B. Espacios de trabajo | 28 | 18 | 8 | 0 | 2 |
-| C. Tableros | 42 | 19 | 18 | 2 | 3 |
-| D. Listas | 17 | 9 | 7 | 0 | 1 |
-| E. Tarjetas: lo básico | 22 | 12 | 10 | 0 | 0 |
+| C. Tableros | 42 | 28 | 9 | 2 | 3 |
+| D. Listas | 17 | 10 | 6 | 0 | 1 |
+| E. Tarjetas: lo básico | 22 | 13 | 9 | 0 | 0 |
 | F. Tarjetas: descripción y texto | 14 | 10 | 3 | 1 | 0 |
 | G. Tarjetas: miembros y etiquetas | 11 | 6 | 5 | 0 | 0 |
 | H. Tarjetas: checklists | 13 | 12 | 0 | 0 | 1 |
@@ -46,9 +46,9 @@
 | S. Inteligencia artificial de Atlassian | 5 | 0 | 0 | 0 | 5 |
 | T. Bandeja de entrada y Planificador | 12 | 0 | 9 | 1 | 2 |
 | U. Plantillas | 5 | 0 | 4 | 0 | 1 |
-| V. Teléfono, instalación y escritorio | 13 | 2 | 3 | 2 | 6 |
+| V. Teléfono, instalación y escritorio | 13 | 5 | 1 | 1 | 6 |
 | W. Importar, exportar e imprimir | 5 | 0 | 4 | 0 | 1 |
-| X. Apariencia y accesibilidad | 7 | 1 | 6 | 0 | 0 |
+| X. Apariencia y accesibilidad | 7 | 2 | 5 | 0 | 0 |
 | Y. Tiempo real | 5 | 4 | 1 | 0 | 0 |
 | Z. Administración avanzada (Enterprise) | 6 | 0 | 2 | 0 | 4 |
 | AA. Requisitos propios de este proyecto (no son de Trello, pero se controlan acá) | 9 | 2 | 7 | 0 | 0 |
@@ -102,13 +102,13 @@
 | B15 | Ajuste: quién puede borrar tableros de cada visibilidad | hecha | 2.1 | V | |
 | B16 | Ajuste: quién puede sumar invitados a los tableros | hecha | 2.1 | A | |
 | B17 | Ajuste: limitar invitaciones a ciertos dominios de correo | pendiente | 6.7 | V | |
-| B18 | Página con todos los tableros del espacio (orden, filtro, búsqueda) | pendiente | 2.4 | A | |
+| B18 | Página con todos los tableros del espacio (orden, filtro, búsqueda) | pendiente | 2.5 | A | |
 | B19 | Colecciones de tableros (agrupar y filtrar) | pendiente | 6.7 | A | |
 | B20 | Exportar todo el espacio (JSON, CSV, adjuntos en ZIP) | pendiente | 6.7 | A | |
 | B21 | Plantillas del espacio | pendiente | 6.4 | A | |
 | B22 | Borrar el espacio | hecha | 2.1 | A | |
 | B23 | Fusionar dos espacios | pendiente | 6.7 | A | |
-| B24 | Mover un tablero a otro espacio | pendiente | 2.4 | A | |
+| B24 | Mover un tablero a otro espacio | pendiente | 2.5 | A | |
 | B25 | Pedir sumarse a un espacio / aprobar pedidos | hecha | 2.1 | A | |
 | B26 | Ajuste: restricción de tipos de adjunto | pendiente | 6.7 | V | |
 | B27 | Planes, facturación, prueba gratis, límite de 10 colaboradores y de 10 tableros | no se puede | — | A | No aplica: la app es tuya, sin planes ni límites |
@@ -119,7 +119,7 @@
 |---|---|---|---|---|---|
 | C01 | Crear tablero (nombre, fondo, espacio, visibilidad) | pendiente | 2.2 | A | |
 | C02 | Renombrar tablero | hecha | 2.2 | A | |
-| C03 | Descripción del tablero ("Acerca de este tablero") | pendiente | 2.4 | A | |
+| C03 | Descripción del tablero ("Acerca de este tablero") | hecha | 2.4 | A | |
 | C04 | Visibilidad: privado | hecha | 2.1 | V | |
 | C05 | Visibilidad: del espacio de trabajo | hecha | 2.1 | V | |
 | C06 | Visibilidad: público (se ve con el enlace, sin cuenta) | hecha | 2.1 | V | |
@@ -133,22 +133,22 @@
 | C14 | Permiso: quién suma y quita miembros | hecha | 2.1 | A | |
 | C15 | Permiso: los miembros del espacio pueden editar y unirse solos | hecha | 2.1 | V | |
 | C16 | Permiso: quién vota | pendiente | 6.4 | V | |
-| C17 | Fondo: color liso o degradado | pendiente | 2.4 | V | |
-| C18 | Fondo: foto propia subida | pendiente | 2.4 | V | |
+| C17 | Fondo: color liso o degradado | hecha | 2.4 | V | Ocho degradados de la casa |
+| C18 | Fondo: foto propia subida | hecha | 2.4 | V | |
 | C19 | Fondo: fotos de la galería Unsplash | pendiente | 6.7 | V | ⚠ parcial: necesita una clave gratuita de Unsplash a tu nombre |
-| C20 | Texto claro u oscuro según el fondo; fondo distinto en modo oscuro | pendiente | 2.4 | V | |
-| C21 | Marcar tablero como favorito (estrella) y reordenar favoritos | pendiente | 2.4 | A | |
-| C22 | Tableros recientes | pendiente | 2.4 | A | |
+| C20 | Texto claro u oscuro según el fondo; fondo distinto en modo oscuro | hecha | 2.4 | V | ⚠ parcial: sobre un fondo el texto va siempre en claro; no hay un fondo distinto para el modo oscuro |
+| C21 | Marcar tablero como favorito (estrella) y reordenar favoritos | hecha | 2.4 | A | ⚠ parcial: se marcan y aparecen arriba en el inicio; todavía no se reordenan |
+| C22 | Tableros recientes | hecha | 2.4 | A | |
 | C23 | Cerrar tablero, reabrirlo, y borrarlo definitivamente | hecha | 2.4 | A | |
 | C24 | Página de tableros cerrados | hecha | 2.4 | M | |
-| C25 | Copiar tablero (con o sin tarjetas) | pendiente | 2.4 | A | |
+| C25 | Copiar tablero (con o sin tarjetas) | pendiente | 2.5 | A | |
 | C26 | Seguir tablero (recibir avisos de todo) | pendiente | 6.1 | A | |
-| C27 | Menú del tablero | pendiente | 2.4 | A | |
+| C27 | Menú del tablero | hecha | 2.4 | A | |
 | C28 | Actividad del tablero (todo / solo comentarios, cargar más) | hecha | 2.3 | A | |
-| C29 | Elementos archivados: tarjetas y listas, buscar, restaurar, borrar | pendiente | 2.4 | A | Ya se ven y se restauran desde "Archivados". Faltan buscar y borrar |
+| C29 | Elementos archivados: tarjetas y listas, buscar, restaurar, borrar | hecha | 2.4 | A | |
 | C30 | Ajuste: mostrar u ocultar portadas | hecha | 2.3 | V | |
 | C31 | Ajuste: mostrar el tilde de completada en el frente | hecha | 2.3 | V | |
-| C32 | Ajuste: mostrar cantidad de tarjetas por lista | pendiente | 2.4 | V | |
+| C32 | Ajuste: mostrar cantidad de tarjetas por lista | hecha | 2.4 | V | |
 | C33 | Gestión de etiquetas del tablero | hecha | 2.3 | A | |
 | C34 | Cabecera: avatares de miembros, filtro, estrella, visibilidad, compartir | pendiente | 2.2 | A | |
 | C35 | Dirección web corta del tablero y número de tarjeta | hecha | 2.2 | V | El número se ve al abrir la tarjeta; la dirección propia de la tarjeta se usa desde la 2.3 |
@@ -158,7 +158,7 @@
 | C39 | Archivado automático de tarjetas | pendiente | 6.5 | V | Solo vi que existe el ajuste; se revisa el detalle |
 | C40 | Crear un tablero con IA a partir de una descripción | no se puede | — | A | Ver sección S. Alex puede hacerlo por la puerta MCP |
 | C41 | Fondos generados con IA | no se puede | — | A | Ver sección S |
-| C42 | Panel lateral por persona (mostrar/ocultar secciones) | pendiente | 2.4 | V | |
+| C42 | Panel lateral por persona (mostrar/ocultar secciones) | pendiente | 2.5 | V | |
 
 ## D. Listas
 | # | Función | Estado | Tanda | Fuente | Nota |
@@ -169,7 +169,7 @@
 | D04 | Mover lista (elegir tablero y posición) | hecha | 2.2 | A |  |
 | D05 | Copiar lista con sus tarjetas | hecha | 2.2 | A |  |
 | D06 | Archivar y restaurar lista | hecha | 2.2 | A |  |
-| D07 | Borrar lista archivada | pendiente | 2.4 | A | |
+| D07 | Borrar lista archivada | hecha | 2.4 | A | |
 | D08 | Mover todas las tarjetas de la lista | hecha | 2.2 | A |  |
 | D09 | Archivar todas las tarjetas de la lista | hecha | 2.2 | A |  |
 | D10 | Ordenar lista (alfabético, vencimiento, creación, votos, campos) | pendiente | 2.3 | A | Ya ordena por nombre, por fecha de creación y por vencimiento. Faltan votos y campos, que llegan con esas funciones |
@@ -193,7 +193,7 @@
 | E07 | Mover a otro tablero conservando contenido | hecha | 2.2 | A | Al cambiar de tablero recibe número nuevo |
 | E08 | Copiar tarjeta eligiendo qué conservar | hecha | 2.2 | A | Se elige si conservar descripción, etiquetas, miembros, checklists y adjuntos |
 | E09 | Archivar y restaurar tarjeta | hecha | 2.2 | A |  |
-| E10 | Borrar tarjeta archivada | pendiente | 2.4 | A | |
+| E10 | Borrar tarjeta archivada | hecha | 2.4 | A | |
 | E11 | Marcar tarjeta como completada (círculo) | hecha | 2.3 | A | |
 | E12 | Edición rápida desde el frente (lápiz o clic derecho) | pendiente | 6.2 | A | |
 | E13 | Selección múltiple (hasta 20) para mover o copiar en grupo | pendiente | 6.2 | A | |
@@ -279,7 +279,7 @@
 | J05 | Pegar imagen del portapapeles | hecha | 2.3 | A | |
 | J06 | Renombrar, comentar, descargar y borrar adjunto | hecha | 2.3 | A | ⚠ parcial: renombrar, bajar y borrar. Falta comentar un adjunto puntual |
 | J07 | Vista previa de imágenes y documentos comunes | hecha | 2.3 | A | ⚠ parcial: imágenes, audio y video se ven adentro de la app; PDF y texto se abren en otra pestaña; el resto se baja |
-| J08 | Miniaturas en varias medidas | pendiente | 2.3 | V | Por ahora se usa la imagen original achicada en pantalla; las miniaturas livianas quedan para la tanda 2.4 |
+| J08 | Miniaturas en varias medidas | pendiente | 2.5 | V | Por ahora se usa la imagen original achicada en pantalla |
 | J09 | Adjuntos privados: solo los ve quien puede ver la tarjeta | hecha | 2.3 | A | Probado: sin acceso a la tarjeta, el archivo responde como si no existiera |
 | J10 | Reordenar adjuntos | hecha | 2.3 | V | Con flechas |
 | J11 | Selector de Google Drive, Dropbox, Box, OneDrive | no se puede | — | A | Cada uno exige registrar la app ante esa empresa. Se puede pegar el enlace del archivo |
@@ -304,7 +304,7 @@
 | K05 | Reacciones con emoji | hecha | 2.3 | V | |
 | K06 | Adjuntar al comentar | hecha | 2.3 | A | ⚠ parcial: pegar una imagen en el comentario la adjunta a la tarjeta y la muestra en el texto |
 | K07 | Enlace directo a un comentario | hecha | 2.3 | A | |
-| K08 | Indicador "está escribiendo" | pendiente | 2.3 | A | Pasa a la tanda 2.4 |
+| K08 | Indicador "está escribiendo" | pendiente | 2.5 | A | |
 | K09 | Actividad de la tarjeta con quién, qué y cuándo | hecha | 2.3 | A | |
 | K10 | Mostrar u ocultar detalles de actividad | hecha | 2.3 | A | |
 | K11 | Comentar respondiendo al correo de la tarjeta | pendiente | 6.6 | A | ⚠ parcial: misma dependencia que C37 |
@@ -497,8 +497,8 @@
 ## V. Teléfono, instalación y escritorio
 | # | Función | Estado | Tanda | Fuente | Nota |
 |---|---|---|---|---|---|
-| V01 | Uso completo desde el navegador del teléfono | pendiente | 2.4 | — | Listas y tarjetas ya se usan en tamaño de teléfono; se da por hecha al cerrar la fase 2 |
-| V02 | Instalable en la pantalla de inicio del iPhone y Android | pendiente | 2.4 | — | |
+| V01 | Uso completo desde el navegador del teléfono | hecha | 2.4 | — | Probado en tamaño de teléfono; falta un iPhone de verdad |
+| V02 | Instalable en la pantalla de inicio del iPhone y Android | hecha | 2.4 | — | Con ícono propio y abre sin la barra del navegador. Falta probarlo en un iPhone de verdad |
 | V03 | Arrastrar con el dedo (mantener apretado) | hecha | 2.2 | M | Probado con dedo simulado; falta probarlo en un iPhone de verdad |
 | V04 | Sacar foto y adjuntarla | hecha | 2.3 | A | El botón Adjuntar ofrece la cámara en el teléfono. Falta probarlo en un iPhone de verdad |
 | V05 | App nativa en App Store y Google Play | no se puede | — | A | Se reemplaza por la app web instalable. Publicar en tiendas tiene costo anual y revisión de Apple |
@@ -506,10 +506,10 @@
 | V07 | Siri y Atajos de iOS | no se puede | — | A | Idem. Alternativa posible: un Atajo que envíe a la bandeja por correo (T03) |
 | V08 | Escanear texto con la cámara | no se puede | — | A | Función de app nativa. El iPhone ya permite copiar texto desde una foto |
 | V09 | Uso sin conexión | pendiente | 6.7 | M | ⚠ parcial: ver lo ya cargado sin conexión; los cambios se envían al volver la señal |
-| V10 | App de escritorio para Mac y Windows | pendiente | 2.4 | V | ⚠ parcial: se instala como app web desde el navegador |
+| V10 | App de escritorio para Mac y Windows | hecha | 2.4 | V | ⚠ parcial: se instala como app web desde el navegador |
 | V11 | Atajo global de "tarjeta nueva" desde cualquier programa de la Mac | no se puede | — | V | Una app web no puede escuchar el teclado fuera de su ventana |
 | V12 | Ícono en la barra de menú y barra táctil de la Mac | no se puede | — | V | Solo apps nativas |
-| V13 | Abrir enlaces de la app directamente en la app instalada | pendiente | 2.4 | V | |
+| V13 | Abrir enlaces de la app directamente en la app instalada | pendiente | 2.5 | V | |
 
 ## W. Importar, exportar e imprimir
 | # | Función | Estado | Tanda | Fuente | Nota |
@@ -524,12 +524,12 @@
 | # | Función | Estado | Tanda | Fuente | Nota |
 |---|---|---|---|---|---|
 | X01 | Modo claro, oscuro e igual que el sistema | hecha | 2.4 | A | |
-| X02 | Respetar "reducir movimiento" del sistema | pendiente | 2.4 | A | |
+| X02 | Respetar "reducir movimiento" del sistema | hecha | 2.4 | A | |
 | X03 | Uso con teclado y con lector de pantalla | pendiente | 6.7 | M | |
 | X04 | Alto contraste | pendiente | 6.7 | V | |
-| X05 | Pantalla de inicio con tableros y novedades | pendiente | 2.4 | A | |
-| X06 | Conmutador de tableros (búsqueda, favoritos, recientes, por espacio; lista o cuadrícula; fijable) | pendiente | 2.4 | A | |
-| X07 | Botón Crear (tablero, plantilla, vista, espacio) | pendiente | 2.4 | A | |
+| X05 | Pantalla de inicio con tableros y novedades | pendiente | 2.5 | A | Favoritos y vistos hace poco ya están en el inicio; faltan las novedades |
+| X06 | Conmutador de tableros (búsqueda, favoritos, recientes, por espacio; lista o cuadrícula; fijable) | pendiente | 2.5 | A | |
+| X07 | Botón Crear (tablero, plantilla, vista, espacio) | pendiente | 2.5 | A | |
 
 ## Y. Tiempo real
 | # | Función | Estado | Tanda | Fuente | Nota |

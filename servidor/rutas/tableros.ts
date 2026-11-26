@@ -3,7 +3,7 @@
 import type { FastifyInstance } from 'fastify';
 import type { DatabaseSync } from 'node:sqlite';
 import { buscarUsuario, cantidadAdminsTablero, crearInvitacion, exigirUsuario, fichaPublica, leerUsuario, registrarActividad, sumarAEspacio, sumarATablero } from '../nucleo.ts';
-import { capacidadesTablero, COMENTAR, contexto, leerEspacio, leerTablero, PERMISOS_TABLERO_INICIALES, puedeAdministrarEspacio, puedeAdministrarTablero, puedeBorrarTablero, puedeCrearTablero, puedeEditarTablero, puedeInvitarATablero, puedeUnirseSolo, puedeVerEspacio, puedeVerTablero, VIS_TABLERO } from '../permisos.ts';
+import { capacidadesTablero, COMENTAR, contexto, leerEspacio, leerTablero, FONDOS, PERMISOS_TABLERO_INICIALES, puedeAdministrarEspacio, puedeAdministrarTablero, puedeBorrarTablero, puedeCrearTablero, puedeEditarTablero, puedeInvitarATablero, puedeUnirseSolo, puedeVerEspacio, puedeVerTablero, VIS_TABLERO } from '../permisos.ts';
 import type { PermisosTablero, RolTablero, Tablero, Usuario } from '../permisos.ts';
 import type { Vivo } from '../vivo.ts';
 import type { Archivos } from '../archivos.ts';
@@ -27,7 +27,7 @@ function validarPermisos(v: unknown, actuales: PermisosTablero): PermisosTablero
 export function rutasTableros(app: FastifyInstance, db: DatabaseSync, vivo: Vivo, archivos: Archivos) {
   /** Avisa a quienes miran el tablero que cambió algo de su cabecera (nombre, gente, permisos): vuelven a pedirlo. */
   const avisar = (tableroId: string) => vivo.emitir(tableroId, { tipo: 'tablero' });
-  const resumen = (t: Tablero) => ({ id: t.id, enlace: t.enlace, espacio_id: t.espacio_id, nombre: t.nombre, descripcion: t.descripcion, visibilidad: t.visibilidad, cerrado: t.cerrado === 1 });
+  const resumen = (t: Tablero) => ({ id: t.id, enlace: t.enlace, espacio_id: t.espacio_id, nombre: t.nombre, descripcion: t.descripcion, visibilidad: t.visibilidad, cerrado: t.cerrado === 1, fondo: t.ajustes.fondo });
 
   /** Trae tablero, espacio y contexto. Si la persona no puede verlo: 401 sin sesión, 403 "sin acceso" con sesión (para ofrecer pedir acceso). */
   function abrir(idOEnlace: string, u: Usuario | null) {
@@ -83,6 +83,13 @@ export function rutasTableros(app: FastifyInstance, db: DatabaseSync, vivo: Vivo
                                         (SELECT 1 FROM espacio_miembros em WHERE em.espacio_id = ? AND em.usuario_id = u.id) AS del_espacio
                                  FROM tablero_miembros tm JOIN usuarios u ON u.id = tm.usuario_id WHERE tm.tablero_id = ? ORDER BY u.nombre COLLATE NOCASE`).all(e.id, t.id) as unknown as (Usuario & { rol: RolTablero; del_espacio: number | null })[];
     const administra = puedeAdministrarTablero(c);
+    // Se anota que la persona lo abrió (para "recientes") y se lee si lo tiene de favorito.
+    let favorito = false;
+    if (req.usuario) {
+      db.prepare(`INSERT INTO tablero_usuario (usuario_id, tablero_id, visto_en) VALUES (?,?,?)
+                  ON CONFLICT(usuario_id, tablero_id) DO UPDATE SET visto_en = excluded.visto_en`).run(req.usuario.id, t.id, ahora());
+      favorito = !!(db.prepare('SELECT favorito FROM tablero_usuario WHERE usuario_id = ? AND tablero_id = ?').get(req.usuario.id, t.id) as { favorito: number }).favorito;
+    }
     const pedidos = !administra ? [] : db.prepare(`SELECT p.id, p.creado_en, u.id AS uid, u.usuario, u.nombre, u.iniciales, u.avatar, u.es_robot
                               FROM pedidos_acceso p JOIN usuarios u ON u.id = p.usuario_id WHERE p.tipo = 'tablero' AND p.destino_id = ? AND p.estado = 'pendiente' ORDER BY p.creado_en`).all(t.id) as unknown as (Usuario & { uid: string })[];
     return {
@@ -91,7 +98,7 @@ export function rutasTableros(app: FastifyInstance, db: DatabaseSync, vivo: Vivo
       espacio: { id: e.id, nombre: e.nombre },
       miembros: miembros.map((m) => ({ ...fichaPublica(m), rol: m.rol, invitado: !m.del_espacio })),
       pedidos: pedidos.map((p) => ({ id: p.id, creado_en: p.creado_en, persona: fichaPublica({ ...p, id: p.uid }) })),
-      mi: { rol: c.rolTablero, rol_espacio: c.rolEspacio, puede: capacidadesTablero(c, t, e) },
+      mi: { rol: c.rolTablero, rol_espacio: c.rolEspacio, favorito, puede: capacidadesTablero(c, t, e) },
     };
   });
 
@@ -110,7 +117,15 @@ export function rutasTableros(app: FastifyInstance, db: DatabaseSync, vivo: Vivo
     const permisos = b.permisos === undefined ? t.permisos : validarPermisos(b.permisos, t.permisos);
     const cerrado = b.cerrado === undefined ? t.cerrado : b.cerrado ? 1 : 0;
     const aj = (typeof b.ajustes === 'object' && b.ajustes !== null ? b.ajustes : {}) as Record<string, unknown>;
-    const ajustes = { portadas: typeof aj.portadas === 'boolean' ? aj.portadas : t.ajustes.portadas, tilde: typeof aj.tilde === 'boolean' ? aj.tilde : t.ajustes.tilde };
+    const si = (v: unknown, actual: boolean) => (typeof v === 'boolean' ? v : actual);
+    let fondo = t.ajustes.fondo;
+    if (aj.fondo !== undefined) {
+      // Desde acá se elige un degradado o se quita el fondo; la foto se sube por su propia ruta.
+      const valor = aj.fondo === null ? '' : opcion((aj.fondo as Record<string, unknown>)?.valor, 'el fondo', FONDOS);
+      if (fondo.tipo === 'foto') archivos.borrarFoto(fondo.valor);
+      fondo = valor ? { tipo: 'color', valor } : { tipo: 'ninguno', valor: '' };
+    }
+    const ajustes = { portadas: si(aj.portadas, t.ajustes.portadas), tilde: si(aj.tilde, t.ajustes.tilde), conteo: si(aj.conteo, t.ajustes.conteo), fondo };
     db.prepare('UPDATE tableros SET nombre = ?, descripcion = ?, visibilidad = ?, permisos = ?, cerrado = ?, ajustes = ? WHERE id = ?')
       .run(nombre, descripcion, vis, JSON.stringify(permisos), cerrado, JSON.stringify(ajustes), t.id);
     if (vis !== t.visibilidad) registrarActividad(db, 'tablero_visibilidad', u.id, { espacio_id: e.id, tablero_id: t.id, datos: { antes: t.visibilidad, ahora: vis } });
@@ -121,12 +136,52 @@ export function rutasTableros(app: FastifyInstance, db: DatabaseSync, vivo: Vivo
     return { tablero: { ...resumen(nuevo), permisos: nuevo.permisos, ajustes: nuevo.ajustes } };
   });
 
+  // Marcar o desmarcar como favorito: es de cada persona, no cambia nada para las demás.
+  app.post('/api/tableros/:id/favorito', async (req) => {
+    const u = exigirUsuario(req);
+    const { t } = abrir((req.params as { id: string }).id, u);
+    const favorito = ((req.body ?? {}) as Record<string, unknown>).favorito === false ? 0 : 1;
+    db.prepare(`INSERT INTO tablero_usuario (usuario_id, tablero_id, favorito, favorito_en) VALUES (?,?,?,?)
+                ON CONFLICT(usuario_id, tablero_id) DO UPDATE SET favorito = excluded.favorito, favorito_en = excluded.favorito_en`).run(u.id, t.id, favorito, favorito ? ahora() : null);
+    return { favorito: favorito === 1 };
+  });
+
+  // Mis favoritos y los últimos tableros que abrí (solo los que todavía puedo ver).
+  app.get('/api/yo/tableros', async (req) => {
+    const u = exigirUsuario(req);
+    const filas = db.prepare(`SELECT tu.tablero_id, tu.favorito, tu.favorito_en, tu.visto_en, e.nombre AS espacio FROM tablero_usuario tu
+                              JOIN tableros t ON t.id = tu.tablero_id JOIN espacios e ON e.id = t.espacio_id
+                              WHERE tu.usuario_id = ? AND t.cerrado = 0`).all(u.id) as { tablero_id: string; favorito: number; favorito_en: string | null; visto_en: string | null; espacio: string }[];
+    const visibles = filas.flatMap((f) => {
+      const t = leerTablero(db, f.tablero_id)!;
+      return puedeVerTablero(contexto(db, u, t.espacio_id, t.id), t) ? [{ ...resumen(t), espacio: f.espacio, favorito: f.favorito === 1, favorito_en: f.favorito_en, visto_en: f.visto_en }] : [];
+    });
+    return {
+      favoritos: visibles.filter((v) => v.favorito).sort((a, b) => (a.favorito_en! < b.favorito_en! ? -1 : 1)),
+      recientes: visibles.filter((v) => v.visto_en).sort((a, b) => (a.visto_en! < b.visto_en! ? 1 : -1)).slice(0, 8),
+    };
+  });
+
+  // Foto propia como fondo del tablero.
+  app.post('/api/tableros/:id/fondo', async (req) => {
+    const u = exigirUsuario(req);
+    const { t, c } = abrir((req.params as { id: string }).id, u);
+    if (!puedeAdministrarTablero(c)) throw sinPermiso('Solo quien administra el tablero puede cambiar el fondo.');
+    if (!String(req.headers['content-type'] ?? '').startsWith('application/octet-stream')) throw datoInvalido('Falta la imagen.');
+    const nombre = await archivos.guardarFoto(req.body as import('node:stream').Readable);
+    if (t.ajustes.fondo.tipo === 'foto') archivos.borrarFoto(t.ajustes.fondo.valor);
+    db.prepare('UPDATE tableros SET ajustes = ? WHERE id = ?').run(JSON.stringify({ ...t.ajustes, fondo: { tipo: 'foto', valor: nombre } }), t.id);
+    avisar(t.id);
+    return { fondo: { tipo: 'foto', valor: nombre } };
+  });
+
   app.delete('/api/tableros/:id', async (req) => {
     const u = exigirUsuario(req);
     const { t, e, c } = abrir((req.params as { id: string }).id, u);
     if (!puedeBorrarTablero(c, t, e)) throw sinPermiso('No podés borrar este tablero.');
     if (!t.cerrado) throw new ErrorApi(409, 'no_cerrado', 'Primero hay que cerrar el tablero; después se puede borrar.');
     db.prepare('DELETE FROM tableros WHERE id = ?').run(t.id);
+    if (t.ajustes.fondo.tipo === 'foto') archivos.borrarFoto(t.ajustes.fondo.valor);
     archivos.barrer(db);
     registrarActividad(db, 'tablero_borrado', u.id, { espacio_id: e.id, datos: { nombre: t.nombre } });
     return { ok: true };

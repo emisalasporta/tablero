@@ -179,7 +179,7 @@ export function Listas({ d, ops, alAbrir }: { d: Datos; ops: Ops; alAbrir: (t: T
       <section key={l.id} className={'lista' + (levantada ? ' levantada' : '')} data-lista={l.id} aria-label={`Lista ${l.nombre}`}>
         <header onPointerDown={puede ? (e) => motor.apretar(e, 'lista', l.id, e.currentTarget.parentElement!) : undefined}>
           <TituloLista l={l} puede={puede} motor={motor} alGuardar={(nombre) => void ops.cambiarLista(l.id, { nombre })} />
-          <span className="n" title="Cantidad de tarjetas">{tarjetas.length}</span>
+          {d.tablero.ajustes.conteo && <span className="n" title="Cantidad de tarjetas">{tarjetas.length}</span>}
           {puede && <button type="button" className="mas" aria-label={`Acciones de la lista ${l.nombre}`} onClick={(e) => setMenu({ lista: l.id, ancla: e.currentTarget.getBoundingClientRect() })}>···</button>}
         </header>
         {componiendo?.arriba && caja}

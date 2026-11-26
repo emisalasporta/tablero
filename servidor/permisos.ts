@@ -54,8 +54,9 @@ export interface Tablero {
   permisos: PermisosTablero; ajustes: AjustesTablero; cerrado: number; creado_por: string | null; creado_en: string;
 }
 /** Cómo se ve el tablero: si los frentes muestran la portada y el círculo de completada. */
-export interface AjustesTablero { portadas: boolean; tilde: boolean }
-export const AJUSTES_TABLERO_INICIALES: AjustesTablero = { portadas: true, tilde: true };
+export interface AjustesTablero { portadas: boolean; tilde: boolean; /** Mostrar cuántas tarjetas tiene cada lista. */ conteo: boolean; /** Fondo: uno de los degradados de la casa o una foto subida. */ fondo: { tipo: 'ninguno' | 'color' | 'foto'; valor: string } }
+export const FONDOS = ['oceano', 'atardecer', 'bosque', 'uva', 'grafito', 'arena', 'aurora', 'coral'] as const;
+export const AJUSTES_TABLERO_INICIALES: AjustesTablero = { portadas: true, tilde: true, conteo: true, fondo: { tipo: 'ninguno', valor: '' } };
 
 /** Qué es una persona respecto de un espacio y (si corresponde) de un tablero. */
 export interface Contexto {

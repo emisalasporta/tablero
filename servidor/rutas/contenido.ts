@@ -462,6 +462,30 @@ export function rutasContenido(app: FastifyInstance, db: DatabaseSync, vivo: Viv
     return reply.code(201).send({ tarjeta: frenteTarjeta(leerTarjeta(id)!) });
   });
 
+  // Borrar para siempre: solo lo que ya está archivado (así nada se borra por un toque sin querer).
+  app.delete('/api/tarjetas/:id', async (req) => {
+    const u = exigirUsuario(req);
+    const { c, t } = tarjetaEditable((req.params as { id: string }).id, u);
+    if (!c.archivada) throw new ErrorApi(409, 'no_archivada', 'Primero hay que archivar la tarjeta; después se puede borrar.');
+    enTransaccion(() => {
+      db.prepare('DELETE FROM tarjetas WHERE id = ?').run(c.id);
+      registrarActividad(db, 'tarjeta_borrada', u.id, { espacio_id: t.espacio_id, tablero_id: t.id, datos: { titulo: c.titulo } });
+    });
+    archivos.barrer(db);
+    return { ok: true };
+  });
+  app.delete('/api/listas/:id', async (req) => {
+    const u = exigirUsuario(req);
+    const { l, t } = listaEditable((req.params as { id: string }).id, u);
+    if (!l.archivada) throw new ErrorApi(409, 'no_archivada', 'Primero hay que archivar la lista; después se puede borrar.');
+    enTransaccion(() => {
+      db.prepare('DELETE FROM listas WHERE id = ?').run(l.id);
+      registrarActividad(db, 'lista_borrada', u.id, { espacio_id: t.espacio_id, tablero_id: t.id, datos: { nombre: l.nombre } });
+    });
+    archivos.barrer(db);
+    return { ok: true };
+  });
+
   // =====================================================================
   // ARCHIVADOS y destinos para mover
   // =====================================================================
