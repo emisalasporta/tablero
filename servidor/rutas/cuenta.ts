@@ -152,6 +152,16 @@ export function rutasCuenta(app: FastifyInstance, db: DatabaseSync) {
     return { usuarios: filas.map((f) => ({ ...fichaPublica(f), email: f.email, es_admin_general: f.es_admin_general === 1, creado_en: f.creado_en })) };
   });
 
+  // Todos los espacios de la instalación, sean o no de quien pregunta.
+  app.get('/api/admin/espacios', async (req) => {
+    exigirAdminGeneral(exigirUsuario(req));
+    return { espacios: db.prepare(`SELECT e.id, e.nombre, e.descripcion, e.visibilidad, e.creado_en,
+        (SELECT count(*) FROM espacio_miembros m WHERE m.espacio_id = e.id AND m.desactivado = 0) AS miembros,
+        (SELECT count(*) FROM tableros t WHERE t.espacio_id = e.id AND t.cerrado = 0) AS tableros_abiertos,
+        (SELECT count(*) FROM tableros t WHERE t.espacio_id = e.id AND t.cerrado = 1) AS tableros_cerrados
+      FROM espacios e ORDER BY e.nombre COLLATE NOCASE`).all() };
+  });
+
   // Enlace para que alguien cree su cuenta sin entrar todavía a ningún espacio.
   app.post('/api/admin/invitaciones', async (req, reply) => {
     const u = exigirUsuario(req);

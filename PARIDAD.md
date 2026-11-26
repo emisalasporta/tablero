@@ -1,6 +1,6 @@
 # PARIDAD — todas las funciones de Trello y su estado
 
-Última actualización: 25/11/2026 (tanda 2.2: listas, tarjetas, arrastre con mouse y dedo, y tiempo real).
+Última actualización: 26/11/2026 (Fase 3: la puerta de Alex).
 
 ## Cómo leer esta lista
 - **Estado:** `pendiente` · `hecha` · `no se puede` (con el porqué en la nota).
@@ -16,8 +16,8 @@
 
 | Estado | Cantidad |
 |---|---|
-| Hechas | 145 |
-| Pendientes (se pueden igualar) | 193 |
+| Hechas | 149 |
+| Pendientes (se pueden igualar) | 189 |
 | Pendientes pero parciales (⚠, no quedan idénticas) | 14 |
 | No se puede | 47 |
 
@@ -42,7 +42,7 @@
 | O. Atajos de teclado | 9 | 0 | 9 | 0 | 0 |
 | P. Notificaciones | 14 | 0 | 11 | 2 | 1 |
 | Q. Automatización | 36 | 0 | 30 | 3 | 3 |
-| R. Power-Ups e integraciones | 11 | 0 | 4 | 0 | 7 |
+| R. Power-Ups e integraciones | 11 | 1 | 3 | 0 | 7 |
 | S. Inteligencia artificial de Atlassian | 5 | 0 | 0 | 0 | 5 |
 | T. Bandeja de entrada y Planificador | 12 | 0 | 9 | 1 | 2 |
 | U. Plantillas | 5 | 0 | 4 | 0 | 1 |
@@ -51,7 +51,7 @@
 | X. Apariencia y accesibilidad | 7 | 2 | 5 | 0 | 0 |
 | Y. Tiempo real | 5 | 4 | 1 | 0 | 0 |
 | Z. Administración avanzada (Enterprise) | 6 | 0 | 2 | 0 | 4 |
-| AA. Requisitos propios de este proyecto (no son de Trello, pero se controlan acá) | 9 | 2 | 7 | 0 | 0 |
+| AA. Requisitos propios de este proyecto (no son de Trello, pero se controlan acá) | 9 | 5 | 4 | 0 | 0 |
 <!-- RESUMEN-FIN -->
 
 ---
@@ -458,7 +458,7 @@
 | R08 | Jira y Confluence dentro de las tarjetas; conmutador de apps Atlassian | no se puede | — | A | Productos de Atlassian |
 | R09 | API pública para programas | pendiente | 6.7 | A | Con formato propio (no compatible con programas hechos para Trello) |
 | R10 | Avisos salientes a otros programas (webhooks) | pendiente | 6.7 | A | |
-| R11 | Conexión con asistentes de IA (MCP) | pendiente | 3 | A | Es la puerta de Alex |
+| R11 | Conexión con asistentes de IA (MCP) | hecha | 3 | A | Es la puerta de Alex |
 
 ## S. Inteligencia artificial de Atlassian
 | # | Función | Estado | Tanda | Fuente | Nota |
@@ -553,9 +553,9 @@
 ## AA. Requisitos propios de este proyecto (no son de Trello, pero se controlan acá)
 | # | Función | Estado | Tanda | Fuente | Nota |
 |---|---|---|---|---|---|
-| AA01 | Puerta MCP con acceso de administrador a todo | pendiente | 3 | — | |
-| AA02 | Usuario "Alex" y su nombre en la actividad | pendiente | 3 | — | |
-| AA03 | Prueba que verifica que cada función tiene su herramienta MCP | pendiente | 3 | — | |
+| AA01 | Puerta MCP con acceso de administrador a todo | hecha | 3 | — | 79 herramientas en /mcp. Falta sumarla como conector en Claude (un clic de Emiliano) |
+| AA02 | Usuario "Alex" y su nombre en la actividad | hecha | 3 | — | |
+| AA03 | Prueba que verifica que cada función tiene su herramienta MCP | hecha | 3 | — | |
 | AA04 | Publicación automática al subir a main | hecha | 4 | — | Comprobado el 25/11/2026: un cambio subido a main quedó publicado en unos 30 segundos |
 | AA05 | Pruebas que frenan la publicación si fallan | hecha | 2.0 | — | Comprobado el 25/11/2026 con una prueba rota a propósito: Dokploy marcó error y siguió la versión anterior |
 | AA06 | Respaldo diario + copia fuera del servidor | pendiente | 4 | — | |

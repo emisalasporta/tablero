@@ -8,7 +8,7 @@ export const GALLETA = 'mmd_sesion';
 const DIAS_SESION = 60;
 
 declare module 'fastify' {
-  interface FastifyRequest { usuario: Usuario | null; sesionId: string | null }
+  interface FastifyRequest { usuario: Usuario | null; sesionId: string | null; llaveId: string | null }
 }
 
 export function leerGalleta(req: FastifyRequest, nombre: string): string | null {
@@ -44,6 +44,20 @@ export function cerrarSesion(db: DatabaseSync, req: FastifyRequest, reply: Fasti
 export function identificar(db: DatabaseSync, req: FastifyRequest) {
   req.usuario = null;
   req.sesionId = null;
+  req.llaveId = null;
+  // Una llave (la de Alex) viaja en el encabezado "Authorization: Bearer …" y reemplaza a la sesión.
+  const aut = req.headers.authorization;
+  if (typeof aut === 'string' && /^bearer /i.test(aut)) {
+    const l = db.prepare('SELECT id, usuario_id, expira_en, ultima_vez FROM llaves WHERE token_hash = ?').get(hashToken(aut.slice(7).trim())) as
+      { id: string; usuario_id: string; expira_en: string | null; ultima_vez: string | null } | undefined;
+    if (!l || (l.expira_en && l.expira_en < ahora())) return;
+    const u = leerUsuario(db, l.usuario_id);
+    if (!u) return;
+    req.usuario = u;
+    req.llaveId = l.id;
+    if (!l.ultima_vez || Date.now() - Date.parse(l.ultima_vez) > 600_000) db.prepare('UPDATE llaves SET ultima_vez = ? WHERE id = ?').run(ahora(), l.id);
+    return;
+  }
   const token = leerGalleta(req, GALLETA);
   if (!token) return;
   const s = db.prepare('SELECT id, usuario_id, expira_en, ultima_vez FROM sesiones WHERE token_hash = ?').get(hashToken(token)) as

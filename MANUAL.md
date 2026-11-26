@@ -8,6 +8,8 @@ Se actualiza al terminar cada tanda. Estado: **tanda 2.2** hecha (lo de la 2.1 m
 |---|---|
 | `servidor/` | El programa que corre en el servidor (Node + TypeScript, sin compilar: Node lo ejecuta directo). |
 | `servidor/migraciones/` | Cambios de estructura de la base, numerados (`001_…sql`). Nunca se edita uno ya publicado: se agrega otro. |
+| `servidor/mcp/` | La puerta de Alex: `herramientas.ts` (la lista de herramientas) y `puerta.ts` (la dirección `/mcp`). |
+| `servidor/rutas/puerta.ts` | Quién entra por la puerta: el permiso desde Claude (OAuth), las llaves y la cuenta Alex. |
 | `web/` | Las pantallas (React + Vite). Se arman a `dist/web`. |
 | `pruebas/` | Pruebas automáticas (Vitest). |
 | `scripts/version.mjs` | Anota qué cambio se armó, para verlo en `/api/salud`. |
@@ -84,7 +86,27 @@ Abre en http://localhost:3000. Para trabajar en las pantallas con recarga autom�
 | `PORT` | Puerto | `3000` |
 | `DATA_DIR` | Carpeta de datos (base, adjuntos, respaldos) | `./datos` (en Docker: `/app/data`) |
 | `TZ` | Zona horaria | `America/Argentina/Buenos_Aires` |
+| `URL_PUBLICA` | Dirección pública de la app (`https://…`), para la puerta de Alex. Solo hace falta si la app no logra deducirla de los pedidos | se deduce |
 | `MAX_ADJUNTO_MB` | Tope de cada archivo adjunto, en MB. Cloudflare (plan gratis) no deja pasar más de 100 | `100` |
+
+## La puerta de Alex (MCP)
+Alex es Claude manejando la app. Entra por `https://<dirección de la app>/mcp` con la cuenta robot **Alex** (administración general, sin contraseña). Todo lo que hace queda en la actividad con ese nombre.
+
+**Cómo está hecha**
+- `/mcp` habla el protocolo MCP en su forma simple: cada pedido es un POST con una pregunta y su respuesta. No guarda estado ni deja nada abierto.
+- Cada herramienta llama por dentro a la misma ruta `/api` que usan las pantallas (con `app.inject`), así que valen las mismas reglas, permisos, actividad y avisos en vivo. En `servidor/mcp/herramientas.ts` solo se describe cada herramienta; ahí no se decide nada.
+- **Regla: ruta nueva en `/api` = herramienta nueva en `herramientas.ts`, en la misma tanda.** La prueba "cada ruta de la app tiene su herramienta" (`pruebas/puerta.test.ts`) falla si falta, y como las pruebas corren al armar, no se publica. Si una ruta no debe tener herramienta, va en `EXCLUIDAS` con el motivo.
+- Subir archivos: la herramienta recibe el contenido en `base64` (sirve para archivos chicos). Las respuestas de más de 140.000 caracteres se rechazan con un aviso (Claude corta las largas).
+
+**Cómo se entra** (las llaves se guardan solo como huella; tabla `llaves`)
+1. *Permiso desde Claude (OAuth 2.1 con PKCE y registro automático).* Claude lee `/.well-known/oauth-protected-resource` y `/.well-known/oauth-authorization-server`, se presenta en `/oauth/registro`, abre `/oauth/autorizar` (una pantalla de la app: pide sesión y administración general) y cambia el código en `/oauth/token`. La llave dura 1 hora y se renueva sola con otra de renovación (que rota en cada uso).
+2. *Llave fija.* En Tu cuenta → Alex → "Crear llave". Se muestra una sola vez. Va en el encabezado `Authorization: Bearer mmd_…`. Sirve para Claude Code (`claude mcp add --transport http meetmydash https://…/mcp --header "Authorization: Bearer mmd_…"`) y también para llamar directo a `/api`.
+- Una llave nunca puede crear ni anular llaves, ni aprobar permisos: eso exige la sesión de una persona con administración general.
+- Cortar un acceso: Tu cuenta → Alex → "Cortar". Deja de entrar en el momento.
+
+**Sumarla en Claude (lo hace Emiliano, una vez):** claude.ai → Conectores → Agregar → Agregar conector personalizado → nombre `meetmydash`, dirección `https://meetmydash.emilianosalasporta.cloud/mcp` → Continuar → Agregar → Conectar → en la pantalla de meetmydash, "Permitir".
+
+**Probarla a mano:** `curl -X POST <dirección>/mcp -H "Authorization: Bearer mmd_…" -H "content-type: application/json" -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'`
 
 ## Cómo saber qué versión está publicada
 `GET /api/salud` devuelve `version`, `commit` (los primeros 12 caracteres del cambio) y `armada_en`.

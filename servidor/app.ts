@@ -12,6 +12,8 @@ import { rutasContenido } from './rutas/contenido.ts';
 import { rutasCuenta } from './rutas/cuenta.ts';
 import { rutasEspacios } from './rutas/espacios.ts';
 import { rutasFotos } from './rutas/fotos.ts';
+import { rutasPuerta } from './rutas/puerta.ts';
+import { rutasMcp } from './mcp/puerta.ts';
 import { rutasTarjeta } from './rutas/tarjeta.ts';
 import { rutasTableros } from './rutas/tableros.ts';
 import { ErrorApi, noAutenticado, noExiste } from './util.ts';
@@ -26,17 +28,29 @@ export interface Dependencias {
   dirArchivos: string;
   /** Tope de cada adjunto, en MB. */
   maxAdjuntoMb?: number;
+  /** Dirección pública de la app (https://…). Si falta, se deduce de cada pedido. */
+  urlPublica?: string;
 }
 
-export function crearApp({ db, zonaHoraria, dirWeb, dirArchivos, maxAdjuntoMb }: Dependencias): FastifyInstance {
+declare module 'fastify' {
+  interface FastifyInstance { /** Todas las rutas registradas, como "GET /api/salud". La usa la prueba de cobertura de la puerta de Alex. */ rutas: string[] }
+}
+
+export function crearApp({ db, zonaHoraria, dirWeb, dirArchivos, maxAdjuntoMb, urlPublica }: Dependencias): FastifyInstance {
   // trustProxy: la app corre detrás del proxy de Dokploy y de Cloudflare; así sabe si el pedido original vino por HTTPS.
   const app = Fastify({ logger: false, trustProxy: true, bodyLimit: 1024 * 1024 });
   const version = leerVersion();
 
+  app.decorate('rutas', [] as string[]);
+  app.addHook('onRoute', (r) => {
+    for (const m of Array.isArray(r.method) ? r.method : [r.method]) if (m !== 'HEAD' && m !== 'OPTIONS') app.rutas.push(`${m} ${r.url}`);
+  });
+
   app.decorateRequest('usuario', null);
   app.decorateRequest('sesionId', null);
+  app.decorateRequest('llaveId', null);
   app.addHook('onRequest', async (req) => {
-    if (req.url.startsWith('/api/')) identificar(db, req);
+    if (req.url.startsWith('/api/') || req.url.startsWith('/mcp')) identificar(db, req);
   });
 
   // Todos los errores salen con la misma forma: { error: código, mensaje: texto para la persona }.
@@ -64,6 +78,8 @@ export function crearApp({ db, zonaHoraria, dirWeb, dirArchivos, maxAdjuntoMb }:
 
   // Los archivos subidos llegan "crudos" y se pasan tal cual a la ruta, que los va guardando en disco.
   app.addContentTypeParser('application/octet-stream', (_req, cuerpo, listo) => listo(null, cuerpo));
+  // El estándar de permisos (OAuth) manda sus datos como formulario.
+  app.addContentTypeParser('application/x-www-form-urlencoded', { parseAs: 'string' }, (_req, cuerpo, listo) => listo(null, Object.fromEntries(new URLSearchParams(cuerpo as string))));
   const archivos = new Archivos(dirArchivos, maxAdjuntoMb);
   archivos.barrer(db);
 
@@ -75,6 +91,8 @@ export function crearApp({ db, zonaHoraria, dirWeb, dirArchivos, maxAdjuntoMb }:
   const ayuda = rutasContenido(app, db, vivo, archivos);
   rutasTarjeta(app, db, vivo, archivos, ayuda);
   rutasFotos(app, db, archivos);
+  rutasPuerta(app, db, urlPublica);
+  rutasMcp(app, urlPublica);
 
   // Línea en vivo de un tablero. Solo se abre si la persona puede ver ese tablero.
   app.register(fastifyWebsocket, { options: { maxPayload: 4096 } });
@@ -94,7 +112,7 @@ export function crearApp({ db, zonaHoraria, dirWeb, dirArchivos, maxAdjuntoMb }:
   });
 
   app.setNotFoundHandler(async (req, reply) => {
-    if (req.url.startsWith('/api/')) return reply.code(404).send({ error: 'no_existe', mensaje: 'Esa dirección no existe.' });
+    if (/^\/(api|mcp|oauth\/(token|registro)|\.well-known)(\/|$|\?)/.test(req.url)) return reply.code(404).send({ error: 'no_existe', mensaje: 'Esa dirección no existe.' });
     // Cualquier otra dirección la resuelve la pantalla (para que /t/xxxx funcione al recargar).
     if (dirWeb && fs.existsSync(path.join(dirWeb, 'index.html'))) return reply.sendFile('index.html', dirWeb);
     return reply.code(404).send('Las pantallas todavía no están armadas. Corré: npm run build');

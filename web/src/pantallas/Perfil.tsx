@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { api, subir, Avatar, Campo, CopiarEnlace, Formulario, leerTema, ponerTema, useAccion, useCarga, useSesion } from '../base.tsx';
 import type { Tema, Yo } from '../base.tsx';
+import { hace } from '../tablero/piezas.tsx';
 
 function AdminGeneral() {
   const lista = useCarga<{ usuarios: { id: string; usuario: string; nombre: string; iniciales: string; email: string; es_admin_general: boolean; es_robot: boolean }[] }>('/api/admin/usuarios');
@@ -25,6 +26,47 @@ function AdminGeneral() {
           {!u.es_robot && <button type="button" className="btn chico" onClick={() => accion.hacer(async () => { const r = await api<{ clave_temporal: string }>('POST', `/api/admin/usuarios/${u.id}/clave-temporal`); setTemporal({ nombre: u.nombre, clave: r.clave_temporal }); })}>Dar contraseña temporal</button>}
         </li>
       ))}</ul>
+    </div>
+  );
+}
+
+/** Alex: el asistente (Claude) que maneja la app por su propia puerta. Acá se ve por dónde entra y se le corta el paso. */
+function Alex() {
+  const datos = useCarga<{ alex: { nombre: string } | null; direccion: string; llaves: { id: string; nombre: string; tipo: 'conexion' | 'fija'; creada_en: string; ultima_vez: string | null }[] }>('/api/admin/alex');
+  const accion = useAccion();
+  const [nombre, setNombre] = useState('');
+  const [nueva, setNueva] = useState<string | null>(null);
+  const d = datos.datos;
+  if (!d) return null;
+  return (
+    <div className="panel" id="alex">
+      <div className="columna" style={{ gap: 4 }}><h2>Alex</h2><p className="suave">Alex es tu asistente (Claude). Entra por una puerta propia, sin contraseña, y administra toda la instalación. Lo que hace queda en la actividad con su nombre.</p></div>
+      {accion.error && <p className="error" role="alert">{accion.error}</p>}
+      <div className="columna" style={{ gap: 8 }}>
+        <p><b>Dirección para conectar a Claude</b></p>
+        <p className="suave">En Claude: Conectores → Agregar conector personalizado → pegá esta dirección. Claude te trae de vuelta acá para que lo permitas.</p>
+        <CopiarEnlace url={d.direccion} />
+      </div>
+      <div className="columna" style={{ gap: 8 }}>
+        <p><b>Por dónde entra hoy</b></p>
+        {d.llaves.length === 0 ? <p className="suave">Todavía por ningún lado.</p> : (
+          <ul className="renglones">{d.llaves.map((l) => (
+            <li key={l.id}>
+              <span className="quien"><b>{l.nombre}</b><small>{l.tipo === 'conexion' ? 'Conexión permitida' : 'Llave fija'} · creada {hace(l.creada_en)} · {l.ultima_vez ? `último uso ${hace(l.ultima_vez)}` : 'sin usar'}</small></span>
+              <button type="button" className="btn chico peligro" onClick={() => { if (confirm(`¿Cortar "${l.nombre}"? Deja de entrar en el momento.`)) void accion.hacer(async () => { await api('DELETE', `/api/admin/alex/llaves/${l.id}`); datos.recargar(); }); }}>Cortar</button>
+            </li>
+          ))}</ul>
+        )}
+      </div>
+      <div className="columna" style={{ gap: 8 }}>
+        <p><b>Llave fija</b></p>
+        <p className="suave">Para programas que no pueden pedir permiso por pantalla (por ejemplo Claude Code). Quien tenga la llave maneja todo: guardala como una contraseña.</p>
+        {nueva && <div className="columna" style={{ gap: 6 }}><p>Copiala ahora: no se vuelve a mostrar.</p><div className="codigo">{nueva}</div></div>}
+        <form className="fila" onSubmit={(e) => { e.preventDefault(); void accion.hacer(async () => { const r = await api<{ llave: string }>('POST', '/api/admin/alex/llaves', { nombre }); setNueva(r.llave); setNombre(''); datos.recargar(); }); }}>
+          <input type="text" aria-label="Nombre de la llave" placeholder="Para qué es (ej.: Claude Code)" value={nombre} onChange={(e) => setNombre(e.target.value)} required maxLength={80} style={{ flex: '1 1 200px' }} />
+          <button type="submit" className="btn" disabled={accion.ocupado}>Crear llave</button>
+        </form>
+      </div>
     </div>
   );
 }
@@ -103,6 +145,7 @@ export function Perfil() {
           <Campo rotulo="Contraseña nueva" ayuda="Al menos 8 caracteres."><input id="pf-nueva" type="password" value={nueva} onChange={(e) => setNueva(e.target.value)} autoComplete="new-password" minLength={8} required /></Campo>
         </Formulario>
       </div>
+      {yo.es_admin_general && <Alex />}
       {yo.es_admin_general && <AdminGeneral />}
     </main>
   );

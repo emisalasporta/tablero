@@ -1,5 +1,6 @@
 // Armazón de la app: la barra de arriba y qué pantalla corresponde a cada dirección.
 import { api, Avatar, Enlace, navegar, useAccion, useRuta, useSesion } from './base.tsx';
+import { Autorizar } from './pantallas/Autorizar.tsx';
 import { Entrar, Invitacion } from './pantallas/Entrar.tsx';
 import { Espacio } from './pantallas/Espacio.tsx';
 import { Inicio } from './pantallas/Inicio.tsx';
@@ -36,6 +37,7 @@ function Pantalla() {
   if (partes[0] === 't' && partes[1]) return <Tablero enlace={partes[1]} />;
   if (partes[0] === 'c' && partes[1]) return <Tablero deTarjeta={partes[1]} />;
   if (!yo) return <Entrar volverA={camino === '/entrar' ? '/' : ruta} />;
+  if (partes[0] === 'oauth' && partes[1] === 'autorizar') return <Autorizar />;
   if (partes[0] === 'e' && partes[1]) return <Espacio key={partes[1]} id={partes[1]} />;
   if (partes[0] === 'perfil') return <Perfil />;
   if (partes.length === 0 || partes[0] === 'entrar') return <Inicio />;
