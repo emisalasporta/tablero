@@ -140,7 +140,7 @@ Te los voy a pedir de a uno, con los valores exactos, cuando llegue el momento.
 | 2 | ~~En Dokploy: crear la aplicación `tablero`~~ | — | **Resuelto:** la creé por la API de Dokploy. |
 | 3 | ~~En Dokploy: crear una clave de API~~ | — | **Resuelto:** la generé desde tu sesión abierta en Chrome, con tu permiso; está en PRIVADO.md. |
 | 4 | ~~En Cloudflare: crear el subdominio~~ | — | **Resuelto:** creé `meetmydash.emilianosalasporta.cloud` desde tu sesión de Chrome, con tu permiso. |
-| 5 | En Cloudflare: crear el depósito para la copia externa del respaldo y su clave. | Fase 4 | Es tu cuenta. |
+| 5 | ~~En Cloudflare: crear el depósito para la copia externa del respaldo y su clave.~~ | — | **Resuelto el 26/11/2026:** Emiliano activó R2 y creó la clave; el depósito lo creó Claude desde su sesión de Chrome. |
 | 6 | En Claude: sumar el conector personalizado con la dirección de la puerta MCP. | Fase 3/4 | Solo vos podés sumar conectores. |
 | 7 | En el iPhone: abrir la app en Safari → Compartir → "Agregar a inicio" y aceptar las notificaciones. | Fase 6.1 | Es tu teléfono. |
 | 8 | (Opcional) Una cuenta de envío de correos, para invitaciones y avisos por correo. Sin esto todo funciona, pero invitás pasando un enlace y no hay avisos por correo. | Fase 6.1 | Es una cuenta a tu nombre. |

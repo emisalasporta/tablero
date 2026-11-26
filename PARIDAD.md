@@ -16,8 +16,8 @@
 
 | Estado | Cantidad |
 |---|---|
-| Hechas | 152 |
-| Pendientes (se pueden igualar) | 186 |
+| Hechas | 153 |
+| Pendientes (se pueden igualar) | 185 |
 | Pendientes pero parciales (⚠, no quedan idénticas) | 14 |
 | No se puede | 47 |
 
@@ -558,7 +558,7 @@
 | AA03 | Prueba que verifica que cada función tiene su herramienta MCP | hecha | 3 | — | |
 | AA04 | Publicación automática al subir a main | hecha | 4 | — | Comprobado el 25/11/2026: un cambio subido a main quedó publicado en unos 30 segundos |
 | AA05 | Pruebas que frenan la publicación si fallan | hecha | 2.0 | — | Comprobado el 25/11/2026 con una prueba rota a propósito: Dokploy marcó error y siguió la versión anterior |
-| AA06 | Respaldo diario + copia fuera del servidor | pendiente | 4 | — | Respaldo diario en el servidor: hecho (26/11/2026). Copia fuera del servidor: programada pero apagada; falta el depósito en Cloudflare y probarla de verdad |
+| AA06 | Respaldo diario + copia fuera del servidor | hecha | 4 | A | Respaldo diario en el servidor y copia en Cloudflare R2 (depósito privado meetmydash-respaldo), comprobada el 26/11/2026 con un respaldo manual que llegó al depósito. Sin ensayar: restaurar bajando la copia desde afuera, y la subida de archivos adjuntos (todavía no hay ninguno) |
 | AA07 | Vuelta atrás documentada y ensayada | hecha | 4 | — | Código: ensayado el 25/11/2026. Datos: ensayado el 26/11/2026 en una carpeta de prueba (variable RESTAURAR); no en el servidor publicado |
 | AA08 | Acceso de Alex a Dokploy (estado, errores, republicar) | hecha | 4 | — | Herramientas servidor_ver y servidor_publicar, más el botón de emergencia en GitHub (faltan sus secretos). Sin comprobar todavía en el servidor publicado (hace falta una cuenta) |
 | AA09 | MANUAL.md al día | hecha | 4 | — |  |
