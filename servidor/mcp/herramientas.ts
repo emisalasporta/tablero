@@ -70,6 +70,12 @@ h('yo_foto_quitar', 'DELETE /api/yo/avatar', 'Quitar mi foto', 'Quita la foto de
 h('mis_tableros', 'GET /api/yo/tableros', 'Mis favoritos y recientes', 'Los tableros que Alex marcó como favoritos y los últimos que abrió.');
 h('tableros_editables', 'GET /api/yo/tableros-editables', 'Todos los tableros abiertos', 'Lista TODOS los tableros abiertos de la instalación (con su espacio). Es la forma más rápida de encontrar un tablero por nombre.');
 
+// ---------- cuidar la instalación ----------
+h('respaldos_ver', 'GET /api/admin/respaldos', 'Ver los respaldos', 'Lista los respaldos guardados en el servidor, cuál fue el último y cómo está la copia fuera del servidor (si está encendida, cuándo salió bien por última vez y el último error).');
+h('respaldo_hacer', 'POST /api/admin/respaldos', 'Hacer un respaldo ahora', 'Hace en el momento una copia de la base de datos (y la sube afuera si la copia externa está encendida). Conviene antes de un cambio grande.');
+h('servidor_ver', 'GET /api/admin/servidor', 'Estado del servidor', 'Qué versión está corriendo y desde cuándo, las últimas publicaciones en Dokploy (con su estado: done, error, running) y los últimos errores que tuvo la app.');
+h('servidor_publicar', 'POST /api/admin/servidor/publicar', 'Volver a publicar', 'Le pide a Dokploy que arme y publique de nuevo lo que hay en la rama main. La app se reinicia al terminar. Usalo solo si una publicación quedó trabada o falló por algo pasajero.');
+
 // ---------- personas (administración general) ----------
 h('personas_listar', 'GET /api/admin/usuarios', 'Todas las cuentas', 'Lista todas las cuentas de la instalación, con correo.');
 h('persona_buscar', 'GET /api/usuarios/buscar', 'Buscar una persona', 'Busca una cuenta por correo exacto o nombre de usuario exacto.', { q: s('Correo o nombre de usuario.') }, { consulta: ['q'], requeridos: ['q'] });

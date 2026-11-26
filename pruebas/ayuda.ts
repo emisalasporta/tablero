@@ -6,7 +6,7 @@ import path from 'node:path';
 import type { FastifyInstance } from 'fastify';
 import type { DatabaseSync } from 'node:sqlite';
 import { abrirDb } from '../servidor/db.ts';
-import { crearApp } from '../servidor/app.ts';
+import { crearApp, type Dependencias } from '../servidor/app.ts';
 
 export function carpetaTemporal(): string {
   return fs.mkdtempSync(path.join(os.tmpdir(), 'meetmydash-prueba-'));
@@ -49,14 +49,13 @@ export class Persona {
   del = (url: string) => this.pedir('DELETE', url);
 }
 
-export interface Mundo { app: FastifyInstance; db: DatabaseSync; cerrar: () => Promise<void>; anonimo: Persona;
+export interface Mundo { app: FastifyInstance; db: DatabaseSync; /** Carpeta de datos de esta prueba. */ dir: string; cerrar: () => Promise<void>; anonimo: Persona;
   /** Crea una cuenta. La primera es administradora general; las demás necesitan invitación (se genera sola). */
   registrar: (nombre: string) => Promise<Persona>; }
 
-export function crearMundo(): Mundo {
-  const dir = carpetaTemporal();
+export function crearMundo(extra: Partial<Dependencias> = {}, dir = carpetaTemporal()): Mundo {
   const { db } = abrirDb(dir);
-  const app = crearApp({ db, zonaHoraria: 'America/Argentina/Buenos_Aires', dirArchivos: path.join(dir, 'archivos'), maxAdjuntoMb: 1 });
+  const app = crearApp({ db, zonaHoraria: 'America/Argentina/Buenos_Aires', dirArchivos: path.join(dir, 'archivos'), maxAdjuntoMb: 1, ...extra });
   let primera: Persona | null = null;
   const registrar = async (nombre: string) => {
     const p = new Persona(app);
@@ -69,5 +68,5 @@ export function crearMundo(): Mundo {
     if (!primera) primera = p;
     return p;
   };
-  return { app, db, registrar, anonimo: new Persona(app), cerrar: async () => { await app.close(); db.close(); } };
+  return { app, db, dir, registrar, anonimo: new Persona(app), cerrar: async () => { await app.close(); db.close(); } };
 }

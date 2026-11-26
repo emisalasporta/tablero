@@ -9,6 +9,9 @@ Se actualiza al terminar cada tanda. Estado: **tanda 2.2** hecha (lo de la 2.1 m
 | `servidor/` | El programa que corre en el servidor (Node + TypeScript, sin compilar: Node lo ejecuta directo). |
 | `servidor/migraciones/` | Cambios de estructura de la base, numerados (`001_…sql`). Nunca se edita uno ya publicado: se agrega otro. |
 | `servidor/mcp/` | La puerta de Alex: `herramientas.ts` (la lista de herramientas) y `puerta.ts` (la dirección `/mcp`). |
+| `servidor/respaldo.ts` | Respaldo diario, copia fuera del servidor y restauración. |
+| `servidor/rutas/servidor.ts`, `servidor/registro.ts` | Estado del servidor, publicaciones de Dokploy y memoria corta de errores. |
+| `.github/workflows/` | En GitHub: las pruebas en cada cambio y el botón de emergencia "Volver a publicar". |
 | `servidor/rutas/puerta.ts` | Quién entra por la puerta: el permiso desde Claude (OAuth), las llaves y la cuenta Alex. |
 | `web/` | Las pantallas (React + Vite). Se arman a `dist/web`. |
 | `pruebas/` | Pruebas automáticas (Vitest). |
@@ -87,6 +90,9 @@ Abre en http://localhost:3000. Para trabajar en las pantallas con recarga autom�
 | `DATA_DIR` | Carpeta de datos (base, adjuntos, respaldos) | `./datos` (en Docker: `/app/data`) |
 | `TZ` | Zona horaria | `America/Argentina/Buenos_Aires` |
 | `URL_PUBLICA` | Dirección pública de la app (`https://…`), para la puerta de Alex. Solo hace falta si la app no logra deducirla de los pedidos | se deduce |
+| `R2_ENDPOINT`, `R2_BUCKET`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY` | Depósito para la copia del respaldo fuera del servidor. Con las cuatro, se enciende | apagada |
+| `DOKPLOY_URL`, `DOKPLOY_API_KEY`, `DOKPLOY_APP_ID` | Para que Alex vea las publicaciones y pueda volver a publicar | sin acceso |
+| `RESTAURAR` | Nombre de un respaldo a poner en lugar de la base al arrancar (ver "Volver atrás") | — |
 | `MAX_ADJUNTO_MB` | Tope de cada archivo adjunto, en MB. Cloudflare (plan gratis) no deja pasar más de 100 | `100` |
 
 ## La puerta de Alex (MCP)
@@ -134,7 +140,19 @@ Con `DOKPLOY_URL` y `DOKPLOY_API_KEY` de `PRIVADO.md`, encabezado `x-api-key`:
 - Antes de aplicar migraciones sobre una base que ya existía se guarda una copia en `DATA_DIR/respaldos/antes-de-NNN-<fecha>.db`.
 
 ## Respaldo
-Pendiente (Fase 4): diario + copia fuera del servidor.
+**En el servidor (anda solo, sin configurar nada):**
+- Todos los días, pasadas las 03:30 de Argentina, la app copia la base a `DATA_DIR/respaldos/diario-AAAA-MM-DD.db` (revisa cada 10 minutos; si la app estuvo apagada a esa hora, lo hace al volver). La copia es consistente y no frena nada (`VACUUM INTO`).
+- Se guardan 14 diarias, 8 semanales (las de domingo), las últimas 10 manuales y las últimas 10 previas a migraciones.
+- Archivos subidos: en `DATA_DIR/respaldos/archivos/` queda un segundo nombre de cada archivo (enlace duro: no ocupa espacio extra). Si la app borra un original, ese segundo nombre sigue 30 días.
+- A mano: Tu cuenta → "Respaldo y servidor" → "Hacer uno ahora", o Alex con la herramienta `respaldo_hacer`. Estado: `GET /api/admin/respaldos` (herramienta `respaldos_ver`).
+- Ojo: todo esto vive en el mismo disco que los datos. Protege de errores de la app o de un cambio malo, **no** de perder el servidor.
+
+**Fuera del servidor (hay que encenderlo):** con las cuatro variables `R2_*` cargadas en Dokploy, después de cada respaldo la app sube la base comprimida a `base/<nombre>.gz` y los archivos nuevos a `archivos/…` en un depósito compatible con S3 (Cloudflare R2). Afuera se guardan 30 días de bases; los archivos no se borran. Si la subida falla, el respaldo local se hace igual y el error queda en "Respaldo y servidor" y en `respaldos_ver`. **Estado al 26/11/2026: apagada (falta crear el depósito y su clave en Cloudflare) y sin probar contra un depósito real; solo contra uno de mentira en las pruebas.**
+
+## Ver el servidor (Alex)
+- Por la puerta: `servidor_ver` (versión que corre, últimas publicaciones en Dokploy con su estado, últimos errores de la app) y `servidor_publicar` (volver a armar y publicar `main`). Usan `DOKPLOY_URL`, `DOKPLOY_API_KEY` y `DOKPLOY_APP_ID`, cargadas como variables en Dokploy.
+- Los errores recientes son una memoria corta (los últimos 100) que se vacía cuando la app arranca.
+- Si la app está caída: desde Claude Code con la clave de `PRIVADO.md` (ver "Publicar"), o desde GitHub → Actions → "Volver a publicar" → Run workflow (usa los secretos del repositorio con esos mismos tres nombres; **al 26/11/2026 todavía no están cargados**, así que ese botón aún no funciona).
 
 ## Volver atrás
 **Código (ensayado el 25/11/2026):**
@@ -148,4 +166,10 @@ Se publica sola la versión anterior en menos de un minuto. Comprobar con `/api/
 
 Si lo que se subió tenía pruebas rotas no hace falta apurarse: Dokploy no lo publica y sigue la versión anterior (también ensayado). La aplicación figura con estado `error` en Dokploy hasta la siguiente publicación buena.
 
-**Datos (pendiente de ensayar, Fase 4):** frenar la app, reemplazar `tablero.db` por la copia `respaldos/antes-de-NNN-…db`, arrancar.
+**Datos (ensayado el 26/11/2026 en una carpeta de prueba, arrancando la app de verdad; no en el servidor publicado):**
+1. Elegir el respaldo: `respaldos_ver` o Tu cuenta → "Respaldo y servidor". Sirven los `diario-…`, `manual-…` y `antes-de-…`.
+2. En Dokploy, sumar a las variables de la aplicación `RESTAURAR=<nombre exacto del respaldo>` y volver a publicar (`servidor_publicar`, el botón Deploy, o por la API).
+3. Al arrancar, la app comprueba que el respaldo esté sano, guarda lo que había en `respaldos/antes-de-restaurar-<fecha>.db` y pone el respaldo en su lugar. Lo hace una sola vez por nombre (queda anotado en `respaldos/.restaurado`), así que dejar la variable puesta no repite nada; conviene quitarla después.
+4. Si el nombre no existe o el archivo está dañado, la app no arranca y lo dice en el registro; sigue funcionando la versión anterior. Se corrige la variable y se publica de nuevo.
+- Si lo restaurado es de antes de una migración, la migración se vuelve a aplicar sola al arrancar.
+- Desde la copia externa: bajar `base/<nombre>.gz` del depósito, descomprimirlo y ponerlo en `DATA_DIR/respaldos/` del volumen; después, los mismos pasos. Los archivos se copian de `archivos/` a `DATA_DIR/archivos/`.

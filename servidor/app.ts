@@ -14,6 +14,9 @@ import { rutasEspacios } from './rutas/espacios.ts';
 import { rutasFotos } from './rutas/fotos.ts';
 import { rutasPuerta } from './rutas/puerta.ts';
 import { rutasMcp } from './mcp/puerta.ts';
+import { rutasServidor, type ConfigDokploy } from './rutas/servidor.ts';
+import { Respaldos, type ConfigExterno } from './respaldo.ts';
+import { anotarError } from './registro.ts';
 import { rutasTarjeta } from './rutas/tarjeta.ts';
 import { rutasTableros } from './rutas/tableros.ts';
 import { ErrorApi, noAutenticado, noExiste } from './util.ts';
@@ -30,13 +33,19 @@ export interface Dependencias {
   maxAdjuntoMb?: number;
   /** Dirección pública de la app (https://…). Si falta, se deduce de cada pedido. */
   urlPublica?: string;
+  /** Depósito para la copia del respaldo fuera del servidor. Sin esto, el respaldo queda solo en el servidor. */
+  externo?: ConfigExterno | null;
+  /** Acceso a Dokploy, para ver publicaciones y volver a publicar. */
+  dokploy?: ConfigDokploy | null;
+  /** Con qué se hacen los pedidos hacia afuera (las pruebas lo reemplazan por uno de mentira). */
+  pedirAfuera?: typeof fetch;
 }
 
 declare module 'fastify' {
-  interface FastifyInstance { /** Todas las rutas registradas, como "GET /api/salud". La usa la prueba de cobertura de la puerta de Alex. */ rutas: string[] }
+  interface FastifyInstance { /** Todas las rutas registradas, como "GET /api/salud". La usa la prueba de cobertura de la puerta de Alex. */ rutas: string[]; respaldos: Respaldos }
 }
 
-export function crearApp({ db, zonaHoraria, dirWeb, dirArchivos, maxAdjuntoMb, urlPublica }: Dependencias): FastifyInstance {
+export function crearApp({ db, zonaHoraria, dirWeb, dirArchivos, maxAdjuntoMb, urlPublica, externo, dokploy, pedirAfuera }: Dependencias): FastifyInstance {
   // trustProxy: la app corre detrás del proxy de Dokploy y de Cloudflare; así sabe si el pedido original vino por HTTPS.
   const app = Fastify({ logger: false, trustProxy: true, bodyLimit: 1024 * 1024 });
   const version = leerVersion();
@@ -57,7 +66,7 @@ export function crearApp({ db, zonaHoraria, dirWeb, dirArchivos, maxAdjuntoMb, u
   app.setErrorHandler((err: Error & { statusCode?: number; validation?: unknown }, _req, reply) => {
     if (err instanceof ErrorApi) return reply.code(err.estado).send({ error: err.codigo, mensaje: err.message });
     if (err.statusCode && err.statusCode < 500) return reply.code(err.statusCode).send({ error: 'pedido_invalido', mensaje: 'El pedido no tiene el formato esperado.' });
-    console.error(err);
+    anotarError(`${_req.method} ${_req.url.split('?')[0]}`, err);
     return reply.code(500).send({ error: 'interno', mensaje: 'Algo falló del lado del servidor. Probá de nuevo.' });
   });
 
@@ -93,6 +102,10 @@ export function crearApp({ db, zonaHoraria, dirWeb, dirArchivos, maxAdjuntoMb, u
   rutasFotos(app, db, archivos);
   rutasPuerta(app, db, urlPublica);
   rutasMcp(app, urlPublica);
+  const respaldos = new Respaldos(db, path.dirname(dirArchivos), zonaHoraria, externo ?? null, pedirAfuera);
+  app.decorate('respaldos', respaldos);
+  app.addHook('onClose', async () => respaldos.parar());
+  rutasServidor(app, respaldos, dokploy ?? null, pedirAfuera);
 
   // Línea en vivo de un tablero. Solo se abre si la persona puede ver ese tablero.
   app.register(fastifyWebsocket, { options: { maxPayload: 4096 } });

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { api, subir, Avatar, Campo, CopiarEnlace, Formulario, leerTema, ponerTema, useAccion, useCarga, useSesion } from '../base.tsx';
 import type { Tema, Yo } from '../base.tsx';
-import { hace } from '../tablero/piezas.tsx';
+import { fechaCorta, hace, peso } from '../tablero/piezas.tsx';
 
 function AdminGeneral() {
   const lista = useCarga<{ usuarios: { id: string; usuario: string; nombre: string; iniciales: string; email: string; es_admin_general: boolean; es_robot: boolean }[] }>('/api/admin/usuarios');
@@ -67,6 +67,32 @@ function Alex() {
           <button type="submit" className="btn" disabled={accion.ocupado}>Crear llave</button>
         </form>
       </div>
+    </div>
+  );
+}
+
+/** Respaldos y estado del servidor, para la administración general. */
+function Cuidado() {
+  const resp = useCarga<{ ultimo: { nombre: string; fecha: string; tamano: number } | null; respaldos: { nombre: string; tipo: string; fecha: string; tamano: number }[]; externo: { activo: boolean; ultimo_ok: string | null; error: string | null }; hora_diaria: string }>('/api/admin/respaldos');
+  const serv = useCarga<{ app: { commit: string; arranco_en: string }; publicacion: { configurado: boolean; estado?: string; error?: string; ultimas?: { que: string; estado: string; cuando: string }[] }; errores: { cuando: string; donde: string; mensaje: string }[] }>('/api/admin/servidor');
+  const accion = useAccion();
+  const r = resp.datos;
+  const sv = serv.datos;
+  if (!r || !sv) return null;
+  const ESTADO: Record<string, string> = { done: 'publicada', error: 'falló', running: 'en curso', idle: 'en espera' };
+  return (
+    <div className="panel" id="cuidado">
+      <div className="columna" style={{ gap: 4 }}><h2>Respaldo y servidor</h2><p className="suave">Una copia de los datos todos los días a las {r.hora_diaria}. Se guardan 14 diarias y 8 semanales.</p></div>
+      {accion.error && <p className="error" role="alert">{accion.error}</p>}
+      <ul className="renglones">
+        <li><span className="quien"><b>Último respaldo</b><small>{r.ultimo ? `${fechaCorta(r.ultimo.fecha)} · ${peso(r.ultimo.tamano)} · ${r.respaldos.length} guardados` : 'Todavía no hay ninguno'}</small></span>
+          <button type="button" className="btn chico" disabled={accion.ocupado} onClick={() => accion.hacer(async () => { await api('POST', '/api/admin/respaldos'); resp.recargar(); serv.recargar(); })}>{accion.ocupado ? 'Copiando…' : 'Hacer uno ahora'}</button></li>
+        <li><span className="quien"><b>Copia fuera del servidor</b><small>{!r.externo.activo ? 'Apagada: si se pierde el servidor, se pierden los datos' : r.externo.error ? `Falló: ${r.externo.error}` : r.externo.ultimo_ok ? `Al día · ${hace(r.externo.ultimo_ok)}` : 'Encendida, todavía sin la primera copia'}</small></span>
+          <span className={`chapa${r.externo.activo && !r.externo.error ? ' acento' : ''}`}>{!r.externo.activo ? 'Apagada' : r.externo.error ? 'Con error' : 'Encendida'}</span></li>
+        <li><span className="quien"><b>Versión publicada</b><small>{sv.app.commit} · corriendo desde {hace(sv.app.arranco_en)}</small></span>
+          {sv.publicacion.configurado && sv.publicacion.ultimas?.[0] && <span className="chapa">{ESTADO[sv.publicacion.ultimas[0].estado] ?? sv.publicacion.ultimas[0].estado}</span>}</li>
+        <li><span className="quien"><b>Errores recientes</b><small>{sv.errores.length === 0 ? 'Ninguno desde que arrancó' : `${sv.errores.length} · el último ${hace(sv.errores[0].cuando)}: ${sv.errores[0].mensaje}`}</small></span></li>
+      </ul>
     </div>
   );
 }
@@ -146,6 +172,7 @@ export function Perfil() {
         </Formulario>
       </div>
       {yo.es_admin_general && <Alex />}
+      {yo.es_admin_general && <Cuidado />}
       {yo.es_admin_general && <AdminGeneral />}
     </main>
   );

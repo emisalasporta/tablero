@@ -1,6 +1,6 @@
 # PARIDAD — todas las funciones de Trello y su estado
 
-Última actualización: 26/11/2026 (Fase 3: la puerta de Alex).
+Última actualización: 26/11/2026 (Fase 4: respaldo, restauración y acceso de Alex al servidor).
 
 ## Cómo leer esta lista
 - **Estado:** `pendiente` · `hecha` · `no se puede` (con el porqué en la nota).
@@ -16,8 +16,8 @@
 
 | Estado | Cantidad |
 |---|---|
-| Hechas | 149 |
-| Pendientes (se pueden igualar) | 189 |
+| Hechas | 152 |
+| Pendientes (se pueden igualar) | 186 |
 | Pendientes pero parciales (⚠, no quedan idénticas) | 14 |
 | No se puede | 47 |
 
@@ -51,7 +51,7 @@
 | X. Apariencia y accesibilidad | 7 | 2 | 5 | 0 | 0 |
 | Y. Tiempo real | 5 | 4 | 1 | 0 | 0 |
 | Z. Administración avanzada (Enterprise) | 6 | 0 | 2 | 0 | 4 |
-| AA. Requisitos propios de este proyecto (no son de Trello, pero se controlan acá) | 9 | 5 | 4 | 0 | 0 |
+| AA. Requisitos propios de este proyecto (no son de Trello, pero se controlan acá) | 9 | 8 | 1 | 0 | 0 |
 <!-- RESUMEN-FIN -->
 
 ---
@@ -558,7 +558,7 @@
 | AA03 | Prueba que verifica que cada función tiene su herramienta MCP | hecha | 3 | — | |
 | AA04 | Publicación automática al subir a main | hecha | 4 | — | Comprobado el 25/11/2026: un cambio subido a main quedó publicado en unos 30 segundos |
 | AA05 | Pruebas que frenan la publicación si fallan | hecha | 2.0 | — | Comprobado el 25/11/2026 con una prueba rota a propósito: Dokploy marcó error y siguió la versión anterior |
-| AA06 | Respaldo diario + copia fuera del servidor | pendiente | 4 | — | |
-| AA07 | Vuelta atrás documentada y ensayada | pendiente | 4 | — | Vuelta atrás del código ya ensayada (revertir y subir). Falta ensayar la de los datos, en la Fase 4 |
-| AA08 | Acceso de Alex a Dokploy (estado, errores, republicar) | pendiente | 4 | — | |
-| AA09 | MANUAL.md al día | pendiente | 4 | — | |
+| AA06 | Respaldo diario + copia fuera del servidor | pendiente | 4 | — | Respaldo diario en el servidor: hecho (26/11/2026). Copia fuera del servidor: programada pero apagada; falta el depósito en Cloudflare y probarla de verdad |
+| AA07 | Vuelta atrás documentada y ensayada | hecha | 4 | — | Código: ensayado el 25/11/2026. Datos: ensayado el 26/11/2026 en una carpeta de prueba (variable RESTAURAR); no en el servidor publicado |
+| AA08 | Acceso de Alex a Dokploy (estado, errores, republicar) | hecha | 4 | — | Herramientas servidor_ver y servidor_publicar, más el botón de emergencia en GitHub (faltan sus secretos). Sin comprobar todavía en el servidor publicado (hace falta una cuenta) |
+| AA09 | MANUAL.md al día | hecha | 4 | — |  |

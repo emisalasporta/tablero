@@ -1,0 +1,19 @@
+# Camino de emergencia: volver a publicar a mano desde GitHub (pestaña Actions → "Volver a publicar" → Run workflow).
+# Sirve aunque la app esté caída. Usa los secretos DOKPLOY_URL, DOKPLOY_API_KEY y DOKPLOY_APP_ID del repositorio.
+name: Volver a publicar
+on:
+  workflow_dispatch:
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pedirle a Dokploy que arme y publique main
+        env:
+          DOKPLOY_URL: ${{ secrets.DOKPLOY_URL }}
+          DOKPLOY_API_KEY: ${{ secrets.DOKPLOY_API_KEY }}
+          DOKPLOY_APP_ID: ${{ secrets.DOKPLOY_APP_ID }}
+        run: |
+          curl --fail --silent --show-error --max-time 30 -X POST "$DOKPLOY_URL/api/application.deploy" \
+            -H "x-api-key: $DOKPLOY_API_KEY" -H "content-type: application/json" \
+            -d "{\"applicationId\":\"$DOKPLOY_APP_ID\"}"
+          echo "Publicación pedida."
