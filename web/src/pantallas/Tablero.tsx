@@ -181,7 +181,7 @@ function DialogoActividad({ d, alAbrir, alCerrar }: { d: Datos; alAbrir: (enlace
       {!accion.ocupado && filas.length === 0 && <p className="suave">Todavía no hay nada.</p>}
       <ul className="linea">{filas.map((a) => (
         <li key={a.id} className="hecho-menor">{a.actor ? <Avatar p={a.actor} chica /> : <span className="per chica" />}
-          <p><b>{a.actor?.nombre ?? 'Alguien'}</b> {describir(a, false)} <small className="suave" title={new Date(a.creado_en).toLocaleString('es-AR')}>· {hace(a.creado_en)}</small>
+          <p><b>{a.actor?.nombre ?? (a.datos.de_trello ? `${a.datos.de_trello} (en Trello)` : 'Alguien')}</b> {describir(a, false)} <small className="suave" title={new Date(a.creado_en).toLocaleString('es-AR')}>· {hace(a.creado_en)}</small>
             {a.tarjeta_enlace && <> · <button type="button" className="como-enlace" onClick={() => alAbrir(a.tarjeta_enlace!)}>abrir tarjeta</button></>}</p></li>
       ))}</ul>
       {hayMas && <div><button type="button" className="btn" disabled={accion.ocupado} onClick={() => void traer(filas)}>Cargar más</button></div>}

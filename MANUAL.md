@@ -114,6 +114,17 @@ Alex es Claude manejando la app. Entra por `https://<dirección de la app>/mcp` 
 
 **Probarla a mano:** `curl -X POST <dirección>/mcp -H "Authorization: Bearer mmd_…" -H "content-type: application/json" -d '{"jsonrpc":"2.0","id":1,"method":"tools/list"}'`
 
+## Traer tableros de Trello
+
+En la página de un espacio (o en el inicio) hay una ficha **"Traer de Trello"**. Se elige el archivo que exporta Trello (en el tablero: menú → Imprimir, exportar y compartir → Exportar como JSON) y la app arma un tablero nuevo. Al terminar muestra un informe de qué entró y qué no. Alex hace lo mismo con la herramienta `tablero_importar_trello` (el archivo viaja en base64: para tableros grandes conviene la pantalla). La app nunca habla con Trello: trabaja solo con el archivo.
+
+- **Entra:** nombre y descripción del tablero, color de fondo, listas (las cerradas, archivadas), tarjetas con su número, descripción, fechas, completada, etiquetas con sus colores, portadas de color, checklists con sus ítems, comentarios con su fecha y el historial (crear, mover, archivar, renombrar, fechas, checklists, adjuntos, miembros).
+- **Personas:** se emparejan por usuario, nombre o correo con las cuentas que ya existen. Quien no tiene cuenta no se crea: sus comentarios y movimientos quedan con su nombre "(en Trello)" y sus asignaciones a tarjetas se pierden. Se puede emparejar a mano con `?emparejar=usuarioDeTrello:usuarioDeAca`.
+- **No entra (el informe lo cuenta):** los archivos adjuntos subidos a Trello quedan como **enlace a Trello** (no se bajan; si se cierra la cuenta de Trello se pierden), las portadas con foto, los campos personalizados, las pegatinas y los datos de Power-Ups. Trello exporta como mucho los últimos 1.000 movimientos.
+- Si el mismo tablero ya se había traído, avisa y pide confirmar antes de crear otro. Tope del archivo: 50 MB. Todo entra en una sola operación: si falla, no queda nada a medias.
+- Código: `servidor/importar.ts` (la traducción), `servidor/rutas/importar.ts` (la dirección `POST /api/espacios/:id/importar/trello`), tabla `importaciones` (guarda cada informe). Pruebas: `pruebas/importar.test.ts`.
+- **Estado al 26/11/2026:** probado con archivos armados a mano con la forma de la exportación de Trello. **Falta probarlo con una exportación real de un tablero de Emiliano.** Bajar los archivos adjuntos de Trello queda pendiente (necesita una clave de la cuenta de Trello).
+
 ## Cómo saber qué versión está publicada
 `GET /api/salud` devuelve `version`, `commit` (los primeros 12 caracteres del cambio) y `armada_en`.
 

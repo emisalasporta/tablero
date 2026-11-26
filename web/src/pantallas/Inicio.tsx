@@ -1,6 +1,6 @@
 // Inicio: mis espacios de trabajo y sus tableros. También el diálogo para crear un tablero.
 import { useState } from 'react';
-import { api, AYUDA_VIS, Campo, Dialogo, Enlace, Formulario, navegar, NOMBRE_VIS, pintarFondo, useCarga } from '../base.tsx';
+import { api, AYUDA_VIS, Campo, Dialogo, Enlace, ErrorServidor, Formulario, navegar, NOMBRE_VIS, pintarFondo, subir, useCarga } from '../base.tsx';
 import type { Fondo } from '../base.tsx';
 
 export interface EspacioResumen { id: string; nombre: string; descripcion: string; visibilidad: string; rol: string | null; invitado: boolean }
@@ -33,8 +33,56 @@ export function CrearTablero({ espacio, puedeCrear, alCerrar }: { espacio: { id:
   );
 }
 
+interface Informe { tablero: { enlace: string; nombre: string }; entraron: Record<string, number>; personas_sin_cuenta: string[]; no_entro: string[]; avisos: string[] }
+const QUE: [string, string, string][] = [['listas', 'lista', 'listas'], ['tarjetas', 'tarjeta', 'tarjetas'], ['etiquetas', 'etiqueta', 'etiquetas'], ['checklists', 'checklist', 'checklists'], ['items', 'ítem de checklist', 'ítems de checklist'], ['comentarios', 'comentario', 'comentarios'], ['adjuntos', 'adjunto', 'adjuntos'], ['actividad', 'movimiento del historial', 'movimientos del historial'], ['miembros', 'persona sumada al tablero', 'personas sumadas al tablero']];
+
+/** Traer un tablero desde el archivo JSON que exporta Trello. Al terminar muestra qué entró y qué no. */
+export function ImportarTrello({ espacio, puedeCrear, alCerrar }: { espacio: { id: string; nombre: string }; puedeCrear: Record<string, boolean>; alCerrar: () => void }) {
+  const opciones = ['espacio', 'privado', 'publico'].filter((v) => puedeCrear[v]);
+  const [archivo, setArchivo] = useState<File | null>(null);
+  const [vis, setVis] = useState(opciones[0] ?? 'espacio');
+  const [repetir, setRepetir] = useState(false);
+  const [informe, setInforme] = useState<Informe | null>(null);
+  if (informe) {
+    const e = informe.entraron;
+    return (
+      <Dialogo titulo="Tablero importado" alCerrar={alCerrar}>
+        <div className="columna">
+          <p>Se creó el tablero <b>{informe.tablero.nombre}</b> con:</p>
+          <ul className="informe">{QUE.filter(([k]) => e[k] > 0).map(([k, uno, varios]) => <li key={k}><b>{e[k]}</b> {e[k] === 1 ? uno : varios}</li>)}</ul>
+          {informe.no_entro.length > 0 && <><h3>Lo que no entró</h3><ul className="informe">{informe.no_entro.map((t) => <li key={t}>{t}</li>)}</ul></>}
+          {informe.personas_sin_cuenta.length > 0 && <><h3>Personas sin cuenta acá</h3><p className="suave">{informe.personas_sin_cuenta.join(', ')}</p></>}
+          {informe.avisos.map((t) => <p key={t} className="suave">{t}</p>)}
+          <div className="fila"><button type="button" className="btn lleno" onClick={() => navegar(`/t/${informe.tablero.enlace}`)}>Abrir el tablero</button></div>
+        </div>
+      </Dialogo>
+    );
+  }
+  return (
+    <Dialogo titulo="Traer un tablero de Trello" alCerrar={alCerrar}>
+      <Formulario boton={repetir ? 'Traerlo otra vez' : 'Importar'} alEnviar={async () => {
+        if (!archivo) throw new Error('Elegí el archivo que exportaste de Trello.');
+        try {
+          const r = await subir<{ informe: Informe }>(`/api/espacios/${espacio.id}/importar/trello?visibilidad=${vis}${repetir ? '&repetir=1' : ''}`, archivo);
+          setInforme(r.informe);
+        } catch (err) {
+          if (err instanceof ErrorServidor && err.codigo === 'ya_importado') setRepetir(true);
+          throw err;
+        }
+      }}>
+        <p className="suave">En Trello, abrí el tablero y andá a: menú (•••) → Imprimir, exportar y compartir → Exportar como JSON. Guardá el archivo y elegilo acá. Entra al espacio {espacio.nombre}.</p>
+        <Campo rotulo="Archivo de Trello (.json)"><input id="imp-archivo" type="file" accept=".json,application/json" onChange={(e) => { setArchivo(e.target.files?.[0] ?? null); setRepetir(false); }} required /></Campo>
+        <Campo rotulo="Quién lo ve" ayuda={AYUDA_VIS[vis]}>
+          <select id="imp-vis" value={vis} onChange={(e) => setVis(e.target.value)}>{opciones.map((v) => <option key={v} value={v}>{NOMBRE_VIS[v]}</option>)}</select>
+        </Campo>
+      </Formulario>
+    </Dialogo>
+  );
+}
+
 export function GrillaTableros({ espacio, lista }: { espacio: { id: string; nombre: string }; lista: ListaTableros }) {
   const [creando, setCreando] = useState(false);
+  const [importando, setImportando] = useState(false);
   const abiertos = lista.tableros.filter((t) => !t.cerrado);
   const cerrados = lista.tableros.filter((t) => t.cerrado);
   const puede = Object.values(lista.puede_crear).some(Boolean);
@@ -46,6 +94,7 @@ export function GrillaTableros({ espacio, lista }: { espacio: { id: string; nomb
             <Ficha key={t.id} t={t} abajo={NOMBRE_VIS[t.visibilidad]} />
           ))}
           {puede && <button type="button" className="ficha nueva" onClick={() => setCreando(true)}><b>+ Tablero nuevo</b></button>}
+          {puede && <button type="button" className="ficha nueva" onClick={() => setImportando(true)}><b>Traer de Trello</b><span className="suave">Desde un archivo exportado</span></button>}
         </div>
       )}
       {cerrados.length > 0 && (
@@ -57,6 +106,7 @@ export function GrillaTableros({ espacio, lista }: { espacio: { id: string; nomb
         </details>
       )}
       {creando && <CrearTablero espacio={espacio} puedeCrear={lista.puede_crear} alCerrar={() => setCreando(false)} />}
+      {importando && <ImportarTrello espacio={espacio} puedeCrear={lista.puede_crear} alCerrar={() => setImportando(false)} />}
     </>
   );
 }

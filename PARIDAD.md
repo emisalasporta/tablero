@@ -16,8 +16,8 @@
 
 | Estado | Cantidad |
 |---|---|
-| Hechas | 153 |
-| Pendientes (se pueden igualar) | 185 |
+| Hechas | 154 |
+| Pendientes (se pueden igualar) | 184 |
 | Pendientes pero parciales (⚠, no quedan idénticas) | 14 |
 | No se puede | 47 |
 
@@ -47,7 +47,7 @@
 | T. Bandeja de entrada y Planificador | 12 | 0 | 9 | 1 | 2 |
 | U. Plantillas | 5 | 0 | 4 | 0 | 1 |
 | V. Teléfono, instalación y escritorio | 13 | 5 | 1 | 1 | 6 |
-| W. Importar, exportar e imprimir | 5 | 0 | 4 | 0 | 1 |
+| W. Importar, exportar e imprimir | 5 | 1 | 3 | 0 | 1 |
 | X. Apariencia y accesibilidad | 7 | 2 | 5 | 0 | 0 |
 | Y. Tiempo real | 5 | 4 | 1 | 0 | 0 |
 | Z. Administración avanzada (Enterprise) | 6 | 0 | 2 | 0 | 4 |
@@ -517,7 +517,7 @@
 | W01 | Exportar tablero a JSON | pendiente | 6.7 | A | Con toda la actividad (Trello corta en 1.000) |
 | W02 | Exportar tablero a CSV | pendiente | 6.7 | A | |
 | W03 | Imprimir tablero | pendiente | 6.7 | A | |
-| W04 | Importar tableros desde el JSON de Trello | pendiente | 5 | A | Esto Trello no lo tiene (no reimporta sus exportaciones) |
+| W04 | Importar tableros desde el JSON de Trello | hecha | 5 | A | Esto Trello no lo tiene. Los archivos adjuntos quedan como enlace a Trello y los campos personalizados no entran (ver MANUAL.md). Falta probar con una exportación real |
 | W05 | Importar desde otras herramientas (Asana, Jira, etc.) | no se puede | — | A | Fuera de alcance; Trello lo hace con importadores de terceros |
 
 ## X. Apariencia y accesibilidad

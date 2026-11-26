@@ -12,6 +12,7 @@ import { rutasContenido } from './rutas/contenido.ts';
 import { rutasCuenta } from './rutas/cuenta.ts';
 import { rutasEspacios } from './rutas/espacios.ts';
 import { rutasFotos } from './rutas/fotos.ts';
+import { rutasImportar } from './rutas/importar.ts';
 import { rutasPuerta } from './rutas/puerta.ts';
 import { rutasMcp } from './mcp/puerta.ts';
 import { rutasServidor, type ConfigDokploy } from './rutas/servidor.ts';
@@ -100,6 +101,7 @@ export function crearApp({ db, zonaHoraria, dirWeb, dirArchivos, maxAdjuntoMb, u
   const ayuda = rutasContenido(app, db, vivo, archivos);
   rutasTarjeta(app, db, vivo, archivos, ayuda);
   rutasFotos(app, db, archivos);
+  rutasImportar(app, db, zonaHoraria);
   rutasPuerta(app, db, urlPublica);
   rutasMcp(app, urlPublica);
   const respaldos = new Respaldos(db, path.dirname(dirArchivos), zonaHoraria, externo ?? null, pedirAfuera);

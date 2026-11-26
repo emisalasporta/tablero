@@ -14,7 +14,7 @@ import type { Actividad } from './piezas.tsx';
 interface Item { id: string; checklist_id: string; texto: string; hecho: boolean; posicion: number; asignado_id: string | null; vence: string | null }
 interface Checklist { id: string; nombre: string; posicion: number; items: Item[] }
 interface Adjunto { id: string; tipo: 'archivo' | 'enlace'; nombre: string; url: string; mime: string; tamano: number; posicion: number; creado_en: string; es_imagen: boolean; se_ve: boolean }
-interface Comentario { id: string; autor: Persona | null; texto: string; creado_en: string; editado_en: string | null; reacciones: { emoji: string; usuarios: string[] }[] }
+interface Comentario { id: string; autor: Persona | null; autor_externo?: string | null; texto: string; creado_en: string; editado_en: string | null; reacciones: { emoji: string; usuarios: string[] }[] }
 interface Detalle { tarjeta: Tarjeta & { descripcion: string }; lista: Lista; tablero: { id: string; enlace: string; nombre: string }; checklists: Checklist[]; adjuntos: Adjunto[]; comentarios: Comentario[]; actividad: Actividad[] }
 
 const archivoDe = (id: string) => `/api/adjuntos/${id}/archivo`;
@@ -275,12 +275,12 @@ export function DialogoTarjeta({ d, cual, frente, ops, alCambiarTablero, alCerra
             </div>
           )}
           <ul className="linea">{linea.map((x) => x.k === 'a' ? (
-            <li key={x.a.id} className="hecho-menor">{x.a.actor ? <Avatar p={x.a.actor} chica /> : <span className="per chica" />}<p><b>{x.a.actor?.nombre ?? 'Alguien'}</b> {describir(x.a, true)} <small className="suave" title={new Date(x.a.creado_en).toLocaleString('es-AR')}>· {hace(x.a.creado_en)}</small></p></li>
+            <li key={x.a.id} className="hecho-menor">{x.a.actor ? <Avatar p={x.a.actor} chica /> : <span className="per chica" />}<p><b>{x.a.actor?.nombre ?? (x.a.datos.de_trello ? `${x.a.datos.de_trello} (en Trello)` : 'Alguien')}</b> {describir(x.a, true)} <small className="suave" title={new Date(x.a.creado_en).toLocaleString('es-AR')}>· {hace(x.a.creado_en)}</small></p></li>
           ) : (
             <li key={x.c.id} id={`comentario-${x.c.id}`} className={marcado.current === x.c.id ? 'marcado' : ''}>
               {x.c.autor ? <Avatar p={x.c.autor} /> : <span className="per" />}
               <div className="cuerpo">
-                <p><b>{x.c.autor?.nombre ?? 'Cuenta borrada'}</b> <small className="suave" title={new Date(x.c.creado_en).toLocaleString('es-AR')}>{hace(x.c.creado_en)}{x.c.editado_en ? ' (editado)' : ''}</small></p>
+                <p><b>{x.c.autor?.nombre ?? (x.c.autor_externo ? `${x.c.autor_externo} (en Trello)` : 'Cuenta borrada')}</b> <small className="suave" title={new Date(x.c.creado_en).toLocaleString('es-AR')}>{hace(x.c.creado_en)}{x.c.editado_en ? ' (editado)' : ''}</small></p>
                 {editando?.id === x.c.id ? (
                   <div className="columna" style={{ gap: 8 }}>
                     <Editor valor={editando.texto} alCambiar={(v) => setEditando({ id: x.c.id, texto: v })} personas={d.miembros} rotulo="Editar comentario" auto alCancelar={() => setEditando(null)}

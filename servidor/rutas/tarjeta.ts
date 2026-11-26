@@ -27,7 +27,7 @@ const SE_VE = /^(image\/(png|jpeg|gif|webp)|application\/pdf|audio\/[\w.+-]+|vid
 interface Checklist { id: string; tarjeta_id: string; nombre: string; posicion: number }
 interface Item { id: string; checklist_id: string; texto: string; hecho: number; posicion: number; asignado_id: string | null; vence: string | null }
 interface Adjunto { id: string; tarjeta_id: string; tipo: 'archivo' | 'enlace'; nombre: string; url: string; mime: string; tamano: number; posicion: number; creado_por: string | null; creado_en: string }
-interface Comentario { id: string; tarjeta_id: string; autor_id: string | null; texto: string; creado_en: string; editado_en: string | null }
+interface Comentario { id: string; tarjeta_id: string; autor_id: string | null; autor_externo: string | null; texto: string; creado_en: string; editado_en: string | null }
 
 const frenteItem = (i: Item) => ({ id: i.id, checklist_id: i.checklist_id, texto: i.texto, hecho: i.hecho === 1, posicion: i.posicion, asignado_id: i.asignado_id, vence: i.vence });
 const frenteAdjunto = (a: Adjunto) => ({ id: a.id, tipo: a.tipo, nombre: a.nombre, url: a.url, mime: a.mime, tamano: a.tamano, posicion: a.posicion, creado_en: a.creado_en, es_imagen: a.tipo === 'archivo' && a.mime.startsWith('image/'), se_ve: a.tipo === 'archivo' && SE_VE.test(a.mime) });
@@ -62,7 +62,7 @@ export function rutasTarjeta(app: FastifyInstance, db: DatabaseSync, vivo: Vivo,
     return filas.map((c) => {
       const porEmoji = new Map<string, string[]>();
       for (const r of reac) if (r.comentario_id === c.id) porEmoji.set(r.emoji, [...(porEmoji.get(r.emoji) ?? []), r.usuario_id]);
-      return { id: c.id, autor: ficha(c.autor_id), texto: c.texto, creado_en: c.creado_en, editado_en: c.editado_en, reacciones: [...porEmoji].map(([emoji, usuarios]) => ({ emoji, usuarios })) };
+      return { id: c.id, autor: ficha(c.autor_id), autor_externo: c.autor_id ? null : c.autor_externo, texto: c.texto, creado_en: c.creado_en, editado_en: c.editado_en, reacciones: [...porEmoji].map(([emoji, usuarios]) => ({ emoji, usuarios })) };
     });
   }
   function interior(tarjetaId: string) {
