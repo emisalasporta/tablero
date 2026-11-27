@@ -16,8 +16,8 @@
 
 | Estado | Cantidad |
 |---|---|
-| Hechas | 154 |
-| Pendientes (se pueden igualar) | 184 |
+| Hechas | 155 |
+| Pendientes (se pueden igualar) | 183 |
 | Pendientes pero parciales (⚠, no quedan idénticas) | 14 |
 | No se puede | 47 |
 
