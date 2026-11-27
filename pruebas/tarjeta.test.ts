@@ -299,6 +299,26 @@ describe('fondos, favoritos, recientes y borrado definitivo', () => {
     expect((await beto.subir(`/api/tableros/${tablero}/fondo`, PNG)).estado).toBe(403);
   });
 
+  it('el inicio resume mis tableros y lo que vence en estos días', async () => {
+    const dia = (n: number) => new Date(Date.now() + n * 86_400_000).toISOString();
+    const otra = (await ana.post(`/api/tableros/${tablero}/listas`, { nombre: 'Hecho' })).json.lista.id;
+    const nueva = async (titulo: string, vence: string | null, extra: object = {}) => { const id = (await ana.post(`/api/listas/${lista}/tarjetas`, { titulo })).json.tarjeta.id; await ana.patch(`/api/tarjetas/${id}`, { vence, ...extra }); return id; };
+    await ana.patch(`/api/tarjetas/${tarjeta}`, { vence: dia(-2) });
+    await nueva('Pronto', dia(3));
+    await nueva('Lejos', dia(30));
+    await nueva('Lista', dia(-5), { completada: true });
+    await nueva('Guardada', dia(1), { archivada: true });
+    const r = (await ana.get('/api/yo/inicio')).json;
+    expect(r.tableros[tablero]).toEqual({ listas: [{ nombre: 'Pendiente', n: 4 }, { nombre: 'Hecho', n: 0 }], abiertas: 4, vencidas: 1, proximas: 1 });
+    expect(otra).toBeTruthy();
+    expect(r.agenda.map((c: any) => c.titulo)).toEqual(['Pintar', 'Pronto']);
+    expect(r.agenda[0]).toMatchObject({ tablero: 'Obra', lista: 'Pendiente', mia: false });
+    // Quien no ve el tablero no lo recibe.
+    const beto = await m.registrar('Beto');
+    expect((await beto.get('/api/yo/inicio')).json).toEqual({ tableros: {}, agenda: [] });
+    expect((await m.anonimo.get('/api/yo/inicio')).estado).toBe(401);
+  });
+
   it('favoritos y recientes son de cada persona', async () => {
     const beto = await m.registrar('Beto');
     await ana.post(`/api/espacios/${espacio}/miembros`, { quien: 'beto@prueba.test' });

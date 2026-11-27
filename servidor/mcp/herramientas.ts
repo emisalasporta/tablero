@@ -67,6 +67,7 @@ h('yo_cambiar', 'PATCH /api/yo', 'Cambiar mi cuenta', 'Cambia el nombre, el nomb
   { nombre: s('Nombre a mostrar.'), usuario: s('Nombre de usuario para menciones: 3 a 30 letras minúsculas, números o guion bajo.'), bio: s('Biografía.'), zona_horaria: s('Zona horaria, como America/Argentina/Buenos_Aires.') });
 h('yo_foto_subir', 'POST /api/yo/avatar', 'Poner mi foto', 'Pone una foto de perfil a la cuenta de Alex (PNG, JPG, GIF o WebP, hasta 5 MB).', { base64: B64 }, { sube: true, requeridos: ['base64'] });
 h('yo_foto_quitar', 'DELETE /api/yo/avatar', 'Quitar mi foto', 'Quita la foto de perfil de la cuenta de Alex.');
+h('mi_inicio', 'GET /api/yo/inicio', 'Mi pantalla de inicio', 'Resumen de los tableros de Alex: cuántas tarjetas tiene cada lista, cuántas están vencidas, y las tarjetas sin completar que ya vencieron o vencen en los próximos 7 días.');
 h('mis_tableros', 'GET /api/yo/tableros', 'Mis favoritos y recientes', 'Los tableros que Alex marcó como favoritos y los últimos que abrió.');
 h('tableros_editables', 'GET /api/yo/tableros-editables', 'Todos los tableros abiertos', 'Lista TODOS los tableros abiertos de la instalación (con su espacio). Es la forma más rápida de encontrar un tablero por nombre.');
 

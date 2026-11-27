@@ -1,15 +1,43 @@
 // Inicio: mis espacios de trabajo y sus tableros. También el diálogo para crear un tablero.
 import { useState } from 'react';
-import { api, AYUDA_VIS, Campo, Dialogo, Enlace, ErrorServidor, Formulario, navegar, NOMBRE_VIS, pintarFondo, subir, useCarga } from '../base.tsx';
+import { api, AYUDA_VIS, Campo, Dialogo, Enlace, ErrorServidor, Formulario, navegar, NOMBRE_VIS, pintarFondo, subir, useCarga, useSesion } from '../base.tsx';
 import type { Fondo } from '../base.tsx';
 
 export interface EspacioResumen { id: string; nombre: string; descripcion: string; visibilidad: string; rol: string | null; invitado: boolean }
 export interface TableroResumen { id: string; enlace: string; nombre: string; visibilidad: string; cerrado: boolean; mi_rol: string | null; fondo?: Fondo; espacio?: string }
 
-/** La ficha de un tablero, pintada con su fondo. */
-export function Ficha({ t, abajo }: { t: TableroResumen; abajo: string }) {
+/** Cómo viene un tablero: tarjetas por lista y cuántas están vencidas o por vencer. Lo da /api/yo/inicio. */
+export interface ResumenTablero { listas: { nombre: string; n: number }[]; abiertas: number; vencidas: number; proximas: number }
+export interface Cita { enlace: string; titulo: string; vence: string; lista: string; mia: boolean; tablero: string; tablero_enlace: string }
+export interface DatosInicio { tableros: Record<string, ResumenTablero>; agenda: Cita[] }
+
+/** El tablero en chiquito: una barra por lista, tan alta como tarjetas tiene. */
+function Silueta({ r }: { r: ResumenTablero }) {
+  const listas = r.listas.slice(0, 10);
+  const tope = Math.max(1, ...listas.map((l) => l.n));
+  if (listas.length === 0) return <span className="silueta vacia" aria-hidden="true" />;
+  return (
+    <span className="silueta" role="img" aria-label={listas.map((l) => `${l.nombre}: ${l.n}`).join(', ')}>
+      {listas.map((l, i) => <i key={i} title={`${l.nombre}: ${l.n}`} style={{ height: `${l.n === 0 ? 6 : Math.max(14, Math.round((l.n / tope) * 100))}%` }} />)}
+    </span>
+  );
+}
+
+/** La ficha de un tablero, pintada con su fondo. Si viene el resumen, muestra su silueta y sus números. */
+export function Ficha({ t, abajo, r }: { t: TableroResumen; abajo: string; r?: ResumenTablero }) {
   const f = pintarFondo(t.fondo);
-  return <Enlace a={`/t/${t.enlace}`} className={'ficha' + f.clase} estilo={f.estilo}><b>{t.nombre}</b><span className="chapa">{abajo}</span></Enlace>;
+  return (
+    <Enlace a={`/t/${t.enlace}`} className={'ficha' + f.clase + (r ? ' con-resumen' : '')} estilo={f.estilo}>
+      <b>{t.nombre}</b>
+      {r && <Silueta r={r} />}
+      <span className="pie">
+        {r && <span className="dato">{r.abiertas} {r.abiertas === 1 ? 'tarjeta' : 'tarjetas'}</span>}
+        {r && r.vencidas > 0 && <span className="chapa marcador">{r.vencidas} {r.vencidas === 1 ? 'atrasada' : 'atrasadas'}</span>}
+        <span className="hueco" />
+        {abajo && <span className="chapa">{abajo}</span>}
+      </span>
+    </Enlace>
+  );
 }
 export interface ListaTableros { tableros: TableroResumen[]; puede_crear: Record<string, boolean> }
 
@@ -80,7 +108,7 @@ export function ImportarTrello({ espacio, puedeCrear, alCerrar }: { espacio: { i
   );
 }
 
-export function GrillaTableros({ espacio, lista }: { espacio: { id: string; nombre: string }; lista: ListaTableros }) {
+export function GrillaTableros({ espacio, lista, resumenes }: { espacio: { id: string; nombre: string }; lista: ListaTableros; resumenes?: Record<string, ResumenTablero> }) {
   const [creando, setCreando] = useState(false);
   const [importando, setImportando] = useState(false);
   const abiertos = lista.tableros.filter((t) => !t.cerrado);
@@ -91,7 +119,7 @@ export function GrillaTableros({ espacio, lista }: { espacio: { id: string; nomb
       {abiertos.length === 0 && !puede ? <p className="suave">Todavía no hay tableros que puedas ver acá.</p> : (
         <div className="grilla">
           {abiertos.map((t) => (
-            <Ficha key={t.id} t={t} abajo={NOMBRE_VIS[t.visibilidad]} />
+            <Ficha key={t.id} t={t} abajo={NOMBRE_VIS[t.visibilidad]} r={resumenes?.[t.id]} />
           ))}
           {puede && <button type="button" className="ficha nueva" onClick={() => setCreando(true)}><b>+ Tablero nuevo</b></button>}
           {puede && <button type="button" className="ficha nueva" onClick={() => setImportando(true)}><b>Traer de Trello</b><span className="suave">Desde un archivo exportado</span></button>}
@@ -111,18 +139,18 @@ export function GrillaTableros({ espacio, lista }: { espacio: { id: string; nomb
   );
 }
 
-function BloqueEspacio({ e }: { e: EspacioResumen }) {
+function BloqueEspacio({ e, resumenes }: { e: EspacioResumen; resumenes?: Record<string, ResumenTablero> }) {
   const lista = useCarga<ListaTableros>(`/api/espacios/${e.id}/tableros`);
   return (
     <section className="columna">
       <div className="encabezado">
-        <h2><Enlace a={`/e/${e.id}`}>{e.nombre}</Enlace></h2>
+        <h3 className="nombre-espacio"><Enlace a={`/e/${e.id}`}>{e.nombre}</Enlace></h3>
         {e.invitado ? <span className="chapa">Invitado</span> : e.rol === 'admin' ? <span className="chapa acento">Administrás</span> : null}
         <span className="hueco" />
         {!e.invitado && <Enlace a={`/e/${e.id}?ver=miembros`} className="btn chico">Miembros</Enlace>}
         {e.rol === 'admin' && <Enlace a={`/e/${e.id}?ver=ajustes`} className="btn chico">Ajustes</Enlace>}
       </div>
-      {lista.datos && <GrillaTableros espacio={e} lista={lista.datos} />}
+      {lista.datos && <GrillaTableros espacio={e} lista={lista.datos} resumenes={resumenes} />}
       {lista.error && <p className="error">{lista.error.message}</p>}
     </section>
   );
@@ -145,16 +173,75 @@ export function CrearEspacio({ alCerrar }: { alCerrar: () => void }) {
   );
 }
 
+const diaClave = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const DIAS = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb'];
+const hora = (iso: string) => new Date(iso).toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit', hour12: false });
+
+/** La semana a la vista: lo atrasado y lo que vence en cada uno de los próximos siete días. */
+function Semana({ agenda }: { agenda: Cita[] }) {
+  const [todo, setTodo] = useState(false);
+  const hoy = new Date();
+  const claveHoy = diaClave(hoy);
+  const dias = Array.from({ length: 7 }, (_, i) => { const d = new Date(hoy.getFullYear(), hoy.getMonth(), hoy.getDate() + i); return { clave: diaClave(d), rotulo: i === 0 ? 'Hoy' : i === 1 ? 'Mañana' : `${DIAS[d.getDay()]} ${d.getDate()}` }; });
+  const de = (clave: string) => agenda.filter((c) => diaClave(new Date(c.vence)) === clave);
+  const atrasadas = agenda.filter((c) => diaClave(new Date(c.vence)) < claveHoy);
+  const columnas = [{ clave: 'atrasadas', rotulo: 'Atrasadas', citas: atrasadas, clase: ' atraso' }, ...dias.map((d, i) => ({ ...d, citas: de(d.clave), clase: i === 0 ? ' hoy' : '' }))];
+  const hayMas = columnas.some((c) => c.citas.length > 3);
+  const nada = columnas.every((c) => c.citas.length === 0);
+  return (
+    <section className="columna">
+      <div className="encabezado"><h2>Tu semana</h2><span className="hueco" />{hayMas && <button type="button" className="btn chico plano" onClick={() => setTodo(!todo)}>{todo ? 'Ver menos' : 'Ver todas'}</button>}</div>
+      <div className={'semana' + (nada ? ' sin-nada' : '')}>
+        {columnas.map((col) => (
+          <div key={col.clave} className={'dia' + col.clase + (col.citas.length === 0 ? ' libre' : '')}>
+            <span className="rotulo">{col.rotulo}{col.citas.length > 0 && <em>{col.citas.length}</em>}</span>
+            {(todo ? col.citas : col.citas.slice(0, 3)).map((c) => (
+              <Enlace key={c.enlace} a={`/c/${c.enlace}`} className={'cita' + (new Date(c.vence) < hoy ? ' pasada' : '')} title={`${c.tablero} · ${c.lista}`}>
+                <span className="que">{c.titulo}</span>
+                <span className="donde">{col.clave === 'atrasadas' ? new Date(c.vence).toLocaleDateString('es-AR', { day: 'numeric', month: 'short' }) : hora(c.vence)} · {c.tablero}</span>
+              </Enlace>
+            ))}
+            {!todo && col.citas.length > 3 && <span className="mas">+{col.citas.length - 3} más</span>}
+          </div>
+        ))}
+      </div>
+      {nada && <p className="suave">Nada vence estos días. Cuando le pongas fecha a una tarjeta, aparece acá.</p>}
+    </section>
+  );
+}
+
+function Saludo({ nombre, agenda }: { nombre: string; agenda: Cita[] | undefined }) {
+  const ahora = new Date();
+  const h = ahora.getHours();
+  const claveHoy = diaClave(ahora);
+  const atrasadas = agenda?.filter((c) => diaClave(new Date(c.vence)) < claveHoy).length ?? 0;
+  const deHoy = agenda?.filter((c) => diaClave(new Date(c.vence)) === claveHoy).length ?? 0;
+  const resto = (agenda?.length ?? 0) - atrasadas - deHoy;
+  const partes = [atrasadas > 0 && `${atrasadas} ${atrasadas === 1 ? 'atrasada' : 'atrasadas'}`, deHoy > 0 && `${deHoy} para hoy`, resto > 0 && `${resto} en los próximos días`].filter(Boolean) as string[];
+  return (
+    <header className="saludo">
+      <span className="rotulo">{ahora.toLocaleDateString('es-AR', { weekday: 'long', day: 'numeric', month: 'long' })}</span>
+      <h1>{h < 5 ? 'Buenas noches' : h < 13 ? 'Buen día' : h < 20 ? 'Buenas tardes' : 'Buenas noches'}, {nombre.split(' ')[0]}.</h1>
+      {agenda && <p className="suave">{partes.length ? `Tarjetas con fecha: ${partes.join(' · ')}.` : 'No tenés nada con fecha para estos días.'}</p>}
+    </header>
+  );
+}
+
 export function Inicio() {
+  const { yo } = useSesion();
   const espacios = useCarga<{ espacios: EspacioResumen[] }>('/api/espacios');
   const mios = useCarga<{ favoritos: TableroResumen[]; recientes: TableroResumen[] }>('/api/yo/tableros');
+  const inicio = useCarga<DatosInicio>('/api/yo/inicio');
+  const res = inicio.datos?.tableros;
   const [creando, setCreando] = useState(false);
   const recientes = mios.datos?.recientes.filter((t) => !mios.datos!.favoritos.some((f) => f.id === t.id)) ?? [];
   return (
     <main className="pagina">
-      {(mios.datos?.favoritos.length ?? 0) > 0 && <section className="columna"><h2>★ Favoritos</h2><div className="grilla">{mios.datos!.favoritos.map((t) => <Ficha key={t.id} t={t} abajo={t.espacio ?? ''} />)}</div></section>}
-      {recientes.length > 0 && <section className="columna"><h2>Vistos hace poco</h2><div className="grilla">{recientes.slice(0, 4).map((t) => <Ficha key={t.id} t={t} abajo={t.espacio ?? ''} />)}</div></section>}
-      <div className="encabezado"><h1>Tus espacios de trabajo</h1><span className="hueco" /><button type="button" className="btn" onClick={() => setCreando(true)}>Espacio nuevo</button></div>
+      {yo && <Saludo nombre={yo.nombre} agenda={inicio.datos?.agenda} />}
+      {inicio.datos && Object.keys(inicio.datos.tableros).length > 0 && <Semana agenda={inicio.datos.agenda} />}
+      {(mios.datos?.favoritos.length ?? 0) > 0 && <section className="columna"><h2>★ Favoritos</h2><div className="grilla">{mios.datos!.favoritos.map((t) => <Ficha key={t.id} t={t} abajo={t.espacio ?? ''} r={res?.[t.id]} />)}</div></section>}
+      {recientes.length > 0 && <section className="columna"><h2>Vistos hace poco</h2><div className="grilla">{recientes.slice(0, 4).map((t) => <Ficha key={t.id} t={t} abajo={t.espacio ?? ''} r={res?.[t.id]} />)}</div></section>}
+      <div className="encabezado"><h2>Tus espacios de trabajo</h2><span className="hueco" /><button type="button" className="btn" onClick={() => setCreando(true)}>Espacio nuevo</button></div>
       {espacios.error && <p className="error">{espacios.error.message}</p>}
       {espacios.datos?.espacios.length === 0 && (
         <div className="vacio">
@@ -162,7 +249,7 @@ export function Inicio() {
           <button type="button" className="btn lleno" onClick={() => setCreando(true)}>Crear el primero</button>
         </div>
       )}
-      {espacios.datos?.espacios.map((e) => <BloqueEspacio key={e.id} e={e} />)}
+      {espacios.datos?.espacios.map((e) => <BloqueEspacio key={e.id} e={e} resumenes={res} />)}
       {creando && <CrearEspacio alCerrar={() => setCreando(false)} />}
     </main>
   );

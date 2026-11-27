@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { api, subir, Avatar, Campo, CopiarEnlace, Formulario, navegar, NOMBRE_VIS, useAccion, useCarga, useRuta, useSesion } from '../base.tsx';
 import { GrillaTableros } from './Inicio.tsx';
-import type { ListaTableros } from './Inicio.tsx';
+import type { DatosInicio, ListaTableros } from './Inicio.tsx';
 
 interface Ajustes { crear: Record<string, string>; borrar: Record<string, string>; invitados: string }
 interface DatosEspacio { espacio: { id: string; nombre: string; descripcion: string; sitio_web: string; logo: string | null; visibilidad: string; ajustes?: Ajustes }; mi: { rol: string | null; invitado: boolean; administra: boolean } }
@@ -161,6 +161,7 @@ export function Espacio({ id }: { id: string }) {
   const ver = new URLSearchParams(ruta.split('?')[1] ?? '').get('ver') ?? 'tableros';
   const datos = useCarga<DatosEspacio>(`/api/espacios/${id}`);
   const lista = useCarga<ListaTableros>(`/api/espacios/${id}/tableros`);
+  const resumenes = useCarga<DatosInicio>('/api/yo/inicio');
   const accion = useAccion();
   const [pedido, setPedido] = useState(false);
   if (datos.error) return <main className="pagina"><h1>No encontramos ese espacio</h1><p className="suave">{datos.error.message}</p></main>;
@@ -193,7 +194,7 @@ export function Espacio({ id }: { id: string }) {
           ))}
         </div>
       )}
-      {pestana === 'tableros' && lista.datos && <GrillaTableros espacio={e} lista={lista.datos} />}
+      {pestana === 'tableros' && lista.datos && <GrillaTableros espacio={e} lista={lista.datos} resumenes={resumenes.datos?.tableros} />}
       {pestana === 'miembros' && <Miembros id={id} administra={mi.administra} />}
       {pestana === 'ajustes' && e.ajustes && <AjustesEspacio d={datos.datos} alGuardar={datos.recargar} />}
     </main>

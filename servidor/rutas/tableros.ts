@@ -162,6 +162,38 @@ export function rutasTableros(app: FastifyInstance, db: DatabaseSync, vivo: Vivo
     };
   });
 
+  // La pantalla de inicio: cómo viene cada tablero mío (cuántas tarjetas por lista, cuántas vencidas)
+  // y lo que vence en estos días. Solo tableros abiertos que puedo ver y que son de mis espacios o donde estoy sumado.
+  app.get('/api/yo/inicio', async (req) => {
+    const u = exigirUsuario(req);
+    const ids = db.prepare(`SELECT id FROM tableros WHERE cerrado = 0 AND (
+        espacio_id IN (SELECT espacio_id FROM espacio_miembros WHERE usuario_id = ? AND desactivado = 0)
+        OR id IN (SELECT tablero_id FROM tablero_miembros WHERE usuario_id = ?))`).all(u.id, u.id) as { id: string }[];
+    const mios = ids.map((f) => leerTablero(db, f.id)!).filter((t) => puedeVerTablero(contexto(db, u, t.espacio_id, t.id), t));
+    const ahoraIso = ahora();
+    const hasta = new Date(Date.now() + 8 * 86_400_000).toISOString();
+    const porLista = db.prepare(`SELECT l.nombre, (SELECT count(*) FROM tarjetas c WHERE c.lista_id = l.id AND c.archivada = 0) AS n
+                                 FROM listas l WHERE l.tablero_id = ? AND l.archivada = 0 ORDER BY l.posicion`);
+    const cuenta = db.prepare(`SELECT count(*) AS abiertas,
+        coalesce(sum(c.completada = 0 AND c.vence IS NOT NULL AND c.vence < ?), 0) AS vencidas,
+        coalesce(sum(c.completada = 0 AND c.vence IS NOT NULL AND c.vence >= ? AND c.vence < ?), 0) AS proximas
+        FROM tarjetas c JOIN listas l ON l.id = c.lista_id WHERE c.tablero_id = ? AND c.archivada = 0 AND l.archivada = 0`);
+    const vencen = db.prepare(`SELECT c.enlace, c.titulo, c.vence, l.nombre AS lista,
+        EXISTS (SELECT 1 FROM tarjeta_miembros m WHERE m.tarjeta_id = c.id AND m.usuario_id = ?) AS mia
+        FROM tarjetas c JOIN listas l ON l.id = c.lista_id
+        WHERE c.tablero_id = ? AND c.archivada = 0 AND l.archivada = 0 AND c.completada = 0 AND c.vence IS NOT NULL AND c.vence < ?
+        ORDER BY c.vence LIMIT 40`);
+    const tableros: Record<string, unknown> = {};
+    const agenda: { enlace: string; titulo: string; vence: string; lista: string; mia: boolean; tablero: string; tablero_enlace: string }[] = [];
+    for (const t of mios) {
+      const c = cuenta.get(ahoraIso, ahoraIso, hasta, t.id) as { abiertas: number; vencidas: number; proximas: number };
+      tableros[t.id] = { listas: porLista.all(t.id), abiertas: Number(c.abiertas), vencidas: Number(c.vencidas), proximas: Number(c.proximas) };
+      for (const f of vencen.all(u.id, t.id, hasta) as { enlace: string; titulo: string; vence: string; lista: string; mia: number }[]) agenda.push({ ...f, mia: f.mia === 1, tablero: t.nombre, tablero_enlace: t.enlace });
+    }
+    agenda.sort((a, b) => (a.vence < b.vence ? -1 : 1));
+    return { tableros, agenda: agenda.slice(0, 60) };
+  });
+
   // Foto propia como fondo del tablero.
   app.post('/api/tableros/:id/fondo', async (req) => {
     const u = exigirUsuario(req);

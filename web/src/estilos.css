@@ -390,3 +390,52 @@ button.mini { cursor: zoom-in; }
 .ficha.nueva .suave { font-size: 13px; }
 input[type='file'] { font: inherit; color: var(--tinta-suave); max-width: 100%; }
 input[type='file']::file-selector-button { font: inherit; margin-right: 10px; padding: 7px 12px; border-radius: 8px; border: 1px solid var(--linea); background: none; color: var(--tinta); cursor: pointer; }
+
+/* ---------- inicio: saludo, semana y fichas con silueta ---------- */
+.saludo { display: flex; flex-direction: column; gap: 8px; padding-bottom: 18px; border-bottom: 1px solid var(--linea); position: relative; }
+.saludo::after { content: ""; position: absolute; left: 0; bottom: -2px; width: 56px; height: 4px; background: var(--acento); box-shadow: var(--brillo); }
+.saludo h1 { font-size: clamp(26px, 4.2vw, 38px); letter-spacing: -0.01em; }
+.saludo .rotulo::first-letter { text-transform: uppercase; }
+.nombre-espacio a { color: var(--tinta); }
+
+.semana { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); border: 1px solid var(--linea); border-radius: var(--r-panel); background: var(--superficie); overflow: hidden; }
+.dia { display: flex; flex-direction: column; gap: 6px; padding: 10px 8px 12px; min-height: 132px; min-width: 0; border-left: 1px solid var(--linea); }
+.dia:first-child { border-left: 0; }
+.dia .rotulo { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding-bottom: 6px; border-bottom: 2px solid var(--linea); }
+.dia .rotulo em { font-style: normal; color: var(--tinta); }
+.dia.hoy { background: color-mix(in srgb, var(--acento) 7%, var(--superficie)); }
+.dia.hoy .rotulo { color: var(--acento); border-bottom-color: var(--acento); }
+.dia.atraso .rotulo { border-bottom-color: var(--marcador); }
+.dia.atraso:not(.libre) .rotulo { color: var(--alerta); }
+.dia.libre::after { content: ""; width: 14px; height: 2px; background: var(--linea); margin-top: 6px; }
+.cita { display: flex; flex-direction: column; gap: 3px; padding: 6px 7px; border-radius: 6px; background: var(--hundido); color: var(--tinta); border-left: 3px solid var(--acento); min-width: 0; }
+.cita:hover { text-decoration: none; background: color-mix(in srgb, var(--acento) 14%, var(--hundido)); }
+.cita.pasada { border-left-color: var(--marcador); }
+.cita .que { font-size: 13px; font-weight: 600; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+.cita .donde { font: 500 10.5px/1.2 var(--f-dato); color: var(--tinta-suave); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.dia .mas { font: 600 11px/1 var(--f-dato); color: var(--tinta-suave); padding: 2px 4px; }
+
+.ficha.con-resumen { min-height: 148px; gap: 10px; transition: transform .12s, border-color .12s, box-shadow .12s; }
+.ficha.con-resumen:not(.con-fondo) { background: var(--superficie); color: var(--tinta); border-color: var(--linea); }
+.ficha.con-resumen:not(.con-fondo):hover { border-color: var(--acento); }
+.ficha.con-fondo .chapa.marcador { background: var(--marcador); color: var(--sobre-marcador); }
+.ficha.con-resumen:hover { transform: translateY(-2px); box-shadow: var(--brillo); }
+.ficha .pie { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.ficha .dato { font: 600 11px/1 var(--f-dato); letter-spacing: 0.04em; color: var(--tinta-suave); }
+.ficha.con-fondo .dato { color: inherit; opacity: .85; }
+.silueta { flex: 1; min-height: 44px; display: flex; align-items: flex-end; gap: 4px; border-bottom: 1px solid color-mix(in srgb, currentColor 22%, transparent); }
+.silueta i { flex: 1; max-width: 26px; min-height: 3px; border-radius: 3px 3px 0 0; background: var(--acento); opacity: .85; }
+.silueta i:nth-child(even) { opacity: .55; }
+.ficha.con-fondo .silueta i { background: currentColor; opacity: .7; }
+.ficha.con-fondo .silueta i:nth-child(even) { opacity: .45; }
+.ficha.con-resumen.con-foto { box-shadow: inset 0 0 0 400px rgba(0, 0, 0, 0.34); }
+
+@media (max-width: 860px) {
+  .semana { display: flex; flex-direction: column; }
+  .dia { min-height: 0; border-left: 0; border-top: 1px solid var(--linea); padding: 10px 12px; }
+  .dia:first-child { border-top: 0; }
+  .dia.libre { display: none; }
+  .semana.sin-nada { display: none; }
+  .dia .rotulo { border-bottom: 0; padding-bottom: 0; }
+  .cita .que { -webkit-line-clamp: 3; }
+}

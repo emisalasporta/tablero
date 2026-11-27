@@ -527,7 +527,7 @@
 | X02 | Respetar "reducir movimiento" del sistema | hecha | 2.4 | A | |
 | X03 | Uso con teclado y con lector de pantalla | pendiente | 6.7 | M | |
 | X04 | Alto contraste | pendiente | 6.7 | V | |
-| X05 | Pantalla de inicio con tableros y novedades | pendiente | 2.5 | A | Favoritos y vistos hace poco ya están en el inicio; faltan las novedades |
+| X05 | Pantalla de inicio con tableros y novedades | hecha | 2.5 | A | ⚠ parcial: saludo, "Tu semana" (lo atrasado y lo que vence en los próximos 7 días, de todos mis tableros), y cada tablero con su silueta (una barra por lista) y sus números. Faltan las novedades (últimos movimientos) |
 | X06 | Conmutador de tableros (búsqueda, favoritos, recientes, por espacio; lista o cuadrícula; fijable) | pendiente | 2.5 | A | |
 | X07 | Botón Crear (tablero, plantilla, vista, espacio) | pendiente | 2.5 | A | |
 
