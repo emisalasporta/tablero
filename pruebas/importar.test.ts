@@ -128,6 +128,53 @@ describe('importar de Trello', () => {
     expect(r.json.informe.personas_sin_cuenta).toEqual([]);
   });
 
+  it('reconoce nombres parecidos y al único dueño de un tablero personal', async () => {
+    // "Marta Ruiz" acá, "Marta Ruiz Díaz" en Trello: una sola cuenta parecida, se empareja y se avisa.
+    const e = exportacion();
+    e.members[1].fullName = 'Marta Ruiz Díaz';
+    e.members[1].username = 'mruizdiaz';
+    e.actions.push({ id: 'x8', type: 'commentCard', date: '2026-11-17T12:00:00.000Z', idMemberCreator: 'm-marta', data: { card: { id: id(10) }, text: 'Soy Marta' } });
+    const inf = (await subir(emi, e)).json.informe;
+    expect(inf.personas_sin_cuenta).toEqual(['Pedro Sinnada']);
+    expect(inf.avisos.join(' ')).toContain('"Marta Ruiz Díaz" de Trello quedó como Marta Ruiz.');
+    // Tablero de una sola persona con otro nombre: es de quien lo trae.
+    const solo = exportacion();
+    solo.id = id(2);
+    solo.members = [{ id: 'm-emi', fullName: 'Otro Nombre Distinto', username: 'otro' }];
+    solo.memberships = [{ idMember: 'm-emi', memberType: 'admin' }];
+    solo.cards.forEach((c: any) => { c.idMembers = []; });
+    solo.checklists = [];
+    solo.actions = solo.actions.filter((a: any) => a.idMemberCreator === 'm-emi');
+    const inf2 = (await subir(emi, solo)).json.informe;
+    expect(inf2.personas_sin_cuenta).toEqual([]);
+    const act = (await emi.get(`/api/tableros/${inf2.tablero.enlace}/actividad`)).json.actividad;
+    expect(act.every((a: any) => a.actor?.id === emi.id)).toBe(true);
+    // Si dos cuentas se parecen, no adivina.
+    await m.registrar('Pedro');
+    await m.registrar('Sinnada');
+    const dudoso = exportacion();
+    dudoso.id = id(3);
+    expect((await subir(emi, dudoso)).json.informe.personas_sin_cuenta).toEqual(['Pedro Sinnada']);
+  });
+
+  it('deja decir después quién es alguien que entró con su nombre de Trello', async () => {
+    const inf = (await subir(emi, exportacion())).json.informe;
+    const ruta = `/api/tableros/${inf.tablero.enlace}/de-trello`;
+    expect((await emi.get(ruta)).json.nombres).toEqual(['Pedro Sinnada']);
+    const pedro = await m.registrar('Pedrito');
+    expect((await pedro.post(`${ruta}/reconocer`, { nombre: 'Pedro Sinnada', usuario_id: pedro.id })).estado).toBe(404);
+    expect((await emi.post(`${ruta}/reconocer`, { nombre: 'Nadie', usuario_id: pedro.id })).estado).toBe(404);
+    const r = await emi.post(`${ruta}/reconocer`, { nombre: 'Pedro Sinnada', usuario_id: pedro.id });
+    expect(r.estado).toBe(200);
+    expect(r.json.cambios).toEqual({ comentarios: 1, actividad: 1 });
+    expect(r.json.quedan).toEqual([]);
+    const t = (await emi.get(`/api/tableros/${inf.tablero.enlace}`)).json;
+    const cemento = t.tarjetas.find((c: any) => c.titulo === 'Comprar cemento');
+    const d = (await emi.get(`/api/tarjetas/${cemento.id}`)).json;
+    expect(d.comentarios.find((c: any) => c.texto === 'Yo lo retiro').autor.id).toBe(pedro.id);
+    expect(d.actividad.find((a: any) => a.tipo === 'tarjeta_comentada' && a.datos.texto === 'Yo lo retiro').actor.id).toBe(pedro.id);
+  });
+
   it('rechaza archivos que no son de Trello y no deja nada a medias', async () => {
     expect((await subir(emi, 'esto no es json')).estado).toBe(400);
     expect((await subir(emi, { hola: 1 })).estado).toBe(400);

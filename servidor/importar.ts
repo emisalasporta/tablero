@@ -9,6 +9,11 @@ import { ahora, datoInvalido, nuevoEnlace, nuevoId } from './util.ts';
 const MAX_TEXTO = 16384;
 const MAX_NOMBRE = 200;
 
+// Para comparar nombres: palabras en minúscula y sin acentos.
+const palabras = (v: unknown): string[] => String(v ?? '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').split(/[^a-z0-9]+/).filter(Boolean);
+// Dos nombres se parecen si todas las palabras del más corto están en el más largo.
+const contenido = (a: string[], b: string[]): boolean => { if (!a.length || !b.length) return false; const [corto, largo] = a.length <= b.length ? [a, b] : [b, a]; return corto.every((p) => largo.includes(p)); };
+
 // Colores de Trello → tonos de la casa. Trello tiene tres intensidades por color (claro, normal, oscuro), igual que acá.
 const TONO: Record<string, string> = { green: 'verde', yellow: 'amarillo', orange: 'naranja', red: 'rojo', purple: 'violeta', blue: 'azul', sky: 'celeste', lime: 'lima', pink: 'rosa' };
 const FONDO: Record<string, string> = { blue: 'oceano', sky: 'oceano', orange: 'atardecer', red: 'coral', pink: 'coral', green: 'bosque', lime: 'bosque', purple: 'uva', grey: 'grafito' };
@@ -54,21 +59,37 @@ export function importarTrello(db: DatabaseSync, crudo: unknown, o: OpcionesImpo
   const cuando = ahora();
   const noEntro: string[] = [];
   const avisos: string[] = [];
+  const reconocidas: string[] = [];
   const cuenta = { listas: 0, tarjetas: 0, etiquetas: 0, checklists: 0, items: 0, comentarios: 0, adjuntos: 0, actividad: 0, miembros: 0 };
 
   // ---------- personas ----------
-  const usuarios = db.prepare('SELECT id, usuario, nombre, email FROM usuarios').all() as { id: string; usuario: string; nombre: string; email: string }[];
+  const usuarios = db.prepare('SELECT id, usuario, nombre, email, es_robot FROM usuarios').all() as { id: string; usuario: string; nombre: string; email: string; es_robot: number }[];
   const buscar = (v: string | undefined) => { const b = (v ?? '').trim().toLowerCase(); return b ? usuarios.find((u) => u.usuario.toLowerCase() === b || u.email.toLowerCase() === b || u.nombre.toLowerCase() === b) : undefined; };
   const persona = new Map<string, string>();   // id de Trello → id de acá
   const nombreDe = new Map<string, string>();  // id de Trello → nombre para mostrar
   const sinCuenta = new Set<string>();
   const manual = Object.fromEntries(Object.entries(o.emparejar ?? {}).map(([k, v]) => [k.toLowerCase().replace(/^@/, ''), v]));
-  for (const m of lista(j.members)) {
-    const nombre = txt(m.fullName, MAX_NOMBRE) || txt(m.username, MAX_NOMBRE) || 'Alguien';
-    nombreDe.set(m.id, nombre);
+  const miembros = lista(j.members);
+  // Primera pasada: coincidencia exacta (a mano, correo, usuario o nombre).
+  for (const m of miembros) {
+    nombreDe.set(m.id, txt(m.fullName, MAX_NOMBRE) || txt(m.username, MAX_NOMBRE) || 'Alguien');
     const u = buscar(manual[String(m.username ?? '').toLowerCase()]) ?? buscar(m.email) ?? buscar(m.username) ?? buscar(m.fullName);
-    if (u) persona.set(m.id, u.id); else sinCuenta.add(nombre);
+    if (u) persona.set(m.id, u.id);
   }
+  // Segunda pasada: nombres parecidos ("Emiliano" acá, "Emiliano Salas Porta" en Trello). Solo vale si no hay dudas:
+  // una única cuenta libre que se parezca, y una única persona de Trello que se parezca a esa cuenta.
+  const tomadas = () => new Set(persona.values());
+  const candidatos = new Map<string, string[]>();   // id de acá → ids de Trello que se le parecen
+  for (const m of miembros) {
+    if (persona.has(m.id)) continue;
+    const a = palabras(m.fullName);
+    const parecidas = usuarios.filter((u) => !u.es_robot && !tomadas().has(u.id) && contenido(a, palabras(u.nombre)));
+    if (parecidas.length === 1) candidatos.set(parecidas[0].id, [...(candidatos.get(parecidas[0].id) ?? []), m.id]);
+  }
+  for (const [uid, ids] of candidatos) if (ids.length === 1) { persona.set(ids[0], uid); reconocidas.push(`"${nombreDe.get(ids[0])}" de Trello quedó como ${usuarios.find((u) => u.id === uid)!.nombre}.`); }
+  // Un tablero con una sola persona es de quien lo trae.
+  if (miembros.length === 1 && !persona.has(miembros[0].id) && !tomadas().has(o.usuario.id)) { persona.set(miembros[0].id, o.usuario.id); reconocidas.push(`"${nombreDe.get(miembros[0].id)}" de Trello quedó como ${o.usuario.nombre}, porque era la única persona del tablero.`); }
+  for (const m of miembros) if (!persona.has(m.id)) sinCuenta.add(nombreDe.get(m.id)!);
   // Quien hizo algo y ya no está en el tablero también figura en la actividad.
   for (const a of lista(j.actions)) if (a.idMemberCreator && !nombreDe.has(a.idMemberCreator) && a.memberCreator) nombreDe.set(a.idMemberCreator, txt(a.memberCreator.fullName, MAX_NOMBRE) || 'Alguien');
 
@@ -263,6 +284,7 @@ export function importarTrello(db: DatabaseSync, crudo: unknown, o: OpcionesImpo
     if (sinTraducir) noEntro.push(`${sinTraducir} ${sinTraducir === 1 ? 'movimiento' : 'movimientos'} del historial de un tipo que acá no existe.`);
     const acciones = lista(j.actions).length;
     if (acciones >= 1000) avisos.push('Trello exporta como mucho los últimos 1.000 movimientos del tablero: el historial y los comentarios más viejos pueden no estar en el archivo. Las tarjetas, listas, etiquetas y checklists entran completas igual.');
+    avisos.push(...reconocidas);
     if (sinCuenta.size) avisos.push('Los comentarios y movimientos de quienes no tienen cuenta acá entraron con su nombre de Trello.');
 
     const informe: Informe = { tablero: { id: tableroId, enlace, nombre: nombreTablero }, entraron: cuenta, personas_sin_cuenta: [...sinCuenta].sort(), no_entro: noEntro, avisos };
@@ -281,4 +303,21 @@ export function yaImportado(db: DatabaseSync, crudo: unknown): { nombre: string;
   const id = (crudo as Dic | null)?.id;
   if (typeof id !== 'string' || !id) return null;
   return (db.prepare(`SELECT t.nombre, t.enlace FROM importaciones i JOIN tableros t ON t.id = i.tablero_id WHERE i.origen = 'trello' AND i.origen_id = ? ORDER BY i.creado_en DESC LIMIT 1`).get(id) as { nombre: string; enlace: string } | undefined) ?? null;
+}
+
+// Decir después quién es alguien que entró solo con su nombre de Trello (por ejemplo, cuando esa persona recién se hace la cuenta).
+// Sus comentarios y movimientos de ese tablero pasan a ser de la cuenta indicada.
+export function nombresDeTrello(db: DatabaseSync, tableroId: string): string[] {
+  const filas = db.prepare(`SELECT autor_externo AS n FROM comentarios WHERE autor_externo IS NOT NULL AND tarjeta_id IN (SELECT id FROM tarjetas WHERE tablero_id = ?)
+    UNION SELECT json_extract(datos, '$.de_trello') FROM actividad WHERE tablero_id = ? AND actor_id IS NULL AND json_extract(datos, '$.de_trello') IS NOT NULL`).all(tableroId, tableroId) as { n: string }[];
+  return filas.map((f) => f.n).filter(Boolean).sort();
+}
+export function reconocerPersona(db: DatabaseSync, tableroId: string, nombre: string, usuarioId: string): { comentarios: number; actividad: number } {
+  db.exec('BEGIN');
+  try {
+    const c = db.prepare('UPDATE comentarios SET autor_id = ?, autor_externo = NULL WHERE autor_externo = ? AND tarjeta_id IN (SELECT id FROM tarjetas WHERE tablero_id = ?)').run(usuarioId, nombre, tableroId);
+    const a = db.prepare("UPDATE actividad SET actor_id = ?, datos = json_remove(datos, '$.de_trello') WHERE tablero_id = ? AND actor_id IS NULL AND json_extract(datos, '$.de_trello') = ?").run(usuarioId, tableroId, nombre);
+    db.exec('COMMIT');
+    return { comentarios: Number(c.changes), actividad: Number(a.changes) };
+  } catch (e) { db.exec('ROLLBACK'); throw e; }
 }

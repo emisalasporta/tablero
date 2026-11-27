@@ -103,6 +103,7 @@ export function describir(a: Actividad, enTarjeta: boolean): ReactNode {
     case 'lista_tarjetas_archivadas': return <>archivó las {d.cantidad} tarjetas de {N(d.nombre)}</>;
     case 'tablero_creado': return <>creó este tablero</>;
     case 'tablero_importado': return <>trajo este tablero desde {String(d.origen ?? 'otro lado')}</>;
+    case 'tablero_persona_reconocida': return <>indicó que {N(d.nombre_en_trello)} de Trello es {N(d.nombre)}</>;
     case 'tablero_renombrado': return <>cambió el nombre del tablero de {N(d.antes)} a {N(d.ahora)}</>;
     case 'tablero_visibilidad': return <>cambió quién ve el tablero</>;
     case 'tablero_cerrado': return <>cerró el tablero</>;
